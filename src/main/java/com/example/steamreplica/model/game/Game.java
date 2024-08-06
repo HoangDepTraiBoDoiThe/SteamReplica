@@ -27,7 +27,7 @@ public class Game {
     private Long id;
 
     @NotBlank(message = "Game name cannot be empty")
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String gameName;
 
     @NotNull(message = "Game base price cannot be null")
