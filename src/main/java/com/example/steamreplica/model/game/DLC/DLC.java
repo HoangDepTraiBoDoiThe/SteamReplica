@@ -1,6 +1,7 @@
 package com.example.steamreplica.model.game.DLC;
 
 import com.example.steamreplica.model.game.Game;
+import com.example.steamreplica.model.game.discount.Discount;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -9,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -36,4 +38,8 @@ public class DLC {
 
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "dlc")
     private Set<DLCImage> dlcImages;
+
+    @ManyToMany
+    @JoinTable(name = "discount_dlc", joinColumns = @JoinColumn(name = "dlc_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "discount_Id", referencedColumnName = "id"))
+    private Set<Discount> discounts = new HashSet<>();
 }

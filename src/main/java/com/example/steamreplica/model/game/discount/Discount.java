@@ -1,5 +1,6 @@
 package com.example.steamreplica.model.game.discount;
 
+import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.purchasedLibrary.PurchasedGameDiscount;
 import com.example.steamreplica.model.game.Game;
 import jakarta.persistence.*;
@@ -37,8 +38,11 @@ public class Discount {
     private BigDecimal discountPercent;
 
     @ManyToMany(mappedBy = "discounts")
-    private Set<Game> games = new HashSet<>();
+    private Set<Game> discountedGames = new HashSet<>();
     
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<PurchasedGameDiscount> purchasedGameDiscounts;
+    
+    @ManyToMany(mappedBy = "discounts")
+    private Set<DLC> discountedDlc = new HashSet<>();
 }
