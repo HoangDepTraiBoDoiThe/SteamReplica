@@ -1,4 +1,4 @@
-package com.example.steamreplica.model.boughtLibrary;
+package com.example.steamreplica.model.purchasedLibrary;
 
 import com.example.steamreplica.model.game.discount.Discount;
 import jakarta.persistence.*;

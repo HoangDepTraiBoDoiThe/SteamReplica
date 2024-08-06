@@ -1,6 +1,6 @@
 package com.example.steamreplica.model.game.discount;
 
-import com.example.steamreplica.model.boughtLibrary.PurchasedGameDiscount;
+import com.example.steamreplica.model.purchasedLibrary.PurchasedGameDiscount;
 import com.example.steamreplica.model.game.Game;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
