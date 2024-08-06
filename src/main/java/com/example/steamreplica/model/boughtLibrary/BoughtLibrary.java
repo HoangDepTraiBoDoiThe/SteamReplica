@@ -1,6 +1,6 @@
-package com.example.steamreplica.model.boughtLibraryModels;
+package com.example.steamreplica.model.boughtLibrary;
 
-import com.example.steamreplica.model.userApplicationModels.User;
+import com.example.steamreplica.model.userApplication.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

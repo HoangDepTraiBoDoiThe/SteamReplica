@@ -1,6 +1,6 @@
-package com.example.steamreplica.model.gameModels;
+package com.example.steamreplica.model.game;
 
-import com.example.steamreplica.model.boughtLibraryModels.TransactionGame;
+import com.example.steamreplica.model.boughtLibrary.TransactionGame;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

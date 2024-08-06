@@ -1,4 +1,4 @@
-package com.example.steamreplica.model.boughtLibraryModels;
+package com.example.steamreplica.model.boughtLibrary;
 
 import com.example.steamreplica.constants.TransactionType;
 import jakarta.persistence.*;

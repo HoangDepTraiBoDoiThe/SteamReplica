@@ -1,4 +1,4 @@
-package com.example.steamreplica.model.gameModels;
+package com.example.steamreplica.model.game;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

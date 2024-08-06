@@ -1,4 +1,4 @@
-package com.example.steamreplica.model.userApplicationModels;
+package com.example.steamreplica.model.userApplication;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
