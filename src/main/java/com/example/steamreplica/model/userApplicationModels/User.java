@@ -1,6 +1,7 @@
 package com.example.steamreplica.model.userApplicationModels;
 
 import com.example.steamreplica.constants.UserStatus;
+import com.example.steamreplica.model.BoughtLibraryModels.BoughtLibrary;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -51,4 +52,7 @@ public class User {
     // This user is friend to ...
     @OneToMany(mappedBy = "friend")
     private Set<Friend> friendOf = new HashSet<>();
+    
+    @OneToOne(mappedBy = "user")
+    private BoughtLibrary boughtLibrary;
 }
