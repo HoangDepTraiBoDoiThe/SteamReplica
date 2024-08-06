@@ -41,4 +41,7 @@ public class Game {
 
     @OneToMany(mappedBy = "game")
     private Set<TransactionGame> transactionGames = new HashSet<>();
+    
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
+    private Set<GameImage> gameImages;
 }
