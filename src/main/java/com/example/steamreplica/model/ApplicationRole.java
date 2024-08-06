@@ -1,8 +1,10 @@
 package com.example.steamreplica.model;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.util.Set;
 
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApplicationRole {
@@ -17,6 +20,7 @@ public class ApplicationRole {
     @GeneratedValue
     private long id;
     
+    @NotBlank
     private String roleName;
     
     @ManyToMany(mappedBy = "roles")
