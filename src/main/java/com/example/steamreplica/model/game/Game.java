@@ -1,5 +1,6 @@
 package com.example.steamreplica.model.game;
 
+import com.example.steamreplica.model.boughtLibrary.Transaction;
 import com.example.steamreplica.model.boughtLibrary.TransactionGame;
 import com.example.steamreplica.model.game.discount.Discount;
 import jakarta.persistence.*;
@@ -53,4 +54,7 @@ public class Game {
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "game_discount", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "discount_Id", referencedColumnName = "id"))
     private Set<Discount> discounts = new HashSet<>();
+    
+    @OneToMany(mappedBy = "transaction", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<TransactionGame> transactionGame;
 }

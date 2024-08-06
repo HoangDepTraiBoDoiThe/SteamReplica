@@ -18,14 +18,14 @@ public class Transaction {
     @Id
     @GeneratedValue
     private long id;
-    
+
     private ZonedDateTime TransactionDate;
     private TransactionType transactionType;
-    
+
     @ManyToOne
     @JoinColumn(name = "boughtLibrary", referencedColumnName = "id")
     private BoughtLibrary boughtLibrary;
-    
-    @OneToMany(mappedBy = "transaction")
+
+    @OneToMany(mappedBy = "transaction", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<TransactionGame> transactionGames = new HashSet<>();
 }
