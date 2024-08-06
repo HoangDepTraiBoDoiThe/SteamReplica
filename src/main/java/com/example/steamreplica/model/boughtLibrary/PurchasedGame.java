@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Data
 @Entity
@@ -28,4 +29,7 @@ public class PurchasedGame {
     @ManyToOne
     @JoinColumn(name = "game_Id", referencedColumnName = "id")
     private Game game;
+
+    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
+    private Set<PurchasedGameDiscount> purchasedGameDiscounts;
 }
