@@ -1,7 +1,6 @@
 package com.example.steamreplica.model.game;
 
-import com.example.steamreplica.model.boughtLibrary.Transaction;
-import com.example.steamreplica.model.boughtLibrary.TransactionGame;
+import com.example.steamreplica.model.boughtLibrary.PurchasedGame;
 import com.example.steamreplica.model.game.discount.Discount;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -42,7 +41,7 @@ public class Game {
     private LocalDate releaseDate;
 
     @OneToMany(mappedBy = "game")
-    private Set<TransactionGame> transactionGames = new HashSet<>();
+    private Set<PurchasedGame> purchasedGames = new HashSet<>();
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<GameImage> gameImages;
@@ -55,6 +54,6 @@ public class Game {
     @JoinTable(name = "game_discount", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "discount_Id", referencedColumnName = "id"))
     private Set<Discount> discounts = new HashSet<>();
     
-    @OneToMany(mappedBy = "transaction", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private Set<TransactionGame> transactionGame;
+    @OneToMany(mappedBy = "game", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<PurchasedGame> purchasedGame = new HashSet<>();
 }

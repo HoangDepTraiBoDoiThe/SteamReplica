@@ -27,5 +27,5 @@ public class Transaction {
     private BoughtLibrary boughtLibrary;
 
     @OneToMany(mappedBy = "transaction", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private Set<TransactionGame> transactionGames = new HashSet<>();
+    private Set<PurchasedGame> purchasedGames = new HashSet<>();
 }

@@ -1,6 +1,5 @@
-package com.example.steamreplica.model.game.transaction;
+package com.example.steamreplica.model.boughtLibrary;
 
-import com.example.steamreplica.model.boughtLibrary.Transaction;
 import com.example.steamreplica.model.game.Game;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -14,15 +13,14 @@ import java.math.BigDecimal;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class TransactionGame {
+public class PurchasedGame {
     @Id
     @GeneratedValue
     private long id;
-    
+
     @PositiveOrZero
-    @Column(nullable = false)
     private BigDecimal gameBasePriceAtTheTime;
-    
+
     @ManyToOne
     @JoinColumn(name = "transaction_Id", referencedColumnName = "id")
     private Transaction transaction;
