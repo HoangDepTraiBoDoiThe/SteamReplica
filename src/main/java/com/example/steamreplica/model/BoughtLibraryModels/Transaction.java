@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -23,4 +25,7 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "boughtLibrary", referencedColumnName = "id")
     private BoughtLibrary boughtLibrary;
+    
+    @OneToMany(mappedBy = "transaction")
+    private Set<TransactionGame> transactionGames = new HashSet<>();
 }
