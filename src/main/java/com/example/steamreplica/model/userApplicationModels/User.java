@@ -1,4 +1,4 @@
-package com.example.steamreplica.model;
+package com.example.steamreplica.model.userApplicationModels;
 
 import com.example.steamreplica.constants.UserStatus;
 import jakarta.persistence.*;

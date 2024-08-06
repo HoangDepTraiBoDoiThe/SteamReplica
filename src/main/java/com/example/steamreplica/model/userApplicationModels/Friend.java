@@ -1,4 +1,4 @@
-package com.example.steamreplica.model;
+package com.example.steamreplica.model.userApplicationModels;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
