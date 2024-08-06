@@ -1,4 +1,4 @@
-package com.example.steamreplica.model.purchasedLibrary;
+package com.example.steamreplica.model.purchasedLibrary.DLC;
 
 import com.example.steamreplica.model.game.discount.Discount;
 import jakarta.persistence.*;
@@ -11,9 +11,10 @@ import java.math.BigDecimal;
 
 @Data
 @Entity
+@Table(name = "purchased_game_discount")
 @AllArgsConstructor
 @NoArgsConstructor
-public class PurchasedGameDiscount {
+public class PurchasedDLCDiscount {
     @Id
     @GeneratedValue
     private long id;
@@ -26,7 +27,8 @@ public class PurchasedGameDiscount {
     @JoinColumn(name = "discount_Id", referencedColumnName = "id")
     private Discount discount;
     
+    @Column(name = "purchased_dlc")
     @ManyToOne
     @JoinColumn(name = "purchasedGame_Id", referencedColumnName = "id")
-    private PurchasedGame purchasedGame;
+    private PurchasedDLC purchasedDLC;
 }

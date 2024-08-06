@@ -1,7 +1,8 @@
-package com.example.steamreplica.model.purchasedLibrary;
+package com.example.steamreplica.model.purchasedLibrary.game;
 
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.game.GameReview;
+import com.example.steamreplica.model.purchasedLibrary.Transaction;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
@@ -34,7 +35,6 @@ public class PurchasedGame {
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
     private Set<PurchasedGameDiscount> purchasedGameDiscounts;
 
-    @OneToOne(orphanRemoval = true)
-    @JoinColumn(referencedColumnName = "id")
+    @OneToOne(orphanRemoval = true, mappedBy = "purchasedGame")
     private GameReview gameReview;
 }

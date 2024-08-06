@@ -2,6 +2,7 @@ package com.example.steamreplica.model.game.DLC;
 
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.game.discount.Discount;
+import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -15,6 +16,7 @@ import java.util.Set;
 
 @Data
 @Entity
+@Table(name = "game_dlc")
 @AllArgsConstructor
 @NoArgsConstructor
 public class DLC {
@@ -35,6 +37,10 @@ public class DLC {
     @ManyToOne
     @JoinColumn
     private Game game;
+    
+    @OneToMany(mappedBy = "dlc", cascade = CascadeType.ALL)
+    @Column(name = "purchased_dlcs")
+    private Set<PurchasedDLC> purchasedDLCS;
 
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "dlc")
     private Set<DLCImage> dlcImages;

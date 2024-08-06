@@ -1,6 +1,7 @@
 package com.example.steamreplica.model.purchasedLibrary;
 
 import com.example.steamreplica.constants.TransactionType;
+import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

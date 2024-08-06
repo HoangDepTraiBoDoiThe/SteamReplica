@@ -1,7 +1,8 @@
 package com.example.steamreplica.model.game.discount;
 
 import com.example.steamreplica.model.game.DLC.DLC;
-import com.example.steamreplica.model.purchasedLibrary.PurchasedGameDiscount;
+import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLCDiscount;
+import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGameDiscount;
 import com.example.steamreplica.model.game.Game;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -45,4 +46,7 @@ public class Discount {
     
     @ManyToMany(mappedBy = "discounts")
     private Set<DLC> discountedDlc = new HashSet<>();
+
+    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    private Set<PurchasedDLCDiscount> purchasedDLCDiscounts = new HashSet<>();
 }

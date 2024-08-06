@@ -1,6 +1,6 @@
-package com.example.steamreplica.model.game;
+package com.example.steamreplica.model.game.DLC;
 
-import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
+import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
+@Table(name = "dlc_review")
 @AllArgsConstructor
 @NoArgsConstructor
-public class GameReview {
+public class DLCReview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +23,8 @@ public class GameReview {
     @Column(nullable = false)
     private boolean recommended;
     
-    @OneToOne()
+    @OneToOne
+    @Column(name = "purchased_dlc")
     @JoinColumn(referencedColumnName = "id")
-    private PurchasedGame purchasedGame;
+    private PurchasedDLC purchasedDLC;
 }
