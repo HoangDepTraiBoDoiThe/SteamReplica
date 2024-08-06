@@ -41,7 +41,11 @@ public class Game {
 
     @OneToMany(mappedBy = "game")
     private Set<TransactionGame> transactionGames = new HashSet<>();
-    
+
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     private Set<GameImage> gameImages;
+
+    @ManyToMany()
+    @JoinTable(name = "game_category", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
+    private Set<Category> categories = new HashSet<>();
 }
