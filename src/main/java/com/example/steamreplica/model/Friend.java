@@ -16,7 +16,8 @@ public class Friend {
     @Id
     @GeneratedValue
     private long id;
-    
+
+    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private ZonedDateTime friendSince;
     
     @ManyToOne
