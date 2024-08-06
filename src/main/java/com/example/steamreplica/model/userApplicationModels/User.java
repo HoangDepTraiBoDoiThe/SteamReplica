@@ -1,7 +1,7 @@
 package com.example.steamreplica.model.userApplicationModels;
 
 import com.example.steamreplica.constants.UserStatus;
-import com.example.steamreplica.model.BoughtLibraryModels.BoughtLibrary;
+import com.example.steamreplica.model.boughtLibraryModels.BoughtLibrary;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;

@@ -1,5 +1,6 @@
-package com.example.steamreplica.model.BoughtLibraryModels;
+package com.example.steamreplica.model.boughtLibraryModels;
 
+import com.example.steamreplica.model.gameModels.Game;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
@@ -23,4 +24,8 @@ public class TransactionGame {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "transaction_Id", referencedColumnName = "id")
     private Transaction transaction;
+
+    @ManyToOne
+    @JoinColumn(name = "game_Id", referencedColumnName = "id")
+    private Game game;
 }
