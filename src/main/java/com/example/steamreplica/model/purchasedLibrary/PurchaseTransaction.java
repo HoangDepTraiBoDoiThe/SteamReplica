@@ -1,9 +1,9 @@
 package com.example.steamreplica.model.purchasedLibrary;
 
-import com.example.steamreplica.constants.TransactionType;
 import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,13 +16,16 @@ import java.util.Set;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Transaction {
+public class PurchaseTransaction {
     @Id
     @GeneratedValue
     private long id;
 
     private ZonedDateTime TransactionDate;
-    private TransactionType transactionType;
+    
+    @NotBlank
+    @Column(nullable = false)
+    private String transactionType;
 
     @ManyToOne
     @JoinColumn(name = "boughtLibrary", referencedColumnName = "id")

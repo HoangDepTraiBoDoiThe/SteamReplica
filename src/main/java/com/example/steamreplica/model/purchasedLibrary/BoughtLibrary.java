@@ -23,5 +23,5 @@ public class BoughtLibrary {
     private User user;
     
     @OneToMany(mappedBy = "boughtLibrary")
-    private Set<Transaction> transactions = new HashSet<>();
+    private Set<PurchaseTransaction> purchaseTransactions = new HashSet<>();
 }

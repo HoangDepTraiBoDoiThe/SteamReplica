@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 
 @Data
 @Entity
-@Table(name = "purchased_game_discount")
+@Table(name = "purchased_dlc_discount")
 @AllArgsConstructor
 @NoArgsConstructor
 public class PurchasedDLCDiscount {
@@ -27,7 +27,6 @@ public class PurchasedDLCDiscount {
     @JoinColumn(name = "discount_Id", referencedColumnName = "id")
     private Discount discount;
     
-    @Column(name = "purchased_dlc")
     @ManyToOne
     @JoinColumn(name = "purchasedGame_Id", referencedColumnName = "id")
     private PurchasedDLC purchasedDLC;

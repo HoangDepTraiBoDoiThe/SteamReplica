@@ -2,7 +2,7 @@ package com.example.steamreplica.model.purchasedLibrary.DLC;
 
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.DLC.DLCReview;
-import com.example.steamreplica.model.purchasedLibrary.Transaction;
+import com.example.steamreplica.model.purchasedLibrary.PurchaseTransaction;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ public class PurchasedDLC {
 
     @ManyToOne
     @JoinColumn(name = "transaction_Id", referencedColumnName = "id")
-    private Transaction transaction;
+    private PurchaseTransaction transaction;
 
     @ManyToOne
     @JoinColumn(name = "dlc_Id", referencedColumnName = "id")

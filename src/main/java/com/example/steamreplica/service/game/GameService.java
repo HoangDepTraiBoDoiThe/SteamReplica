@@ -23,7 +23,7 @@ public class GameService {
     
     public Game addGame(Game game) {
         // Todo: publishers, devs are required.
-        gameRepository.findGameByGameNameAnd(game.getGameName()).orElseThrow(() -> new GameException("Game already exists"));
+        gameRepository.findGameByGameName(game.getGameName()).orElseThrow(() -> new GameException("Game already exists"));
         return gameRepository.save(game);
     }
 
