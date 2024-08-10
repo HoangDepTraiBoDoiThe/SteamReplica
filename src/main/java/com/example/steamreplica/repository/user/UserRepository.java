@@ -1,4 +1,4 @@
-package com.example.steamreplica.repository.User;
+package com.example.steamreplica.repository.user;
 
 import com.example.steamreplica.model.userApplication.User;
 import org.springframework.data.jpa.repository.JpaRepository;
