@@ -1,8 +1,11 @@
 package com.example.steamreplica.dtos.auth;
 
+import com.example.steamreplica.model.userApplication.User;
+import com.example.steamreplica.util.StaticHelper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Data
 @AllArgsConstructor
@@ -10,8 +13,12 @@ import lombok.NoArgsConstructor;
 public class RegisterRequest {
     private String email;
     private String password;
-    private String username;
+    private String userName;
     private String phoneNumber;
+
+    public User toUser(PasswordEncoder passwordEncoder) {
+        return new User(this.getUserName(), this.getPhoneNumber(), this.getEmail(), passwordEncoder.encode(this.getPassword()), StaticHelper.convertToBlob(""));
+    }
 
     public boolean equals(final Object o) {
         if (o == this) return true;
@@ -24,8 +31,8 @@ public class RegisterRequest {
         final Object this$password = this.getPassword();
         final Object other$password = other.getPassword();
         if (this$password == null ? other$password != null : !this$password.equals(other$password)) return false;
-        final Object this$username = this.getUsername();
-        final Object other$username = other.getUsername();
+        final Object this$username = this.getUserName();
+        final Object other$username = other.getUserName();
         if (this$username == null ? other$username != null : !this$username.equals(other$username)) return false;
         return true;
     }
@@ -41,12 +48,12 @@ public class RegisterRequest {
         result = result * PRIME + ($email == null ? 43 : $email.hashCode());
         final Object $password = this.getPassword();
         result = result * PRIME + ($password == null ? 43 : $password.hashCode());
-        final Object $username = this.getUsername();
+        final Object $username = this.getUserName();
         result = result * PRIME + ($username == null ? 43 : $username.hashCode());
         return result;
     }
 
     public String toString() {
-        return "RegisterRequest(email=" + this.getEmail() + ", password=" + this.getPassword() + ", username=" + this.getUsername() + ")";
+        return "RegisterRequest(email=" + this.getEmail() + ", password=" + this.getPassword() + ", username=" + this.getUserName() + ")";
     }
 }

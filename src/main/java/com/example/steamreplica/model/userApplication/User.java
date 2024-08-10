@@ -27,7 +27,6 @@ public class User {
     private String userName;
 
     @Lob
-    @Size(max = 1048576 * 5, message = "Profile picture must be less than 5MB")
     private Blob userProfilePicture;
 
     private String phoneNumber;
@@ -36,13 +35,13 @@ public class User {
     @NotBlank(message = "Email can not be empty")
     private String email;
 
-    private UserStatus Status = UserStatus.Online;
+    private String Status = UserStatus.ONLINE.name();
 
-    @Size(min = 12, max = 50, message = "Password must be between 12 and 50 characters")
+    @Size(min = 12, message = "Password must be between 12 characters")
     @NotBlank(message = "Password name can not be empty")
     private String password;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "UserRole", joinColumns = @JoinColumn(name = "user_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_Id", referencedColumnName = "id"))
     private Set<ApplicationRole> roles = new HashSet<>();
 
@@ -57,10 +56,11 @@ public class User {
     @OneToOne(mappedBy = "user")
     private BoughtLibrary boughtLibrary;
 
-    public User(String userName, String phoneNumber, String email, String password) {
+    public User(String userName, String phoneNumber, String email, String password, Blob userProfileBlob) {
         this.userName = userName;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.password = password;
+        this.userProfilePicture = userProfileBlob;
     }
 }

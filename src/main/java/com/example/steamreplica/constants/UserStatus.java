@@ -1,10 +1,10 @@
 package com.example.steamreplica.constants;
 
 public enum UserStatus {
-    Online,
-    Offline,
-    Away,
-    PlayingGame,
-    Busy,
+    ONLINE,
+    OFFLINE,
+    AWAY,
+    PLAYING_GAME,
+    BUSY,
     USER_STATUS_MAX
 }

@@ -18,7 +18,7 @@ public class GameService {
     }
 
     public Game getGameById(long id) {
-        return gameRepository.findById(id).orElseThrow(() -> new GameException(String.format(Long.toString(id), "Game with this id [%s] not found")));
+        return gameRepository.findById(id).orElseThrow(() -> new GameException(String.format("Game with this id [%s] not found", Long.toString(id))));
     }
     
     public Game addGame(Game game) {
