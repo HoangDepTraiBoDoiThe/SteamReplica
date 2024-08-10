@@ -1,6 +1,7 @@
 package com.example.steamreplica.model.purchasedLibrary;
 
 import com.example.steamreplica.constants.TransactionType;
+import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,4 +30,7 @@ public class Transaction {
 
     @OneToMany(mappedBy = "transaction", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<PurchasedGame> purchasedGames = new HashSet<>();
+    
+    @OneToMany(mappedBy = "transaction", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<PurchasedDLC> purchasedDLCs = new HashSet<>();
 }

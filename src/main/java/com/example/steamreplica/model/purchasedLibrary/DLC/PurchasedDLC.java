@@ -36,7 +36,6 @@ public class PurchasedDLC {
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true, mappedBy = "purchasedDLC")
     private Set<PurchasedDLCDiscount> purchasedDlcDiscounts;
 
-    @Column(name = "dlcReview")
-    @OneToOne(orphanRemoval = true, mappedBy = "purchasedDLC")
+    @OneToOne(orphanRemoval = true, mappedBy = "purchasedDLC", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private DLCReview DLCReview;
 }

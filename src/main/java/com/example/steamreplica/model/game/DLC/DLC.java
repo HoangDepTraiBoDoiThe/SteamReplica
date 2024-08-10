@@ -39,8 +39,7 @@ public class DLC {
     private Game game;
     
     @OneToMany(mappedBy = "dlc", cascade = CascadeType.ALL)
-    @Column(name = "purchased_dlcs")
-    private Set<PurchasedDLC> purchasedDLCS;
+    private Set<PurchasedDLC> purchasedDLCs = new HashSet<>();
 
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "dlc")
     private Set<DLCImage> dlcImages;

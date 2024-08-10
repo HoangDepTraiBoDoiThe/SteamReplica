@@ -24,7 +24,7 @@ public class DLCReview {
     private boolean recommended;
     
     @OneToOne
-    @Column(name = "purchased_dlc")
+    @PrimaryKeyJoinColumn(name = "purchased_dlc")
     @JoinColumn(referencedColumnName = "id")
     private PurchasedDLC purchasedDLC;
 }
