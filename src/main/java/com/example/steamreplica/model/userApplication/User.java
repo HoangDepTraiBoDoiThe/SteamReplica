@@ -36,7 +36,7 @@ public class User {
     @NotBlank(message = "Email can not be empty")
     private String email;
 
-    private UserStatus Status;
+    private UserStatus Status = UserStatus.Online;
 
     @Size(min = 12, max = 50, message = "Password must be between 12 and 50 characters")
     @NotBlank(message = "Password name can not be empty")
@@ -56,4 +56,11 @@ public class User {
     
     @OneToOne(mappedBy = "user")
     private BoughtLibrary boughtLibrary;
+
+    public User(String userName, String phoneNumber, String email, String password) {
+        this.userName = userName;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.password = password;
+    }
 }
