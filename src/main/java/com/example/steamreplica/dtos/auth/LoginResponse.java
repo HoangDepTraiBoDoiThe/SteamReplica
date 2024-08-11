@@ -1,10 +1,12 @@
 package com.example.steamreplica.dtos.auth;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
-public class LoginResponse {
+public class LoginResponse extends BaseResponse {
     private String token;
+
+    public LoginResponse(String message) {
+        super(message);
+    }
 }

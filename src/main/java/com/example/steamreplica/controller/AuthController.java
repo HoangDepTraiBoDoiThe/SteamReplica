@@ -8,11 +8,14 @@ import com.example.steamreplica.dtos.auth.RegisterRequest;
 import com.example.steamreplica.dtos.auth.RegisterResponse;
 import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.userApplication.ApplicationRole;
+import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.AuthUserDetailService;
 import com.example.steamreplica.service.RoleService;
 import com.example.steamreplica.service.UserService;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -41,7 +44,12 @@ public class AuthController {
             AuthUserDetail userDetail = (AuthUserDetail) authUserDetailService.loadUserByUsername(loginRequest.getEmail());
             String token = authUtil.generateToken(userDetail);
             LoginResponse response = new LoginResponse(token);
-            return ResponseEntity.ok(response);
+
+            EntityModel<LoginResponse> entityModel = EntityModel.of(response,
+                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(userDetail.getId())).withSelfRel()
+            );
+            
+            return ResponseEntity.ok(entityModel);
         } catch (Exception exception) {
             return ResponseEntity.badRequest().body(exception.getMessage());
         }
@@ -56,8 +64,14 @@ public class AuthController {
             ApplicationRole role = roleService.getApplicationRoleByName(SystemRole.ADMIN.name());
             roles.add(role);
 
-            userService.createNewUserWithRoles(request, roles);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponse("User created successfully"));
+            User user = userService.createNewUserWithRoles(request, roles);
+            RegisterResponse registerResponse = new RegisterResponse("User created successfully");
+            EntityModel<RegisterResponse> entityModel = EntityModel.of(registerResponse, 
+                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(user.getId())).withSelfRel(), 
+                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(AuthController.class).login(new LoginRequest(user.getEmail(), request.getPassword()), result)).withSelfRel()
+            );
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(entityModel);
         } catch (Exception exception) {
             return ResponseEntity.badRequest().body(exception.getMessage());
         }
