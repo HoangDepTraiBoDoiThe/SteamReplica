@@ -3,13 +3,14 @@ package com.example.steamreplica.util;
 import io.jsonwebtoken.io.IOException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import javax.sql.rowset.serial.SerialBlob;
 import java.sql.Blob;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class StaticHelper {
     public static String convertBlobToString(Blob roomPic) {
@@ -36,10 +37,15 @@ public class StaticHelper {
         return null;
     }
 
-    public static List<String> extractBindingErrorMessages(BindingResult result) {
-        if (result.hasErrors()) {
-            return result.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
+    public static Map<String, String> extractBindingErrorMessages(BindingResult bindingResult) {
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError error : bindingResult.getFieldErrors()) {
+            errors.put(error.getField(), error.getDefaultMessage());
         }
-        return new ArrayList<>();
+        return errors;
+    }
+    public static <R> R catchingBindingError(BindingResult result, Function<List<String>, R> bindingResultExceptionFunction) {
+        List<String> errors = result.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
+        return bindingResultExceptionFunction.apply(errors);
     }
 }
