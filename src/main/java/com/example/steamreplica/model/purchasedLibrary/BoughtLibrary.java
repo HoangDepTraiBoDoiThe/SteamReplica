@@ -2,9 +2,7 @@ package com.example.steamreplica.model.purchasedLibrary;
 
 import com.example.steamreplica.model.userApplication.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,11 +15,17 @@ public class BoughtLibrary {
     @Id
     @GeneratedValue
     private long id;
-    
-    @OneToOne(cascade = CascadeType.ALL)
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @OneToOne
     @JoinColumn(name = "user_Id", referencedColumnName = "id")
     private User user;
     
     @OneToMany(mappedBy = "boughtLibrary")
     private Set<PurchaseTransaction> purchaseTransactions = new HashSet<>();
+
+    public BoughtLibrary(User user) {
+        this.user = user;
+    }
 }

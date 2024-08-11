@@ -1,17 +1,17 @@
 package com.example.steamreplica.model.userApplication;
 
 import com.example.steamreplica.constants.UserStatus;
+import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
 import com.example.steamreplica.util.StaticHelper;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Blob;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -42,6 +42,8 @@ public class User {
     @NotBlank(message = "Password name can not be empty")
     private String password;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "UserRole", joinColumns = @JoinColumn(name = "user_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_Id", referencedColumnName = "id"))
     private Set<ApplicationRole> roles = new HashSet<>();
@@ -53,9 +55,16 @@ public class User {
     // This user is friend to ...
     @OneToMany(mappedBy = "friend")
     private Set<Friend> friendOf = new HashSet<>();
-    
-    @OneToOne(mappedBy = "user")
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
     private BoughtLibrary boughtLibrary;
+
+    public void setBoughtLibrary(BoughtLibrary boughtLibrary) {
+        this.boughtLibrary = boughtLibrary;
+        if (boughtLibrary != null) this.boughtLibrary.setUser(this);
+    }
 
     public User(String userName, String phoneNumber, String email, String password, Blob userProfileBlob) {
         this.userName = userName;
@@ -70,5 +79,16 @@ public class User {
         this.email = email;
         this.password = password;
         this.userProfilePicture = StaticHelper.convertToBlob("");
+    }
+
+    public AuthUserDetail toAuthUserDetail () {
+        AuthUserDetail authUserDetail = new AuthUserDetail();
+        authUserDetail.setId(id);
+        authUserDetail.setUsername(email);
+        authUserDetail.setPassword(password);
+        authUserDetail.setEmail(email);
+        authUserDetail.setPhoneNumber(phoneNumber);
+        authUserDetail.setRoles(roles.stream().map(ApplicationRole::getRoleName).collect(Collectors.toSet()));
+        return authUserDetail;
     }
 }
