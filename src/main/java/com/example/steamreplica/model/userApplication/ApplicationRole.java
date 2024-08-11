@@ -1,9 +1,6 @@
 package com.example.steamreplica.model.userApplication;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,17 +15,16 @@ import java.util.Set;
 @NoArgsConstructor
 public class ApplicationRole {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     
     @NotBlank
     private String roleName;
     
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     private Set<User> users = new HashSet<>();
 
     public ApplicationRole(String roleName) {
         this.roleName = roleName;
-        this.users = users;
     }
 }

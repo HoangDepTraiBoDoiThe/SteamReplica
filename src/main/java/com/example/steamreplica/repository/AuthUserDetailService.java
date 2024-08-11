@@ -1,9 +1,8 @@
-package com.example.steamreplica.repository.auth;
+package com.example.steamreplica.repository;
 
 import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.userApplication.ApplicationRole;
 import com.example.steamreplica.model.userApplication.User;
-import com.example.steamreplica.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

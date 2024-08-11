@@ -2,6 +2,7 @@ package com.example.steamreplica.model.userApplication;
 
 import com.example.steamreplica.constants.UserStatus;
 import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
+import com.example.steamreplica.util.StaticHelper;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -41,7 +42,7 @@ public class User {
     @NotBlank(message = "Password name can not be empty")
     private String password;
 
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "UserRole", joinColumns = @JoinColumn(name = "user_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_Id", referencedColumnName = "id"))
     private Set<ApplicationRole> roles = new HashSet<>();
 
@@ -62,5 +63,12 @@ public class User {
         this.email = email;
         this.password = password;
         this.userProfilePicture = userProfileBlob;
+    }
+    public User(String userName, String phoneNumber, String email, String password) {
+        this.userName = userName;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.password = password;
+        this.userProfilePicture = StaticHelper.convertToBlob("");
     }
 }

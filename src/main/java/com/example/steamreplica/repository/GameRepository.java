@@ -1,4 +1,4 @@
-package com.example.steamreplica.repository.game;
+package com.example.steamreplica.repository;
 
 import com.example.steamreplica.model.game.Game;
 import org.springframework.data.jpa.repository.JpaRepository;

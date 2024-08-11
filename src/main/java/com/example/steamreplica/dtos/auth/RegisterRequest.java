@@ -17,7 +17,7 @@ public class RegisterRequest {
     private String phoneNumber;
 
     public User toUser(PasswordEncoder passwordEncoder) {
-        return new User(this.getUserName(), this.getPhoneNumber(), this.getEmail(), passwordEncoder.encode(this.getPassword()), StaticHelper.convertToBlob(""));
+        return new User(this.getUserName(), this.getPhoneNumber(), this.getEmail(), passwordEncoder.encode(this.getPassword()));
     }
 
     public boolean equals(final Object o) {

@@ -1,8 +1,8 @@
-package com.example.steamreplica.service.game;
+package com.example.steamreplica.service;
 
-import com.example.steamreplica.service.game.exception.GameException;
+import com.example.steamreplica.service.exception.GameException;
 import com.example.steamreplica.model.game.Game;
-import com.example.steamreplica.repository.game.GameRepository;
+import com.example.steamreplica.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

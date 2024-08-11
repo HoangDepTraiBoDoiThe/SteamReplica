@@ -1,9 +1,7 @@
 package com.example.steamreplica.Auth;
 
 import com.example.steamreplica.model.auth.AuthUserDetail;
-import com.example.steamreplica.model.userApplication.User;
-import com.example.steamreplica.repository.auth.AuthUserDetailService;
-import com.example.steamreplica.repository.user.UserRepository;
+import com.example.steamreplica.repository.AuthUserDetailService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

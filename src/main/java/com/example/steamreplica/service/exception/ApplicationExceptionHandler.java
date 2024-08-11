@@ -1,4 +1,4 @@
-package com.example.steamreplica.service.game.exception;
+package com.example.steamreplica.service.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

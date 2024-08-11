@@ -1,4 +1,4 @@
-package com.example.steamreplica.controller.game;
+package com.example.steamreplica.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
