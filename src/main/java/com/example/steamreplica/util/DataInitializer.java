@@ -1,8 +1,8 @@
 package com.example.steamreplica.util;
 
 import com.example.steamreplica.constants.SystemRole;
+import com.example.steamreplica.dtos.auth.RegisterRequest;
 import com.example.steamreplica.model.userApplication.ApplicationRole;
-import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.service.RoleService;
 import com.example.steamreplica.service.UserService;
 import jakarta.annotation.PostConstruct;
@@ -41,10 +41,10 @@ public class DataInitializer {
         roleService.createRoles(roles);
     }
     void initAdmin() {
-        User initAdmin = new User("Admin", adminInitPhoneNumber, aminDefaultEmail, passwordEncoder.encode(aminDefaultPassword));
+        RegisterRequest request = new RegisterRequest(aminDefaultEmail, aminDefaultPassword, "Admin", adminInitPhoneNumber);
         Set<ApplicationRole> roles = new HashSet<>();
         ApplicationRole role = roleService.getApplicationRoleByName(SystemRole.ADMIN.name());
         roles.add(role);
-        userService.createNewUserWithRoles(initAdmin, roles);
+        userService.createNewUserWithRoles(request, roles);
     }
 }

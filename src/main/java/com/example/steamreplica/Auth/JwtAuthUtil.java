@@ -32,6 +32,7 @@ public class JwtAuthUtil {
         claims.put("email", user.getEmail());
         claims.put("user name", user.getUsername());
         claims.put("roles", user.getAuthorities());
+        claims.put("id", user.getId());
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS256, securityKey)
                 .setSubject(user.getEmail())
