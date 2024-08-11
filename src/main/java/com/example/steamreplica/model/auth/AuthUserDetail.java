@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 @Data
 public class AuthUserDetail implements UserDetails {
+    private long id;
     private String username;
     private String password;
     private String email;

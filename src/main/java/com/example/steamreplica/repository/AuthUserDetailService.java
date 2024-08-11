@@ -20,19 +20,7 @@ public class AuthUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         String emailAsUsername = username;
         User user = userRepository.findUserByEmail(emailAsUsername).orElseThrow(() -> new UsernameNotFoundException(String.format("User with [%s] emil not found", emailAsUsername)));
-        AuthUserDetail userDetails = new AuthUserDetail();
-        userDetails.setUsername(user.getUserName());
-        userDetails.setPassword(user.getPassword());
-        userDetails.setRoles(user.getRoles().stream().map(ApplicationRole::getRoleName).collect(Collectors.toList()));
+        AuthUserDetail userDetails = user.toAuthUserDetail();
         return userDetails;
-    }
-
-    public User createNewUser(User user) {
-        if (userRepository.findUserByEmail(user.getEmail()).isEmpty()) {
-            User newCreatedUser = userRepository.save(user);
-            return newCreatedUser;
-        } else {
-            throw new RuntimeException("User with this email already exists");
-        } 
     }
 }

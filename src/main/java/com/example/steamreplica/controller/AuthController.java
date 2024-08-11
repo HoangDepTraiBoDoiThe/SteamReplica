@@ -8,13 +8,14 @@ import com.example.steamreplica.dtos.auth.RegisterRequest;
 import com.example.steamreplica.dtos.auth.RegisterResponse;
 import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.userApplication.ApplicationRole;
-import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.AuthUserDetailService;
 import com.example.steamreplica.service.RoleService;
 import com.example.steamreplica.service.UserService;
+import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,10 +32,12 @@ public class AuthController {
     private final RoleService roleService;
     private final AuthUserDetailService authUserDetailService;
     private final JwtAuthUtil authUtil;
-    private final PasswordEncoder passwordEncoder;
 
     @PostMapping(("/login"))
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, BindingResult result) {
+        var errors = StaticHelper.extractBindingErrorMessages(result);
+        if (!errors.isEmpty()) ResponseEntity.badRequest().body(errors);
+        
         AuthUserDetail userDetail = (AuthUserDetail) authUserDetailService.loadUserByUsername(loginRequest.getEmail());
         String token = authUtil.generateToken(userDetail);
         LoginResponse response = new LoginResponse(token);
@@ -42,12 +45,15 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
-        User newUser = request.toUser(passwordEncoder);
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request, BindingResult result) {
+        var errors = StaticHelper.extractBindingErrorMessages(result);
+        if (!errors.isEmpty()) ResponseEntity.badRequest().body(errors);
+        
         Set<ApplicationRole> roles = new HashSet<>();
         ApplicationRole role = roleService.getApplicationRoleByName(SystemRole.ADMIN.name());
         roles.add(role);
-        userService.createNewUserWithRoles(newUser, roles);
-        return ResponseEntity.ok(new RegisterResponse("User created successfully"));
+
+        userService.createNewUserWithRoles(request, roles);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponse("User created successfully"));
     }
 }
