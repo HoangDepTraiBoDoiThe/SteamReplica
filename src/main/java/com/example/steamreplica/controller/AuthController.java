@@ -34,26 +34,32 @@ public class AuthController {
     private final JwtAuthUtil authUtil;
 
     @PostMapping(("/login"))
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, BindingResult result) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, BindingResult result) {
         var errors = StaticHelper.extractBindingErrorMessages(result);
-        if (!errors.isEmpty()) ResponseEntity.badRequest().body(errors);
-        
-        AuthUserDetail userDetail = (AuthUserDetail) authUserDetailService.loadUserByUsername(loginRequest.getEmail());
-        String token = authUtil.generateToken(userDetail);
-        LoginResponse response = new LoginResponse(token);
-        return ResponseEntity.ok(response);
+        if (!errors.isEmpty()) return ResponseEntity.badRequest().body(errors);
+        try {
+            AuthUserDetail userDetail = (AuthUserDetail) authUserDetailService.loadUserByUsername(loginRequest.getEmail());
+            String token = authUtil.generateToken(userDetail);
+            LoginResponse response = new LoginResponse(token);
+            return ResponseEntity.ok(response);
+        } catch (Exception exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        }
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request, BindingResult result) {
         var errors = StaticHelper.extractBindingErrorMessages(result);
-        if (!errors.isEmpty()) ResponseEntity.badRequest().body(errors);
-        
-        Set<ApplicationRole> roles = new HashSet<>();
-        ApplicationRole role = roleService.getApplicationRoleByName(SystemRole.ADMIN.name());
-        roles.add(role);
+        if (!errors.isEmpty()) return ResponseEntity.badRequest().body(errors);
+        try {
+            Set<ApplicationRole> roles = new HashSet<>();
+            ApplicationRole role = roleService.getApplicationRoleByName(SystemRole.ADMIN.name());
+            roles.add(role);
 
-        userService.createNewUserWithRoles(request, roles);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponse("User created successfully"));
+            userService.createNewUserWithRoles(request, roles);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponse("User created successfully"));
+        } catch (Exception exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        }
     }
 }
