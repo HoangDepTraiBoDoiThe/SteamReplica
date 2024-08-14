@@ -3,6 +3,7 @@ package com.example.steamreplica.controller;
 import com.example.steamreplica.service.GameImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ public class GameImageController {
     private final GameImageService gameImageService;
     
     @GetMapping()
+    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
     public ResponseEntity<?> getAllImagesByGameId(@PathVariable long id, Authentication authentication) {
         return ResponseEntity.ok(gameImageService.getAllImagesByGameId(id, authentication));
     }

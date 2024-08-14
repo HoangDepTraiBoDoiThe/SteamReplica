@@ -27,8 +27,8 @@ public class DiscountAssembler {
                 );
 
         if (roles.contains(SystemRole.ADMIN.name()) || roles.contains(SystemRole.PUBLISHER.name()) || roles.contains(SystemRole.GAME_DEVELOPER.name())) {
-            responseEntityModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).addDiscount(null, authentication)).withRel("Create discount").withType(HttpRequestTypes.POST.name()),
-                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).updateDiscount(entity.getId(), null, authentication)).withRel("Update discount").withType(HttpRequestTypes.PUT.name()),
+            responseEntityModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).addDiscount(null, authentication, null)).withRel("Create discount").withType(HttpRequestTypes.POST.name()),
+                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).updateDiscount(entity.getId(), null, authentication, null)).withRel("Update discount").withType(HttpRequestTypes.PUT.name()),
                     WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).deleteDiscount(entity.getId())).withRel("Delete discount").withType(HttpRequestTypes.DELETE.name()));
         }
         

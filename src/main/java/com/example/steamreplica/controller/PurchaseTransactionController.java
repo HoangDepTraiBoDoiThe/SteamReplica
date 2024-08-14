@@ -4,9 +4,12 @@ import com.example.steamreplica.controller.assembler.PurchaseTransactionAssemble
 import com.example.steamreplica.dtos.request.PurchaseTransactionRequest;
 import com.example.steamreplica.model.purchasedLibrary.PurchaseTransaction;
 import com.example.steamreplica.service.PurchaseTransactionService;
+import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,13 +35,17 @@ public class PurchaseTransactionController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createTransaction(@RequestBody PurchaseTransactionRequest purchaseTransactionRequest) {
+    public ResponseEntity<?> createTransaction(@RequestBody @Validated PurchaseTransactionRequest purchaseTransactionRequest, BindingResult result) {
+        var errors = StaticHelper.extractBindingErrorMessages(result);
+        if (!errors.isEmpty()) return ResponseEntity.badRequest().body(errors);
         PurchaseTransaction newPurchaseTransaction = purchaseTransactionService.createPurchaseTransaction(purchaseTransactionRequest.toPurchaseTransaction());
         return ResponseEntity.ok(purchaseTransactionAssembler.toModel(newPurchaseTransaction));
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateTransaction(@PathVariable long id, @RequestBody PurchaseTransactionRequest purchaseTransactionRequest) {
+    public ResponseEntity<?> updateTransaction(@PathVariable long id, @RequestBody @Validated PurchaseTransactionRequest purchaseTransactionRequest, BindingResult result) {
+        var errors = StaticHelper.extractBindingErrorMessages(result);
+        if (!errors.isEmpty()) return ResponseEntity.badRequest().body(errors);
         PurchaseTransaction updatedPurchaseTransaction = purchaseTransactionService.updatePurchaseTransaction(id, purchaseTransactionRequest.toPurchaseTransaction());
         return ResponseEntity.ok(purchaseTransactionAssembler.toModel(updatedPurchaseTransaction));
     }
