@@ -23,5 +23,7 @@ public class GameResponse {
     CollectionModel<?> publisher;
     CollectionModel<?> discounts;
     CollectionModel<?> categories;
+    CollectionModel<?> gameImages;
+    String gameThumbnail;
     //        String image
 }

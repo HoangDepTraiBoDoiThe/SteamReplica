@@ -33,7 +33,7 @@ public class StaticHelper {
                 byte[] multiPartFileBytes = image.getBytes();
                 return new SerialBlob(multiPartFileBytes);
             } catch (IOException | SQLException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Can not convert this String image to Blob: " + e);
             }
         }
         return null;

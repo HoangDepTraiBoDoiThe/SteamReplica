@@ -9,11 +9,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,42 +37,55 @@ public class Game {
 
     @Column(nullable = false)
     private LocalDate releaseDate;
-
-    @OneToMany(mappedBy = "game")
-    private Set<PurchasedGame> purchasedGames = new HashSet<>();
-
-    public Game(String gameName, BigDecimal gameBasePrice, String gameDescription, LocalDate releaseDate) {
+    
+    @Lob
+    private Blob gameThumbnail;
+    
+    public Game(String gameName, BigDecimal gameBasePrice, String gameDescription, LocalDate releaseDate, Blob gameThumbnail) {
         this.gameName = gameName;
         this.gameBasePrice = gameBasePrice;
         this.gameDescription = gameDescription;
         this.releaseDate = releaseDate;
+        this.gameThumbnail = gameThumbnail;
     }
 
-    public Game(Long id, String gameName, BigDecimal gameBasePrice, String gameDescription, LocalDate releaseDate, Set<User> developers, Set<User> publishers) {
+    public Game(Long id, String gameName, BigDecimal gameBasePrice, String gameDescription, LocalDate releaseDate, Set<User> developers, Set<User> publishers, Blob gameThumbnail) {
         this.id = id;
         this.gameName = gameName;
         this.gameBasePrice = gameBasePrice;
         this.gameDescription = gameDescription;
+        this.gameThumbnail = gameThumbnail;
         this.releaseDate = releaseDate;
         this.developers = developers;
         this.publishers = publishers;
     }
 
+    @OneToMany(mappedBy = "game")
+    private Set<PurchasedGame> purchasedGames = new HashSet<>();
+
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<GameImage> gameImages;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "game_category", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
     private Set<Category> categories = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "game_discount", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "discount_Id", referencedColumnName = "id"))
     private Set<Discount> discounts = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.EAGER)
     @JoinTable(name = "game_Developer", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "user_Id", referencedColumnName = "id"))
     private Set<User> developers = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.EAGER)
     @JoinTable(name = "game_Publisher", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "user_Id", referencedColumnName = "id"))
     private Set<User> publishers = new HashSet<>();

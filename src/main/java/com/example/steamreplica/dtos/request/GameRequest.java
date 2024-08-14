@@ -2,6 +2,8 @@ package com.example.steamreplica.dtos.request;
 
 
 import com.example.steamreplica.model.game.Game;
+import com.example.steamreplica.model.game.GameImage;
+import com.example.steamreplica.util.StaticHelper;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -13,6 +15,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -28,6 +31,8 @@ public class GameRequest {
         Set<Long> publisherIds;
         Set<Long> discountIds;
         Set<Long> categoryIds;
+        List<GameImageRequest> gameImagesRequest;
+        String gameThumbNail;
 
         @NotBlank
         @PastOrPresent(message = "Release date must be in the past or present")
@@ -38,10 +43,9 @@ public class GameRequest {
         @Length(max = 1000, message = "Game base price must be less than 1000 characters")
         BigDecimal price;
 
-//        String image
 
         public Game toModel() {
-                Game game = new Game(name, price, description, releaseDate);
+                Game game = new Game(name, price, description, releaseDate, StaticHelper.convertToBlob(gameThumbNail));
                 return game;
         }
 }

@@ -21,6 +21,12 @@ public class GameImage {
     @Lob
     private Blob image;
 
+    public GameImage(String imageName, Blob image, Game game) {
+        this.imageName = imageName;
+        this.image = image;
+        this.game = game;
+    }
+
     @ManyToOne
     @JoinColumn(name = "game_Id", referencedColumnName = "id")
     private Game game;

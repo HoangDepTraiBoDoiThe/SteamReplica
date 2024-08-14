@@ -5,6 +5,7 @@ import com.example.steamreplica.constants.SystemRole;
 import com.example.steamreplica.controller.GameController;
 import com.example.steamreplica.dtos.response.CategoryResponse;
 import com.example.steamreplica.dtos.response.DiscountResponse;
+import com.example.steamreplica.dtos.response.GameImageResponse;
 import com.example.steamreplica.dtos.response.GameResponse;
 import com.example.steamreplica.dtos.response.user.UserResponse;
 import com.example.steamreplica.model.game.Game;
@@ -27,6 +28,7 @@ public class GameAssembler {
     private final UserAssembler userAssembler;
     private final DiscountAssembler discountAssembler;
     private final CategoryAssembler categoryAssembler;
+    private final GameImageAssembler gameImageAssembler;
     
     public EntityModel<GameResponse> toModel(Game entity, Authentication authentication) {
         Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
@@ -41,9 +43,12 @@ public class GameAssembler {
         CollectionModel<?> discountCollectionModel = discountAssembler.toCollectionModel(discountResponses, authentication);
         
         List<CategoryResponse> categoryResponses = entity.getCategories().stream().map(CategoryResponse::new).toList();
-        CollectionModel<?> categoryCollectionModel = categoryAssembler.toCollectionModel(categoryResponses, authentication);
+        CollectionModel<?> categoryCollectionModel = categoryAssembler.toCollectionModel(categoryResponses, authentication);        
         
-        GameResponse gameResponse = new GameResponse(entity.getId(), entity.getGameName(), entity.getGameDescription(), entity.getReleaseDate(), entity.getGameBasePrice(), publisherEntityModel, DeveloperEntityModel, discountCollectionModel, categoryCollectionModel);
+        List<GameImageResponse> gameImageResponses = entity.getGameImages().stream().map(gameImage -> new GameImageResponse(entity.getId(), gameImage)).toList();
+        CollectionModel<?> gameImageCollectionModel = gameImageAssembler.toCollectionModel(gameImageResponses, authentication);
+        
+        GameResponse gameResponse = new GameResponse(entity.getId(), entity.getGameName(), entity.getGameDescription(), entity.getReleaseDate(), entity.getGameBasePrice(), publisherEntityModel, DeveloperEntityModel, discountCollectionModel, categoryCollectionModel, gameImageCollectionModel, StaticHelper.convertBlobToString(entity.getGameThumbnail()));
         EntityModel<GameResponse> gameResponseEntityModel = EntityModel.of(gameResponse,
                 WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGame(entity.getId(), authentication)).withSelfRel().withType(HttpRequestTypes.GET.name()),
                 WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGames(authentication)).withRel("Get all Games").withType(HttpRequestTypes.GET.name())
