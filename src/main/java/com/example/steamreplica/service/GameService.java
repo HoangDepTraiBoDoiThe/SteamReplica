@@ -3,6 +3,7 @@ package com.example.steamreplica.service;
 import com.example.steamreplica.controller.assembler.GameAssembler;
 import com.example.steamreplica.dtos.request.GameRequest;
 import com.example.steamreplica.dtos.response.GameResponse;
+import com.example.steamreplica.repository.DiscountRepository;
 import com.example.steamreplica.repository.UserRepository;
 import com.example.steamreplica.service.exception.GameException;
 import com.example.steamreplica.model.game.Game;
@@ -21,6 +22,7 @@ import java.util.HashSet;
 public class GameService {
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
+    private final DiscountRepository discountRepository;
     private final GameAssembler gameAssembler;
     
     public CollectionModel<EntityModel<GameResponse>> getAllGames(Authentication authentication) {
@@ -39,6 +41,7 @@ public class GameService {
         Game newCreatedGame = gameRepository.save(gameRequest.toModel());
         newCreatedGame.setDevelopers(new HashSet<>(userRepository.findAllById(gameRequest.getDeveloperIds())));
         newCreatedGame.setPublishers(new HashSet<>(userRepository.findAllById(gameRequest.getPublisherIds())));
+        newCreatedGame.setDiscounts(new HashSet<>(discountRepository.findAllById(gameRequest.getDiscountIds())));
         
         return gameAssembler.toModel(newCreatedGame, authentication);
     }
@@ -53,6 +56,7 @@ public class GameService {
         gameToUpdate.setReleaseDate(gameRequest.getReleaseDate());
         gameToUpdate.setDevelopers(new HashSet<>(userRepository.findAllById(gameRequest.getDeveloperIds())));
         gameToUpdate.setPublishers(new HashSet<>(userRepository.findAllById(gameRequest.getPublisherIds())));
+        gameToUpdate.setDiscounts(new HashSet<>(discountRepository.findAllById(gameRequest.getPublisherIds())));
 //        gameToUpdate.setGameImages(gameRequest.getGameImages());
 //        gameToUpdate.setCategories(gameRequest.getCategories());
 

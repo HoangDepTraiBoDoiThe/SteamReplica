@@ -26,6 +26,7 @@ public class GameRequest {
 
         Set<Long> developerIds;
         Set<Long> publisherIds;
+        Set<Long> discountIds;
 
         @NotBlank
         @PastOrPresent(message = "Release date must be in the past or present")

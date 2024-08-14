@@ -21,6 +21,7 @@ public class GameResponse {
     BigDecimal price;
     CollectionModel<?> developer;
     CollectionModel<?> publisher;
+    CollectionModel<?> discounts;
 //        String category,
     //        String image
 }
