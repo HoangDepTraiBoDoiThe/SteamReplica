@@ -1,6 +1,7 @@
 package com.example.steamreplica.controller;
 
 import com.example.steamreplica.Auth.JwtAuthUtil;
+import com.example.steamreplica.constants.HttpRequestTypes;
 import com.example.steamreplica.constants.SystemRole;
 import com.example.steamreplica.dtos.request.LoginRequest;
 import com.example.steamreplica.dtos.response.user.LoginResponse;
@@ -43,8 +44,8 @@ public class AuthController {
         try {
             AuthUserDetail userDetail = (AuthUserDetail) authUserDetailService.loadUserByUsername(loginRequest.getEmail());
             String token = authUtil.generateToken(userDetail);
-            LoginResponse response = new LoginResponse(token);
-
+            LoginResponse response = new LoginResponse("Login successfully");
+            response.setToken(token);
             EntityModel<LoginResponse> entityModel = EntityModel.of(response,
                     WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(userDetail.getId())).withSelfRel()
             );
@@ -68,7 +69,7 @@ public class AuthController {
             RegisterResponse registerResponse = new RegisterResponse("User created successfully");
             EntityModel<RegisterResponse> entityModel = EntityModel.of(registerResponse, 
                     WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(user.getId())).withSelfRel(), 
-                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(AuthController.class).login(new LoginRequest(user.getEmail(), request.getPassword()), result)).withSelfRel()
+                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(AuthController.class).login(new LoginRequest(user.getEmail(), request.getPassword()), result)).withRel("Login").withType(HttpRequestTypes.POST.name())
             );
             
             return ResponseEntity.status(HttpStatus.CREATED).body(entityModel);

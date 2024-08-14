@@ -27,7 +27,8 @@ public class UserController {
         return new ArrayList<>();
     }
 
-    public User getUserById(long id) {
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable long id) {
         return null;
     }
 
