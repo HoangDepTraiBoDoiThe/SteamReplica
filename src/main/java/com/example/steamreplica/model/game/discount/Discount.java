@@ -25,17 +25,12 @@ public class Discount {
     @GeneratedValue
     private long id;
 
-    @NotBlank(message = "Discount can not be empty.")
-    @Size(max = 200, message = "Discount's name is too long.")
+    @Column(nullable = false)
     private String discountName;
-
-    @NotBlank(message = "Discount code can not be empty")
     @Column(unique = true, nullable = false)
     private String discountCode;
-
     private String discountDescription;
-
-    @PositiveOrZero(message = "Discount percent value must be a positive value.")
+    @Column(nullable = false)
     private BigDecimal discountPercent;
 
     @ManyToMany(mappedBy = "discounts")
@@ -49,4 +44,11 @@ public class Discount {
 
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<PurchasedDLCDiscount> purchasedDLCDiscounts = new HashSet<>();
+
+    public Discount(String discountName, String discountCode, String discountDescription, BigDecimal discountPercent) {
+        this.discountName = discountName;
+        this.discountCode = discountCode;
+        this.discountDescription = discountDescription;
+        this.discountPercent = discountPercent;
+    }
 }
