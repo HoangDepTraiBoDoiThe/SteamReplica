@@ -2,6 +2,8 @@ package com.example.steamreplica.util;
 
 import io.jsonwebtoken.io.IOException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
@@ -47,5 +49,9 @@ public class StaticHelper {
     public static <R> R catchingBindingError(BindingResult result, Function<List<String>, R> bindingResultExceptionFunction) {
         List<String> errors = result.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
         return bindingResultExceptionFunction.apply(errors);
+    }
+
+    public static Collection<String> extractGrantedAuthority(Authentication authentication) {
+        return authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
     }
 }

@@ -2,10 +2,10 @@ package com.example.steamreplica.controller;
 
 import com.example.steamreplica.Auth.JwtAuthUtil;
 import com.example.steamreplica.constants.SystemRole;
-import com.example.steamreplica.dtos.auth.LoginRequest;
-import com.example.steamreplica.dtos.auth.LoginResponse;
-import com.example.steamreplica.dtos.auth.RegisterRequest;
-import com.example.steamreplica.dtos.auth.RegisterResponse;
+import com.example.steamreplica.dtos.request.LoginRequest;
+import com.example.steamreplica.dtos.response.user.LoginResponse;
+import com.example.steamreplica.dtos.request.RegisterRequest;
+import com.example.steamreplica.dtos.response.user.RegisterResponse;
 import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.userApplication.ApplicationRole;
 import com.example.steamreplica.model.userApplication.User;

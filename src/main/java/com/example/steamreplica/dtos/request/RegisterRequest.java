@@ -1,7 +1,6 @@
-package com.example.steamreplica.dtos.auth;
+package com.example.steamreplica.dtos.request;
 
 import com.example.steamreplica.model.userApplication.User;
-import com.example.steamreplica.util.StaticHelper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

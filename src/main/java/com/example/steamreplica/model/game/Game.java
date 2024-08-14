@@ -49,6 +49,16 @@ public class Game {
         this.releaseDate = releaseDate;
     }
 
+    public Game(Long id, String gameName, BigDecimal gameBasePrice, String gameDescription, LocalDate releaseDate, Set<User> developers, Set<User> publishers) {
+        this.id = id;
+        this.gameName = gameName;
+        this.gameBasePrice = gameBasePrice;
+        this.gameDescription = gameDescription;
+        this.releaseDate = releaseDate;
+        this.developers = developers;
+        this.publishers = publishers;
+    }
+
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<GameImage> gameImages;
 

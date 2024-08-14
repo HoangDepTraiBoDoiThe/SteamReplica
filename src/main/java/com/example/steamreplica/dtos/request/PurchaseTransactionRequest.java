@@ -1,4 +1,4 @@
-package com.example.steamreplica.dtos.transaction;
+package com.example.steamreplica.dtos.request;
 
 import com.example.steamreplica.model.purchasedLibrary.PurchaseTransaction;
 import jakarta.validation.constraints.NotBlank;

@@ -25,32 +25,18 @@ public class ApplicationExceptionHandler {
     private final String serverExceptionMessage = "Server exception: %s";
     private final String  causer = "Causer message error: %s";
 
-    @ExceptionHandler(GameException.class)
+    @ExceptionHandler({UsernameNotFoundException.class, ResourceNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<?> handleGameNotFoundException(GameException ex, WebRequest webRequest) {
-        ErrorDataType exceptionData = extractErrorData(ex, webRequest);
-        return new ResponseEntity<>(exceptionData, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(UserException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<?> handleUserNotFoundException(UserException ex, WebRequest webRequest) {
-        ErrorDataType exceptionData = extractErrorData(ex, webRequest);
-
-        return new ResponseEntity<>(exceptionData, HttpStatus.NOT_FOUND);
-    }
-    @ExceptionHandler(UsernameNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<?> handleUserNotFoundException(UsernameNotFoundException ex, WebRequest webRequest) {
+    public ResponseEntity<?> handleResourceFoundException(RuntimeException ex, WebRequest webRequest) {
         ErrorDataType exceptionData = extractErrorData(ex, webRequest);
         return new ResponseEntity<>(exceptionData, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     ResponseEntity<?> handleOtherException(Exception ex, WebRequest webRequest) {
         ErrorDataType exceptionData = extractErrorData(ex, webRequest);
-        return new ResponseEntity<>(exceptionData, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(exceptionData, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     ErrorDataType extractErrorData(Exception ex, WebRequest webRequest) {

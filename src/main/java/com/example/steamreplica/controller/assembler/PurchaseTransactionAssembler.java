@@ -1,7 +1,7 @@
 package com.example.steamreplica.controller.assembler;
 
 import com.example.steamreplica.controller.PurchaseTransactionController;
-import com.example.steamreplica.dtos.transaction.PurchaseTransactionResponse;
+import com.example.steamreplica.dtos.response.PurchaseTransactionResponse;
 import com.example.steamreplica.model.purchasedLibrary.PurchaseTransaction;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;

@@ -1,7 +1,7 @@
 package com.example.steamreplica.controller;
 
 import com.example.steamreplica.controller.assembler.PurchaseTransactionAssembler;
-import com.example.steamreplica.dtos.transaction.PurchaseTransactionRequest;
+import com.example.steamreplica.dtos.request.PurchaseTransactionRequest;
 import com.example.steamreplica.model.purchasedLibrary.PurchaseTransaction;
 import com.example.steamreplica.service.PurchaseTransactionService;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.example.steamreplica.dtos.auth;
+package com.example.steamreplica.dtos.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

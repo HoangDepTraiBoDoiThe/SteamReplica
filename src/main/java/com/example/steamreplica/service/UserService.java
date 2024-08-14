@@ -1,6 +1,6 @@
 package com.example.steamreplica.service;
 
-import com.example.steamreplica.dtos.auth.RegisterRequest;
+import com.example.steamreplica.dtos.request.RegisterRequest;
 import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
 import com.example.steamreplica.model.userApplication.ApplicationRole;
 import com.example.steamreplica.model.userApplication.User;

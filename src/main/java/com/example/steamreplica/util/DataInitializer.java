@@ -1,7 +1,7 @@
 package com.example.steamreplica.util;
 
 import com.example.steamreplica.constants.SystemRole;
-import com.example.steamreplica.dtos.auth.RegisterRequest;
+import com.example.steamreplica.dtos.request.RegisterRequest;
 import com.example.steamreplica.model.userApplication.ApplicationRole;
 import com.example.steamreplica.service.RoleService;
 import com.example.steamreplica.service.UserService;

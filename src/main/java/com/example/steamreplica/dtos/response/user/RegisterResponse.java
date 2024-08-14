@@ -1,5 +1,6 @@
-package com.example.steamreplica.dtos.auth;
+package com.example.steamreplica.dtos.response.user;
 
+import com.example.steamreplica.dtos.response.BaseResponse;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 

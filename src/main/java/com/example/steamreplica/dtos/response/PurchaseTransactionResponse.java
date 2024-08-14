@@ -1,4 +1,4 @@
-package com.example.steamreplica.dtos.transaction;
+package com.example.steamreplica.dtos.response;
 
 import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
 import com.example.steamreplica.model.purchasedLibrary.PurchaseTransaction;
