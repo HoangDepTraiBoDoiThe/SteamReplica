@@ -3,6 +3,7 @@ package com.example.steamreplica.model.game;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import com.example.steamreplica.model.game.discount.Discount;
+import com.example.steamreplica.model.userApplication.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,23 +27,27 @@ public class Game {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Game name cannot be empty")
     @Column(nullable = false, unique = true)
     private String gameName;
 
-    @NotNull(message = "Game base price cannot be null")
-    @PositiveOrZero(message = "Game base price must be zero(Free) or positive")
     @Column(nullable = false)
     private BigDecimal gameBasePrice;
 
     @Column(length = 1000)
     private String gameDescription;
 
-    @PastOrPresent(message = "Release date must be in the past or present")
+    @Column(nullable = false)
     private LocalDate releaseDate;
 
     @OneToMany(mappedBy = "game")
     private Set<PurchasedGame> purchasedGames = new HashSet<>();
+
+    public Game(String gameName, BigDecimal gameBasePrice, String gameDescription, LocalDate releaseDate) {
+        this.gameName = gameName;
+        this.gameBasePrice = gameBasePrice;
+        this.gameDescription = gameDescription;
+        this.releaseDate = releaseDate;
+    }
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<GameImage> gameImages;
@@ -54,6 +59,14 @@ public class Game {
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "game_discount", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "discount_Id", referencedColumnName = "id"))
     private Set<Discount> discounts = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.EAGER)
+    @JoinTable(name = "game_Developer", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "user_Id", referencedColumnName = "id"))
+    private Set<User> developers = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.EAGER)
+    @JoinTable(name = "game_Publisher", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "user_Id", referencedColumnName = "id"))
+    private Set<User> publishers = new HashSet<>();
 
     @OneToMany(mappedBy = "game", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<PurchasedGame> purchasedGame = new HashSet<>();
