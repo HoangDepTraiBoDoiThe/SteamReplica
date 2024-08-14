@@ -27,11 +27,11 @@ public class GameRequest {
         Set<Long> developerIds;
         Set<Long> publisherIds;
         Set<Long> discountIds;
+        Set<Long> categoryIds;
 
         @NotBlank
         @PastOrPresent(message = "Release date must be in the past or present")
         LocalDate releaseDate;
-//        String category,
 
         @NotNull(message = "Game base price cannot be null")
         @PositiveOrZero(message = "Game base price must be zero(Free) or positive")

@@ -22,6 +22,6 @@ public class GameResponse {
     CollectionModel<?> developer;
     CollectionModel<?> publisher;
     CollectionModel<?> discounts;
-//        String category,
+    CollectionModel<?> categories;
     //        String image
 }
