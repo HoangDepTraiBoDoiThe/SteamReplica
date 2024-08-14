@@ -1,0 +1,25 @@
+package com.example.steamreplica.controller.assembler;
+
+import com.example.steamreplica.dtos.response.CategoryResponse;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
+
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+@Component
+public class CategoryAssembler {
+
+    public <T extends CategoryResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
+        return null;
+    }
+
+    public <T extends CategoryResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
+        return StreamSupport.stream(entities.spliterator(), false) //
+                .map(t -> toModel(t, authentication)) //
+                .collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::of));
+    }
+    
+}
