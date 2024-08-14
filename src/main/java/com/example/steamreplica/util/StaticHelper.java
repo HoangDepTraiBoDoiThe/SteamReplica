@@ -52,6 +52,7 @@ public class StaticHelper {
     }
 
     public static Collection<String> extractGrantedAuthority(Authentication authentication) {
+        if (authentication == null) return new ArrayList<>();
         return authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
     }
 }
