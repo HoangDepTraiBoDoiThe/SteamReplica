@@ -1,9 +1,7 @@
 package com.example.steamreplica.model.game;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Blob;
 
@@ -28,6 +26,8 @@ public class GameImage {
     }
 
     @ManyToOne
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JoinColumn(name = "game_Id", referencedColumnName = "id")
     private Game game;
 }
