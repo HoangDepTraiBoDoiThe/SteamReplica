@@ -58,7 +58,6 @@ public class GameService {
         gameToUpdate.setPublishers(new HashSet<>(userRepository.findAllById(gameRequest.getPublisherIds())));
         gameToUpdate.setDiscounts(new HashSet<>(discountRepository.findAllById(gameRequest.getPublisherIds())));
 //        gameToUpdate.setGameImages(gameRequest.getGameImages());
-//        gameToUpdate.setCategories(gameRequest.getCategories());
 
         Game updatedGame = gameRepository.save(gameToUpdate);
         return gameAssembler.toModel(updatedGame, authentication);

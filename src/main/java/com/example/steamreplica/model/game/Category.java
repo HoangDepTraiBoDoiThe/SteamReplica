@@ -23,4 +23,9 @@ public class Category {
     
     @ManyToMany(mappedBy = "categories")
     private Set<Game> games = new HashSet<>();
+
+    public Category(String categoryName, String categoryDescription) {
+        this.categoryName = categoryName;
+        this.categoryDescription = categoryDescription;
+    }
 }

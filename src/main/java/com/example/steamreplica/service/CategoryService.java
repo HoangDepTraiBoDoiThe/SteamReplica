@@ -1,10 +1,12 @@
 package com.example.steamreplica.service;
 
 import com.example.steamreplica.controller.assembler.CategoryAssembler;
+import com.example.steamreplica.dtos.request.CategoryRequest;
 import com.example.steamreplica.dtos.response.CategoryResponse;
 import com.example.steamreplica.model.game.Category;
 import com.example.steamreplica.repository.CategoryRepository;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -30,15 +32,18 @@ public class CategoryService {
         List<CategoryResponse> categoryResponses = categories.stream().map(CategoryResponse::new).toList();
         return categoryAssembler.toCollectionModel(categoryResponses, authentication);
     }
-    
-    public EntityModel<CategoryResponse> createCategory(Category category, Authentication authentication) {
-        return categoryAssembler.toModel(new CategoryResponse(categoryRepository.save(category)), authentication);
+
+    @Transactional
+    public EntityModel<CategoryResponse> createCategory(CategoryRequest categoryRequest, Authentication authentication) {
+        Category newCategory = categoryRequest.toModel();
+        return categoryAssembler.toModel(new CategoryResponse(categoryRepository.save(newCategory)), authentication);
     }
-    
-    public EntityModel<CategoryResponse> updateCategory(long id, Category category, Authentication authentication) {
+
+    @Transactional
+    public EntityModel<CategoryResponse> updateCategory(long id, CategoryRequest categoryRequest, Authentication authentication) {
         Category categoryToUpdate = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
-        categoryToUpdate.setCategoryName(category.getCategoryName());
-        categoryToUpdate.setCategoryDescription(category.getCategoryDescription());
+        categoryToUpdate.setCategoryName(categoryRequest.getCategoryName());
+        categoryToUpdate.setCategoryDescription(categoryRequest.getCategoryDescription());
         Category updateCategory = categoryRepository.save(categoryToUpdate);
         return categoryAssembler.toModel(new CategoryResponse(updateCategory), authentication);
     }
