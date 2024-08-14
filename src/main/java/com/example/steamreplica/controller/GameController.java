@@ -10,6 +10,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
@@ -35,7 +36,7 @@ public class GameController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
     @PostMapping("/create")
-    public ResponseEntity<?> createNewGame(@RequestBody GameRequest gameRequest, Authentication authentication) {
+    public ResponseEntity<?> createNewGame(@RequestBody @Validated GameRequest gameRequest, Authentication authentication) {
         return ResponseEntity.ok(gameService.addGame(gameRequest, authentication));
     }
 

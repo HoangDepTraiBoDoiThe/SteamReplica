@@ -5,14 +5,13 @@ import com.example.steamreplica.controller.GameController;
 import com.example.steamreplica.controller.GameImageController;
 import com.example.steamreplica.controller.assembler.GameImageAssembler;
 import com.example.steamreplica.dtos.request.GameImageRequest;
-import com.example.steamreplica.dtos.response.DiscountResponse;
 import com.example.steamreplica.dtos.response.GameImageResponse;
-import com.example.steamreplica.dtos.response.GameResponse;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.game.GameImage;
 import com.example.steamreplica.repository.GameImageRepository;
 import com.example.steamreplica.repository.GameRepository;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
+import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -45,7 +44,7 @@ public class GameImageService {
 
     public CollectionModel<EntityModel<GameImageResponse>> addGameImagesToGame(long GameId, List<GameImageRequest> gameImageRequests, Authentication authentication) {
         Game game = gameRepository.findById(GameId).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with id [%d] not found", GameId)));
-        List<GameImage> newGameImages = gameImageRequests.stream().map(gameImageRequest -> new GameImage(gameImageRequest.getImageName(), gameImageRequest.getImage(), game)).toList();
+        List<GameImage> newGameImages = gameImageRequests.stream().map(gameImageRequest -> new GameImage(gameImageRequest.getImageName(), StaticHelper.convertToBlob(gameImageRequest.getImage()), game)).toList();
         List<GameImage> newCreatedGameImages = gameImageRepository.saveAll(newGameImages);
         List<GameImageResponse> gameImageResponses = newCreatedGameImages.stream().map(gameImage -> new GameImageResponse(GameId, gameImage)).toList();
 

@@ -39,12 +39,12 @@ public class GameService {
     
     public EntityModel<GameResponse> addGame(GameRequest gameRequest, Authentication authentication) {
         // Todo: others are required.
-        gameRepository.findGameByGameName(gameRequest.getName()).orElseThrow(() -> new GameException("Game already exists"));
+        if (gameRepository.findGameByGameName(gameRequest.getName()).isPresent()) throw new GameException("Game already exists");
         Game newGame = gameRequest.toModel();
         newGame.setDevelopers(new HashSet<>(userRepository.findAllById(gameRequest.getDeveloperIds())));
         newGame.setPublishers(new HashSet<>(userRepository.findAllById(gameRequest.getPublisherIds())));
         newGame.setDiscounts(new HashSet<>(discountRepository.findAllById(gameRequest.getDiscountIds())));
-        List<GameImage> newGameImages = gameRequest.getGameImagesRequest().stream().map(image -> new GameImage(image.getImageName(), image.getImage(), newGame)).toList();
+        List<GameImage> newGameImages = gameRequest.getGameImagesRequest().stream().map(image -> new GameImage(image.getImageName(), StaticHelper.convertToBlob(image.getImage()), newGame)).toList();
         newGame.setGameImages(new HashSet<>(newGameImages));
 
         Game newCreatedGame = gameRepository.save(newGame);

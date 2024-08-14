@@ -13,5 +13,5 @@ import java.sql.Blob;
 public class GameImageRequest {
     private long id;
     private String imageName;
-    private Blob image;
+    private String image;
 }
