@@ -4,6 +4,7 @@ import com.example.steamreplica.controller.assembler.GameAssembler;
 import com.example.steamreplica.dtos.request.GameRequest;
 import com.example.steamreplica.dtos.response.GameResponse;
 import com.example.steamreplica.model.game.GameImage;
+import com.example.steamreplica.repository.CategoryRepository;
 import com.example.steamreplica.repository.DiscountRepository;
 import com.example.steamreplica.repository.UserRepository;
 import com.example.steamreplica.service.exception.GameException;
@@ -26,6 +27,7 @@ public class GameService {
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
     private final DiscountRepository discountRepository;
+    private final CategoryRepository categoryRepository;
     private final GameAssembler gameAssembler;
     
     public CollectionModel<EntityModel<GameResponse>> getAllGames(Authentication authentication) {
@@ -38,12 +40,12 @@ public class GameService {
     }
     
     public EntityModel<GameResponse> addGame(GameRequest gameRequest, Authentication authentication) {
-        // Todo: others are required.
         if (gameRepository.findGameByGameName(gameRequest.getName()).isPresent()) throw new GameException("Game already exists");
         Game newGame = gameRequest.toModel();
         newGame.setDevelopers(new HashSet<>(userRepository.findAllById(gameRequest.getDeveloperIds())));
         newGame.setPublishers(new HashSet<>(userRepository.findAllById(gameRequest.getPublisherIds())));
         newGame.setDiscounts(new HashSet<>(discountRepository.findAllById(gameRequest.getDiscountIds())));
+        newGame.setCategories(new HashSet<>(categoryRepository.findAllById(gameRequest.getCategoryIds())));
         List<GameImage> newGameImages = gameRequest.getGameImagesRequest().stream().map(image -> new GameImage(image.getImageName(), StaticHelper.convertToBlob(image.getImage()), newGame)).toList();
         newGame.setGameImages(new HashSet<>(newGameImages));
 
@@ -52,18 +54,17 @@ public class GameService {
     }
 
     public EntityModel<GameResponse> updateGame(long id, GameRequest gameRequest, Authentication authentication) {
-        // Todo: publishers, devs should be put into the consideration.
-        
         Game gameToUpdate = gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Game not found"));
+
         gameToUpdate.setGameName(gameRequest.getName());
         gameToUpdate.setGameDescription(gameRequest.getDescription());
         gameToUpdate.setGameBasePrice(gameRequest.getPrice());
         gameToUpdate.setReleaseDate(gameRequest.getReleaseDate());
         gameToUpdate.setDevelopers(new HashSet<>(userRepository.findAllById(gameRequest.getDeveloperIds())));
         gameToUpdate.setPublishers(new HashSet<>(userRepository.findAllById(gameRequest.getPublisherIds())));
-        gameToUpdate.setDiscounts(new HashSet<>(discountRepository.findAllById(gameRequest.getPublisherIds())));
-//        gameToUpdate.setGameImages(gameRequest.getGameImages());
-
+        gameToUpdate.setDiscounts(new HashSet<>(discountRepository.findAllById(gameRequest.getDiscountIds()))); 
+        gameToUpdate.setCategories(new HashSet<>(categoryRepository.findAllById(gameRequest.getCategoryIds())));
+    
         Game updatedGame = gameRepository.save(gameToUpdate);
         return gameAssembler.toModel(updatedGame, authentication);
     }
