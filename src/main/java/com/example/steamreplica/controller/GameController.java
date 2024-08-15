@@ -1,8 +1,7 @@
 package com.example.steamreplica.controller;
 
 import com.example.steamreplica.dtos.request.GameRequest;
-import com.example.steamreplica.dtos.response.GameResponse;
-import com.example.steamreplica.model.game.Game;
+import com.example.steamreplica.dtos.response.GameResponse_Full;
 import com.example.steamreplica.service.GameService;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ public class GameController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getGame(@PathVariable long id, Authentication authentication) {
         Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
-        EntityModel<GameResponse> gameResponseEntityModel = gameService.getGameById(id, authentication);
+        EntityModel<GameResponse_Full> gameResponseEntityModel = gameService.getGameById(id, authentication);
         return ResponseEntity.ok(gameResponseEntityModel);
     }
 

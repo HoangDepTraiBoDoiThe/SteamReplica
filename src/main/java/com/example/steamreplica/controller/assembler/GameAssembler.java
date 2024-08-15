@@ -3,12 +3,7 @@ package com.example.steamreplica.controller.assembler;
 import com.example.steamreplica.constants.HttpRequestTypes;
 import com.example.steamreplica.constants.SystemRole;
 import com.example.steamreplica.controller.GameController;
-import com.example.steamreplica.dtos.response.CategoryResponse;
-import com.example.steamreplica.dtos.response.DiscountResponse;
-import com.example.steamreplica.dtos.response.GameImageResponse;
-import com.example.steamreplica.dtos.response.GameResponse;
-import com.example.steamreplica.dtos.response.user.UserResponse;
-import com.example.steamreplica.model.game.Game;
+import com.example.steamreplica.dtos.response.ResponseBase;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
@@ -18,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -27,7 +21,7 @@ import java.util.stream.StreamSupport;
 public class GameAssembler {
 
     
-    public <T extends GameResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
+    public <T extends ResponseBase> EntityModel<T> toModel(T entity, Authentication authentication) {
         Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
         
         EntityModel<T> gameResponseEntityModel = EntityModel.of(entity,
@@ -43,7 +37,7 @@ public class GameAssembler {
         return gameResponseEntityModel;
     }
 
-    public <T extends GameResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
+    public <T extends ResponseBase> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
         return StreamSupport.stream(entities.spliterator(), false) //
                 .map(game -> toModel(game, authentication)) //
                 .collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::of));

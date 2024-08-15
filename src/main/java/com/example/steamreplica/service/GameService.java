@@ -5,7 +5,7 @@ import com.example.steamreplica.dtos.request.GameRequest;
 import com.example.steamreplica.dtos.response.CategoryResponse;
 import com.example.steamreplica.dtos.response.DiscountResponse;
 import com.example.steamreplica.dtos.response.GameImageResponse;
-import com.example.steamreplica.dtos.response.GameResponse;
+import com.example.steamreplica.dtos.response.GameResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse;
 import com.example.steamreplica.model.game.GameImage;
 import com.example.steamreplica.repository.CategoryRepository;
@@ -38,22 +38,22 @@ public class GameService {
     private final CategoryAssembler categoryAssembler;
     private final GameImageAssembler gameImageAssembler;
     
-    public CollectionModel<EntityModel<GameResponse>> getAllGames(Authentication authentication) {
-        List<GameResponse> list = gameRepository.findAll().stream().map(game -> makeGameResponse(authentication, game)).toList();
+    public CollectionModel<EntityModel<GameResponse_Full>> getAllGames(Authentication authentication) {
+        List<GameResponse_Full> list = gameRepository.findAll().stream().map(game -> makeGameResponse(authentication, game)).toList();
         return gameAssembler.toCollectionModel(list, authentication);
     }
 
-    public EntityModel<GameResponse> getGameById(long id, Authentication authentication) {
+    public EntityModel<GameResponse_Full> getGameById(long id, Authentication authentication) {
         Game game = gameRepository.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
-        GameResponse gameResponse = makeGameResponse(authentication, game);
-        return gameAssembler.toModel(gameResponse, authentication);
+        GameResponse_Full gameResponseFull = makeGameResponse(authentication, game);
+        return gameAssembler.toModel(gameResponseFull, authentication);
     }
 
     public Game getGameById_entity(long id) {
         return gameRepository.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
     }
     
-    public EntityModel<GameResponse> addGame(GameRequest gameRequest, Authentication authentication) {
+    public EntityModel<GameResponse_Full> addGame(GameRequest gameRequest, Authentication authentication) {
         if (gameRepository.findGameByGameName(gameRequest.getName()).isPresent()) throw new GameException("Game already exists");
         Game newGame = gameRequest.toModel();
         newGame.setDevelopers(new HashSet<>(userRepository.findAllById(gameRequest.getDeveloperIds())));
@@ -67,7 +67,7 @@ public class GameService {
         return gameAssembler.toModel(makeGameResponse(authentication, newCreatedGame), authentication);
     }
 
-    public EntityModel<GameResponse> updateGame(long id, GameRequest gameRequest, Authentication authentication) {
+    public EntityModel<GameResponse_Full> updateGame(long id, GameRequest gameRequest, Authentication authentication) {
         Game gameToUpdate = gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Game not found"));
 
         gameToUpdate.setGameName(gameRequest.getName());
@@ -89,7 +89,7 @@ public class GameService {
     }
 
 
-    private GameResponse makeGameResponse(Authentication authentication, Game game) {
+    private GameResponse_Full makeGameResponse(Authentication authentication, Game game) {
         List<UserResponse> usersAsPublisherResponses = game.getPublishers().stream().map(UserResponse::new).toList();
         CollectionModel<?> publisherEntityModel = userAssembler.toCollectionModel(usersAsPublisherResponses, authentication);
 
@@ -105,7 +105,7 @@ public class GameService {
         List<GameImageResponse> gameImageResponses = game.getGameImages().stream().map(gameImage -> new GameImageResponse(game.getId(), gameImage)).toList();
         CollectionModel<?> gameImageCollectionModel = gameImageAssembler.toCollectionModel(gameImageResponses, authentication);
 
-        GameResponse gameResponse = new GameResponse(game.getId(), game.getGameName(), game.getGameDescription(), game.getReleaseDate(), game.getGameBasePrice(), publisherEntityModel, DeveloperEntityModel, discountCollectionModel, categoryCollectionModel, gameImageCollectionModel, StaticHelper.convertBlobToString(game.getGameThumbnail()));
-        return gameResponse;
+        GameResponse_Full gameResponseFull = new GameResponse_Full(game.getId(), game.getGameName(), game.getGameDescription(), game.getReleaseDate(), game.getGameBasePrice(), publisherEntityModel, DeveloperEntityModel, discountCollectionModel, categoryCollectionModel, gameImageCollectionModel, StaticHelper.convertBlobToString(game.getGameThumbnail()));
+        return gameResponseFull;
     }
 }
