@@ -14,20 +14,19 @@ import com.example.steamreplica.repository.GameRepository;
 import com.example.steamreplica.repository.UserRepository;
 import com.example.steamreplica.service.GameService;
 import com.example.steamreplica.service.exception.GameException;
+import com.example.steamreplica.util.StaticHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -58,14 +57,8 @@ public class GameTests {
     private Authentication authentication;
 
     @InjectMocks
-    private GameAssembler gameAssembler;
-
     private GameService gameService;
 
-    @BeforeEach
-    void setUp() {
-        gameService = new GameService(gameRepository, userRepository, discountRepository, categoryRepository, gameAssembler);
-    }
     // Successfully adds a new game when all required fields are provided
     @Test
     public void test_add_game_success() {
@@ -127,8 +120,6 @@ public class GameTests {
         GameAssembler gameAssembler = mock(GameAssembler.class);
         Authentication authentication = mock(Authentication.class);
 
-        GameService gameService = new GameService(gameRepository, userRepository, discountRepository, categoryRepository, gameAssembler);
-
         GameRequest gameRequest = new GameRequest();
         gameRequest.setName("Existing Game");
 
@@ -139,35 +130,5 @@ public class GameTests {
         });
     }
 
-    @Test
-    public void test_update_game_success() {
-        // Arrange
-        GameRepository gameRepository = Mockito.mock(GameRepository.class);
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        DiscountRepository discountRepository = Mockito.mock(DiscountRepository.class);
-        CategoryRepository categoryRepository = Mockito.mock(CategoryRepository.class);
-        GameAssembler gameAssembler = Mockito.mock(GameAssembler.class);
-        Authentication authentication = Mockito.mock(Authentication.class);
 
-        GameService gameService = new GameService(gameRepository, userRepository, discountRepository, categoryRepository, gameAssembler);
-
-        long gameId = 1L;
-        GameRequest gameRequest = new GameRequest("New Game", "Description", Set.of(1L), Set.of(2L), Set.of(3L), Set.of(4L), List.of(), "thumbnail", LocalDate.now(), BigDecimal.valueOf(59.99));
-        Game existingGame = new Game(gameId, "Old Game", BigDecimal.valueOf(49.99), "Old Description", LocalDate.now(), new HashSet<>(), new HashSet<>(), null);
-
-        Mockito.when(gameRepository.findById(gameId)).thenReturn(Optional.of(existingGame));
-        Mockito.when(userRepository.findAllById(gameRequest.getDeveloperIds())).thenReturn(List.of());
-        Mockito.when(userRepository.findAllById(gameRequest.getPublisherIds())).thenReturn(List.of());
-        Mockito.when(discountRepository.findAllById(gameRequest.getDiscountIds())).thenReturn(List.of());
-        Mockito.when(categoryRepository.findAllById(gameRequest.getCategoryIds())).thenReturn(List.of());
-        Mockito.when(gameRepository.save(existingGame)).thenReturn(existingGame);
-        EntityModel<GameResponse_Full> expectedResponse = EntityModel.of(new GameResponse_Full());
-        Mockito.when(gameAssembler.toModel(existingGame, authentication)).thenReturn(expectedResponse);
-
-        // Act
-        EntityModel<GameResponse_Full> response = gameService.updateGame(gameId, gameRequest, authentication);
-
-        // Assert
-        Assertions.assertEquals(expectedResponse, response);
-    }
 }

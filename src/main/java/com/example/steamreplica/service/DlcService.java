@@ -40,7 +40,7 @@ public class DlcService {
     }
 
     public CollectionModel<EntityModel<DlcResponse_Full>> getAllDlcOfGame(long gameId, Authentication authentication) {
-        List<DlcResponse_Full> dlcResponsFulls = dlcRepository.getAllByGame(gameId).stream().map(dlc -> makeDlcResponse(authentication, dlc)).toList();
+        List<DlcResponse_Full> dlcResponsFulls = dlcRepository.getAllByGame_Id(gameId).stream().map(dlc -> makeDlcResponse(authentication, dlc)).toList();
         return dlcAssembler.toCollectionModel(dlcResponsFulls, authentication);
     }
     
@@ -81,7 +81,7 @@ public class DlcService {
     public DlcResponse_Full makeDlcResponse(Authentication authentication, DLC dlc) {
         List<DiscountResponse> discountResponses = dlc.getDiscounts().stream().map(DiscountResponse::new).toList();
         CollectionModel<EntityModel<DiscountResponse>> discountCollectionModel = discountAssembler.toCollectionModel(discountResponses, authentication);
-        Game game = gameService.getGameById_entity(dlc.getId());
+        Game game = gameService.getGameById_entity(dlc.getGame().getId());
         // todo: dlc images.
 
         DlcResponse_Full dlcResponseFull = new DlcResponse_Full(dlc);

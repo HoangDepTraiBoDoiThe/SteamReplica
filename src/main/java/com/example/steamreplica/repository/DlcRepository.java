@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 public interface DlcRepository extends JpaRepository<DLC, Long> {
     Optional<DLC> findDLCByDlcName(String dlcName);
-    List<DLC> getAllByGame(long id);
+    List<DLC> getAllByGame_Id(long id);
 }

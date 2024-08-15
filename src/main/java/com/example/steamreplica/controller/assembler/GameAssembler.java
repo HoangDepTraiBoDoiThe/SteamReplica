@@ -19,8 +19,6 @@ import java.util.stream.StreamSupport;
 @Component
 @RequiredArgsConstructor
 public class GameAssembler {
-
-    
     public <T extends ResponseBase> EntityModel<T> toModel(T entity, Authentication authentication) {
         Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
         
