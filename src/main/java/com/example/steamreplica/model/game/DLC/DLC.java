@@ -6,11 +6,10 @@ import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,16 +33,25 @@ public class DLC {
     @Column(nullable = false)
     private BigDecimal dlcBasePrice;
 
+    @Lob
+    private Blob dlcThumbnail;
+
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "game_Id", referencedColumnName = "id")
     private Game game;
     
-    @OneToMany(mappedBy = "dlc", cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @OneToMany(mappedBy = "dlc", cascade = {CascadeType.MERGE})
     private Set<PurchasedDLC> purchasedDLCs = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "dlc")
-    private Set<DLCImage> dlcImages;
+    private Set<DLCImage> dlcImages = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(name = "discount_dlc", joinColumns = @JoinColumn(name = "dlc_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "discount_Id", referencedColumnName = "id"))
     private Set<Discount> discounts = new HashSet<>();

@@ -22,7 +22,8 @@ public class DLCImage {
     @Lob
     private Blob image;
 
+    
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(name = "dlc_id", referencedColumnName = "id")
     private DLC dlc;
 }
