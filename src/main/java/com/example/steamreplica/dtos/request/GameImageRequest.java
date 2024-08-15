@@ -14,4 +14,9 @@ public class GameImageRequest {
     private long id;
     private String imageName;
     private String image;
+
+    public GameImageRequest(String imageName, String image) {
+        this.imageName = imageName;
+        this.image = image;
+    }
 }
