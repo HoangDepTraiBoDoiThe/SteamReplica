@@ -31,6 +31,13 @@ public class ApplicationExceptionHandler {
         ErrorDataType exceptionData = extractErrorData(ex, webRequest);
         return new ResponseEntity<>(exceptionData, HttpStatus.NOT_FOUND);
     }
+    
+    @ExceptionHandler(ResourceExitedException.class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ResponseEntity<?> handleResourceExitedException(ResourceExitedException ex, WebRequest webRequest) {
+        ErrorDataType exceptionData = extractErrorData(ex, webRequest);
+        return new ResponseEntity<>(exceptionData, HttpStatus.NOT_ACCEPTABLE);
+    }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
