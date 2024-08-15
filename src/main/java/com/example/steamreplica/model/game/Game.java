@@ -5,10 +5,6 @@ import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.userApplication.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -40,7 +36,7 @@ public class Game {
     
     @Lob
     private Blob gameThumbnail;
-    
+
     public Game(String gameName, BigDecimal gameBasePrice, String gameDescription, LocalDate releaseDate, Blob gameThumbnail) {
         this.gameName = gameName;
         this.gameBasePrice = gameBasePrice;

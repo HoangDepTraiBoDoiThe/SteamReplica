@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -17,10 +18,15 @@ public class DlcRequest {
     @Length(max = 100, message = "DLC name must be less than or equal to 100 characters. Any more detail can be added in the description.")
     private String dlcName;
     private String dlcDescription;
+    
+    private Set<Long> dlcImages;
 
     @PositiveOrZero(message = "DLC base price must be positive or zero (Free)")
     private BigDecimal dlcBasePrice;
 
+    @NotBlank(message = "Owning game id is required")
+    private long OwningGameId;
+    
     @NotBlank(message = "DLC thumbnail is required")
     private String dlcThumbnail;
 }

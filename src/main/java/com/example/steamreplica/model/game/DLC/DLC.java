@@ -36,6 +36,13 @@ public class DLC {
     @Lob
     private Blob dlcThumbnail;
 
+    public DLC(String dlcName, String dlcDescription, BigDecimal dlcBasePrice, Blob dlcThumbnail) {
+        this.dlcName = dlcName;
+        this.dlcDescription = dlcDescription;
+        this.dlcBasePrice = dlcBasePrice;
+        this.dlcThumbnail = dlcThumbnail;
+    }
+
     @ManyToOne
     @JoinColumn(name = "game_Id", referencedColumnName = "id")
     private Game game;

@@ -5,9 +5,6 @@ import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLCDiscount;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGameDiscount;
 import com.example.steamreplica.model.game.Game;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;

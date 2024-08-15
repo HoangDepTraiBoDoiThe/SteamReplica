@@ -38,6 +38,9 @@ public class GameService {
         Game game = gameRepository.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
         return gameAssembler.toModel(game, authentication);
     }
+    public Game getGameById_entity(long id) {
+        return gameRepository.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
+    }
     
     public EntityModel<GameResponse> addGame(GameRequest gameRequest, Authentication authentication) {
         if (gameRepository.findGameByGameName(gameRequest.getName()).isPresent()) throw new GameException("Game already exists");
