@@ -5,22 +5,26 @@ import com.example.steamreplica.util.StaticHelper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 
 import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DlcResponse {
-    private Long id;
-    private String dlcName;
+public class DlcResponse_Full extends ResponseBase{
     private String dlcDescription;
     private BigDecimal dlcBasePrice;
     private String dlcThumbnail;
+    private CollectionModel<?> discounts;
+    private CollectionModel<?> gameImages;
+    private EntityModel<?> game;
 
-    public DlcResponse(DLC dlc) {
+    public DlcResponse_Full(DLC dlc) {
+        super(dlc.getId(), dlc.getDlcName());
         this.id = dlc.getId();
-        this.dlcName = dlc.getDlcName();
+        this.name = dlc.getDlcName();
         this.dlcDescription = dlc.getDlcDescription();
         this.dlcBasePrice = dlc.getDlcBasePrice();
         this.dlcThumbnail = StaticHelper.convertBlobToString(dlc.getDlcThumbnail());

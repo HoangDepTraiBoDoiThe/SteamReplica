@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 @Data
@@ -20,6 +21,8 @@ public class DlcRequest {
     private String dlcDescription;
     
     private Set<Long> dlcImages;
+    
+    private ZonedDateTime releaseDate;
 
     @PositiveOrZero(message = "DLC base price must be positive or zero (Free)")
     private BigDecimal dlcBasePrice;

@@ -10,6 +10,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.sql.Blob;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +29,9 @@ public class DLC {
     private String dlcName;
 
     private String dlcDescription;
+    
+    @Column(nullable = false)
+    private ZonedDateTime releaseDate;
 
     @PositiveOrZero(message = "DLC base price must be positive or zero (Free)")
     @Column(nullable = false)
@@ -36,16 +40,17 @@ public class DLC {
     @Lob
     private Blob dlcThumbnail;
 
-    public DLC(String dlcName, String dlcDescription, BigDecimal dlcBasePrice, Blob dlcThumbnail) {
+    @ManyToOne
+    @JoinColumn(name = "game_Id", referencedColumnName = "id")
+    private Game game;
+
+    public DLC(String dlcName, String dlcDescription, BigDecimal dlcBasePrice, Blob dlcThumbnail, ZonedDateTime releaseDate) {
         this.dlcName = dlcName;
         this.dlcDescription = dlcDescription;
         this.dlcBasePrice = dlcBasePrice;
         this.dlcThumbnail = dlcThumbnail;
+        this.releaseDate = releaseDate;
     }
-
-    @ManyToOne
-    @JoinColumn(name = "game_Id", referencedColumnName = "id")
-    private Game game;
     
     @EqualsAndHashCode.Exclude
     @ToString.Exclude

@@ -3,10 +3,9 @@ package com.example.steamreplica;
 import com.example.steamreplica.controller.assembler.*;
 import com.example.steamreplica.dtos.request.GameImageRequest;
 import com.example.steamreplica.dtos.request.GameRequest;
-import com.example.steamreplica.dtos.response.GameResponse;
+import com.example.steamreplica.dtos.response.GameResponse_Full;
 import com.example.steamreplica.model.game.Category;
 import com.example.steamreplica.model.game.Game;
-import com.example.steamreplica.model.game.GameImage;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.CategoryRepository;
@@ -15,7 +14,6 @@ import com.example.steamreplica.repository.GameRepository;
 import com.example.steamreplica.repository.UserRepository;
 import com.example.steamreplica.service.GameService;
 import com.example.steamreplica.service.exception.GameException;
-import com.example.steamreplica.util.StaticHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,7 +91,7 @@ public class GameTests {
         when(gameRepository.save(any(Game.class))).thenReturn(newGame);
 
         // Act
-        EntityModel<GameResponse> response = gameService.addGame(gameRequest, authentication);
+        EntityModel<GameResponse_Full> response = gameService.addGame(gameRequest, authentication);
 
         // Assert
         assertNotNull(response);
@@ -163,11 +161,11 @@ public class GameTests {
         Mockito.when(discountRepository.findAllById(gameRequest.getDiscountIds())).thenReturn(List.of());
         Mockito.when(categoryRepository.findAllById(gameRequest.getCategoryIds())).thenReturn(List.of());
         Mockito.when(gameRepository.save(existingGame)).thenReturn(existingGame);
-        EntityModel<GameResponse> expectedResponse = EntityModel.of(new GameResponse());
+        EntityModel<GameResponse_Full> expectedResponse = EntityModel.of(new GameResponse_Full());
         Mockito.when(gameAssembler.toModel(existingGame, authentication)).thenReturn(expectedResponse);
 
         // Act
-        EntityModel<GameResponse> response = gameService.updateGame(gameId, gameRequest, authentication);
+        EntityModel<GameResponse_Full> response = gameService.updateGame(gameId, gameRequest, authentication);
 
         // Assert
         Assertions.assertEquals(expectedResponse, response);
