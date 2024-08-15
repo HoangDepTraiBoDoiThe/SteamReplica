@@ -25,31 +25,12 @@ import java.util.stream.StreamSupport;
 @Component
 @RequiredArgsConstructor
 public class GameAssembler {
-    private final UserAssembler userAssembler;
-    private final DiscountAssembler discountAssembler;
-    private final CategoryAssembler categoryAssembler;
-    private final GameImageAssembler gameImageAssembler;
-    
-    public EntityModel<GameResponse> toModel(Game entity, Authentication authentication) {
-        Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
 
-        List<UserResponse> usersAsPublisherResponses = entity.getPublishers().stream().map(UserResponse::new).toList();
-        CollectionModel<?> publisherEntityModel = userAssembler.toCollectionModel(usersAsPublisherResponses, authentication);
+    
+    public <T extends GameResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
+        Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
         
-        List<UserResponse> usersAsDevResponses = entity.getPublishers().stream().map(UserResponse::new).toList();
-        CollectionModel<?> DeveloperEntityModel = userAssembler.toCollectionModel(usersAsDevResponses, authentication);
-        
-        List<DiscountResponse> discountResponses = entity.getDiscounts().stream().map(DiscountResponse::new).toList();
-        CollectionModel<?> discountCollectionModel = discountAssembler.toCollectionModel(discountResponses, authentication);
-        
-        List<CategoryResponse> categoryResponses = entity.getCategories().stream().map(CategoryResponse::new).toList();
-        CollectionModel<?> categoryCollectionModel = categoryAssembler.toCollectionModel(categoryResponses, authentication);        
-        
-        List<GameImageResponse> gameImageResponses = entity.getGameImages().stream().map(gameImage -> new GameImageResponse(entity.getId(), gameImage)).toList();
-        CollectionModel<?> gameImageCollectionModel = gameImageAssembler.toCollectionModel(gameImageResponses, authentication);
-        
-        GameResponse gameResponse = new GameResponse(entity.getId(), entity.getGameName(), entity.getGameDescription(), entity.getReleaseDate(), entity.getGameBasePrice(), publisherEntityModel, DeveloperEntityModel, discountCollectionModel, categoryCollectionModel, gameImageCollectionModel, StaticHelper.convertBlobToString(entity.getGameThumbnail()));
-        EntityModel<GameResponse> gameResponseEntityModel = EntityModel.of(gameResponse,
+        EntityModel<T> gameResponseEntityModel = EntityModel.of(entity,
                 WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGame(entity.getId(), authentication)).withSelfRel().withType(HttpRequestTypes.GET.name()),
                 WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGames(authentication)).withRel("Get all Games").withType(HttpRequestTypes.GET.name())
         );
@@ -62,7 +43,7 @@ public class GameAssembler {
         return gameResponseEntityModel;
     }
 
-    public CollectionModel<EntityModel<GameResponse>> toCollectionModel(Iterable<Game> entities, Authentication authentication) {
+    public <T extends GameResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
         return StreamSupport.stream(entities.spliterator(), false) //
                 .map(game -> toModel(game, authentication)) //
                 .collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::of));

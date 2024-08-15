@@ -1,8 +1,12 @@
 package com.example.steamreplica.service;
 
-import com.example.steamreplica.controller.assembler.GameAssembler;
+import com.example.steamreplica.controller.assembler.*;
 import com.example.steamreplica.dtos.request.GameRequest;
+import com.example.steamreplica.dtos.response.CategoryResponse;
+import com.example.steamreplica.dtos.response.DiscountResponse;
+import com.example.steamreplica.dtos.response.GameImageResponse;
 import com.example.steamreplica.dtos.response.GameResponse;
+import com.example.steamreplica.dtos.response.user.UserResponse;
 import com.example.steamreplica.model.game.GameImage;
 import com.example.steamreplica.repository.CategoryRepository;
 import com.example.steamreplica.repository.DiscountRepository;
@@ -29,15 +33,22 @@ public class GameService {
     private final DiscountRepository discountRepository;
     private final CategoryRepository categoryRepository;
     private final GameAssembler gameAssembler;
+    private final UserAssembler userAssembler;
+    private final DiscountAssembler discountAssembler;
+    private final CategoryAssembler categoryAssembler;
+    private final GameImageAssembler gameImageAssembler;
     
     public CollectionModel<EntityModel<GameResponse>> getAllGames(Authentication authentication) {
-        return gameAssembler.toCollectionModel(gameRepository.findAll(), authentication);
+        List<GameResponse> list = gameRepository.findAll().stream().map(game -> makeGameResponse(authentication, game)).toList();
+        return gameAssembler.toCollectionModel(list, authentication);
     }
 
     public EntityModel<GameResponse> getGameById(long id, Authentication authentication) {
         Game game = gameRepository.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
-        return gameAssembler.toModel(game, authentication);
+        GameResponse gameResponse = makeGameResponse(authentication, game);
+        return gameAssembler.toModel(gameResponse, authentication);
     }
+
     public Game getGameById_entity(long id) {
         return gameRepository.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
     }
@@ -53,7 +64,7 @@ public class GameService {
         newGame.setGameImages(new HashSet<>(newGameImages));
 
         Game newCreatedGame = gameRepository.save(newGame);
-        return gameAssembler.toModel(newCreatedGame, authentication);
+        return gameAssembler.toModel(makeGameResponse(authentication, newCreatedGame), authentication);
     }
 
     public EntityModel<GameResponse> updateGame(long id, GameRequest gameRequest, Authentication authentication) {
@@ -69,11 +80,32 @@ public class GameService {
         gameToUpdate.setCategories(new HashSet<>(categoryRepository.findAllById(gameRequest.getCategoryIds())));
     
         Game updatedGame = gameRepository.save(gameToUpdate);
-        return gameAssembler.toModel(updatedGame, authentication);
+        return gameAssembler.toModel(makeGameResponse(authentication, updatedGame), authentication);
     }
 
     public void deleteGame(long id) {
         gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
         gameRepository.deleteById(id);
+    }
+
+
+    private GameResponse makeGameResponse(Authentication authentication, Game game) {
+        List<UserResponse> usersAsPublisherResponses = game.getPublishers().stream().map(UserResponse::new).toList();
+        CollectionModel<?> publisherEntityModel = userAssembler.toCollectionModel(usersAsPublisherResponses, authentication);
+
+        List<UserResponse> usersAsDevResponses = game.getPublishers().stream().map(UserResponse::new).toList();
+        CollectionModel<?> DeveloperEntityModel = userAssembler.toCollectionModel(usersAsDevResponses, authentication);
+
+        List<DiscountResponse> discountResponses = game.getDiscounts().stream().map(DiscountResponse::new).toList();
+        CollectionModel<?> discountCollectionModel = discountAssembler.toCollectionModel(discountResponses, authentication);
+
+        List<CategoryResponse> categoryResponses = game.getCategories().stream().map(CategoryResponse::new).toList();
+        CollectionModel<?> categoryCollectionModel = categoryAssembler.toCollectionModel(categoryResponses, authentication);
+
+        List<GameImageResponse> gameImageResponses = game.getGameImages().stream().map(gameImage -> new GameImageResponse(game.getId(), gameImage)).toList();
+        CollectionModel<?> gameImageCollectionModel = gameImageAssembler.toCollectionModel(gameImageResponses, authentication);
+
+        GameResponse gameResponse = new GameResponse(game.getId(), game.getGameName(), game.getGameDescription(), game.getReleaseDate(), game.getGameBasePrice(), publisherEntityModel, DeveloperEntityModel, discountCollectionModel, categoryCollectionModel, gameImageCollectionModel, StaticHelper.convertBlobToString(game.getGameThumbnail()));
+        return gameResponse;
     }
 }
