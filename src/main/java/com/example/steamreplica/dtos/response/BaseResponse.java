@@ -8,5 +8,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BaseResponse {
+    private long id;
     private String message;
+
+    public BaseResponse(String message) {
+        this.message = message;
+    }
 }
