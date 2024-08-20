@@ -8,6 +8,7 @@ import com.example.steamreplica.dtos.response.game.GameResponse_Minimal;
 import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Basic;
 import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
 import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Minimal;
+import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Basic;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Minimal;
@@ -38,7 +39,7 @@ public class ServiceHelper {
         try {
             T response;
 
-            List<DiscountResponse_Full> discountResponsFulls = game.getDiscounts().stream().map(discount -> ).toList();
+            List<DiscountResponse_Minimal> discountResponsesMinimal = game.getDiscounts().stream().map(DiscountResponse_Minimal::new).toList();
 
             List<EntityModel<CategoryResponse_Minimal>> categoryEntityModelList = game.getCategories().stream().map(category -> makeCategoryResponse(CategoryResponse_Minimal.class, category, authentication)).toList();
             if (GameResponse_Full.class.equals(responseType)) {
@@ -46,12 +47,11 @@ public class ServiceHelper {
 
                 List<EntityModel<UserResponse_Minimal>> usersAsDevResponses = game.getPublishers().stream().map(user -> makeUserResponse(UserResponse_Minimal.class, user, authentication)).toList();
 
-                List<GameImageResponse> gameImageResponses = game.getGameImages().stream().map(gameImage -> new GameImageResponse(game.getId(), gameImage)).toList();
-                CollectionModel<?> gameImageCollectionModel = gameImageAssembler.toCollectionModel(gameImageResponses, authentication);
+                List<EntityModel<GameImageResponse>> gameImageResponses = game.getGameImages().stream().map(gameImage -> new GameImageResponse(game.getId(), gameImage)).toList();
 
-                response = (T) new GameResponse_Full(game, usersAsPublisherResponses, usersAsDevResponses, discountCollectionModel, categoryEntityModelList, gameImageCollectionModel);
+                response = (T) new GameResponse_Full(game, usersAsPublisherResponses, usersAsDevResponses, discountResponsesMinimal, categoryEntityModelList, gameImageCollectionModel);
             } else if (GameResponse_Basic.class.equals(responseType)) {
-                response = (T) new GameResponse_Basic(game, discountCollectionModel, categoryEntityModelList);
+                response = (T) new GameResponse_Basic(game, discountResponsesMinimal, categoryEntityModelList);
             } else {
                 response = responseType.getDeclaredConstructor(Long.class).newInstance(game.getId());
             }
@@ -61,6 +61,7 @@ public class ServiceHelper {
             throw new RuntimeException("Error while creating response: ", e);
         }
     }
+
 
     public <T extends BaseResponse> EntityModel<T> makeCategoryResponse(Class<T> responseType, Category category, Authentication authentication) {
         try {
@@ -112,8 +113,17 @@ public class ServiceHelper {
     }
 
     public <T extends BaseResponse> EntityModel<T> makeDiscountResponse(Class<T> responseType, Discount discount, Authentication authentication) {
+        T response;
+        
         try {
-            return null;
+            if (DiscountResponse_Full.class.equals(responseType)) {
+                List<EntityModel<GameResponse_Minimal>> gameEntityModelList = discount.getDiscountedGames().stream().map(game -> makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
+                List<EntityModel<DlcResponse_Basic>> dlcEntityModelList = discount.getDiscountedDlc().stream().map(dlc -> makeDlcResponse(DlcResponse_Basic.class, dlc, authentication)).toList();
+                response = (T) new DiscountResponse_Full(discount, gameEntityModelList, dlcEntityModelList);
+            } else {
+                response = responseType.getDeclaredConstructor(Discount.class).newInstance(discount);
+            } 
+            return discountAssembler.toModel(response, authentication);
         } catch (Exception e) {
             throw new RuntimeException("Error while creating response: ", e);
         }

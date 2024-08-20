@@ -10,20 +10,15 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DiscountResponse_Full {
-    private long id;
-    private String discountName;
+public class DiscountResponse_Full extends DiscountResponse_Basic {
     private String discountCode;
-    private String discountDescription;
-    private BigDecimal discountPercent;
     private List<?> games;
+    private List<?> dlcs;
 
-
-    public DiscountResponse_Full(Discount discount) {
-        this.id = discount.getId();
-        this.discountName = discount.getDiscountName();
+    public DiscountResponse_Full(Discount discount, List<?> games, List<?> dlcs) {
+        super(discount);
         this.discountCode = discount.getDiscountCode();
-        this.discountDescription = discount.getDiscountDescription();
-        this.discountPercent = discount.getDiscountPercent();
+        this.games = games;
+        this.dlcs = dlcs;
     }
 }

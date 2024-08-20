@@ -40,10 +40,6 @@ public class DLC {
     @Lob
     private Blob dlcThumbnail;
 
-    @ManyToOne
-    @JoinColumn(name = "game_Id", referencedColumnName = "id")
-    private Game game;
-
     public DLC(String dlcName, String dlcDescription, BigDecimal dlcBasePrice, Blob dlcThumbnail, ZonedDateTime releaseDate) {
         this.dlcName = dlcName;
         this.dlcDescription = dlcDescription;
@@ -51,7 +47,13 @@ public class DLC {
         this.dlcThumbnail = dlcThumbnail;
         this.releaseDate = releaseDate;
     }
-    
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @ManyToOne
+    @JoinColumn(name = "game_Id", referencedColumnName = "id")
+    private Game game;
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToMany(mappedBy = "dlc", cascade = {CascadeType.MERGE})

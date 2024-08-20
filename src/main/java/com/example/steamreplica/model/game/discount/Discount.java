@@ -32,7 +32,9 @@ public class Discount {
     @ToString.Exclude
     @ManyToMany(mappedBy = "discounts")
     private Set<Game> discountedGames = new HashSet<>();
-    
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<PurchasedGameDiscount> purchasedGameDiscounts;
 
@@ -41,6 +43,8 @@ public class Discount {
     @ManyToMany(mappedBy = "discounts")
     private Set<DLC> discountedDlc = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<PurchasedDLCDiscount> purchasedDLCDiscounts = new HashSet<>();
 
