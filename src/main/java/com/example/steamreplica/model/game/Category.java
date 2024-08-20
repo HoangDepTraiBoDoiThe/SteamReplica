@@ -1,9 +1,7 @@
 package com.example.steamreplica.model.game;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,6 +19,8 @@ public class Category {
     private String categoryName;
     private String categoryDescription;
     
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToMany(mappedBy = "categories")
     private Set<Game> games = new HashSet<>();
 

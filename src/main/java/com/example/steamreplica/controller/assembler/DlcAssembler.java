@@ -2,6 +2,7 @@ package com.example.steamreplica.controller.assembler;
 
 import com.example.steamreplica.constants.HttpRequestTypes;
 import com.example.steamreplica.controller.DlcController;
+import com.example.steamreplica.dtos.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -15,11 +16,11 @@ import java.util.stream.StreamSupport;
 @Component
 @RequiredArgsConstructor
 public class DlcAssembler{
-    public <T extends ResponseBase> EntityModel<T> toModel(T entity, Authentication authentication) {
+    public <T extends BaseResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
         return EntityModel.of(entity, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DlcController.class).getDlcById(entity.getId(), authentication)).withSelfRel().withType(HttpRequestTypes.GET.name()));
     }
 
-    public <T extends ResponseBase> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
+    public <T extends BaseResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
         return StreamSupport.stream(entities.spliterator(), false) //
                 .map(t -> toModel(t, authentication)) //
                 .collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::of));

@@ -3,7 +3,8 @@ package com.example.steamreplica.controller.assembler;
 import com.example.steamreplica.constants.HttpRequestTypes;
 import com.example.steamreplica.constants.SystemRole;
 import com.example.steamreplica.controller.CategoryController;
-import com.example.steamreplica.dtos.response.CategoryResponse;
+import com.example.steamreplica.dtos.response.BaseResponse;
+import com.example.steamreplica.dtos.response.CategoryResponse_Full;
 import com.example.steamreplica.util.StaticHelper;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -18,7 +19,7 @@ import java.util.stream.StreamSupport;
 @Component
 public class CategoryAssembler {
 
-    public <T extends CategoryResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
+    public <T extends BaseResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
         Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
         EntityModel<T> entityModel = EntityModel.of(entity,
                 WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(CategoryController.class).getCategoryById(entity.getId(), authentication)).withSelfRel().withType(HttpRequestTypes.GET.name()),
@@ -34,7 +35,7 @@ public class CategoryAssembler {
         return entityModel;
     }
 
-    public <T extends CategoryResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
+    public <T extends BaseResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
         return StreamSupport.stream(entities.spliterator(), false) //
                 .map(t -> toModel(t, authentication)) //
                 .collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::of));

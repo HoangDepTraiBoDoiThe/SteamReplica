@@ -56,6 +56,8 @@ public class Game {
         this.publishers = publishers;
     }
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<GameImage> gameImages = new HashSet<>();
 
@@ -83,9 +85,13 @@ public class Game {
     @JoinTable(name = "game_Publisher", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "user_Id", referencedColumnName = "id"))
     private Set<User> publishers = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToMany(mappedBy = "game")
     private Set<PurchasedGame> purchasedGame = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @Column(name = "dlcs")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "game")
     private Set<DLC> dlcs = new HashSet<>();

@@ -10,6 +10,7 @@ import org.springframework.hateoas.CollectionModel;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,11 +18,11 @@ import java.time.LocalDate;
 public class GameResponse_Basic extends BaseResponse {
     LocalDate releaseDate;
     BigDecimal price;
-    CollectionModel<?> discounts;
-    CollectionModel<?> categories;
+    List<?> discounts;
+    List<?> categories;
     String gameThumbnail;
 
-    public GameResponse_Basic(Game game, CollectionModel<?> discounts, CollectionModel<?> categories) {
+    public GameResponse_Basic(Game game, List<?> discounts, List<?> categories) {
         super(game.getId());
         this.releaseDate = game.getReleaseDate();
         this.price = game.getGameBasePrice();

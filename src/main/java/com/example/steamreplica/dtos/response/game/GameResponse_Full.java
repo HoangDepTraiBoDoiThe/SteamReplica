@@ -6,15 +6,17 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class GameResponse_Full extends GameResponse_Basic {
-    CollectionModel<?> developer;
-    CollectionModel<?> publisher;
-    CollectionModel<?> gameImages;
+    List<?> developer;
+    List<?> publisher;
+    List<?> gameImages;
 
-    public GameResponse_Full(Game game, CollectionModel<?> developer, CollectionModel<?> publisher, CollectionModel<?> discounts, CollectionModel<?> categories, CollectionModel<?> gameImages) {
+    public GameResponse_Full(Game game, List<?> developer, List<?> publisher, List<?> discounts, List<?> categories, List<?> gameImages) {
         super(game, discounts, categories);
         this.developer = developer;
         this.publisher = publisher;
