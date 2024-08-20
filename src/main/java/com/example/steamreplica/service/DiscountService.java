@@ -25,6 +25,12 @@ public class DiscountService {
         DiscountResponse discountResponse = new DiscountResponse(discount);
         return discountAssembler.toModel(discountResponse, authentication);
     }
+
+    public Discount getDiscountById_entity(long id, Authentication authentication) {
+        Discount discount = discountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with id [%s]", id)));
+        DiscountResponse discountResponse = new DiscountResponse(discount);
+        return discount;
+    }
     
     public EntityModel<DiscountResponse> getDiscountByCode(String code, Authentication authentication) {
         Discount discount = discountRepository.findDiscountByDiscountCode(code).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with code [%s]", code)));

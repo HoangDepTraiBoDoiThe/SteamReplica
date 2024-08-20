@@ -27,6 +27,11 @@ public class CategoryService {
         return categoryAssembler.toModel(categoryResponse, authentication);
     }
     
+    
+    public Category getCategoryById_entity(long id, Authentication authentication) {
+        return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
+    }
+    
     public CollectionModel<EntityModel<CategoryResponse>> getAllCategories(Authentication authentication) {
         List<Category> categories = categoryRepository.findAll();
         List<CategoryResponse> categoryResponses = categories.stream().map(CategoryResponse::new).toList();

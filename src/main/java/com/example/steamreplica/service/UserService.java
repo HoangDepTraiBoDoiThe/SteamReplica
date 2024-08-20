@@ -19,11 +19,15 @@ import java.util.Set;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final BoughtLibraryRepository boughtLibraryRepository;
-    private final RoleService roleService;
 
     public Collection<User> findUsersWithByRole(String roleName) {
         return userRepository.findUsersByRoleName(roleName);
+    }
+    public User findUsersWithByEmail_entity(String email) {
+        return userRepository.findUserByEmail(email).orElseThrow(() -> new RuntimeException(String.format("User with email %s not found", email)));
+    }
+    public User findUsersWithById_entity(long id) {
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException(String.format("User with id [%d] not found", id)));
     }
 
     @Transactional

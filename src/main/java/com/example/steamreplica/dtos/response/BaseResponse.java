@@ -14,4 +14,8 @@ public class BaseResponse {
     public BaseResponse(String message) {
         this.message = message;
     }
+
+    public BaseResponse(long id) {
+        this.id = id;
+    }
 }

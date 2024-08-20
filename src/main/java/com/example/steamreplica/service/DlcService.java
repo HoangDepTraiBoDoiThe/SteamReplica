@@ -6,7 +6,6 @@ import com.example.steamreplica.controller.assembler.GameAssembler;
 import com.example.steamreplica.dtos.request.DlcRequest;
 import com.example.steamreplica.dtos.response.DiscountResponse;
 import com.example.steamreplica.dtos.response.DlcResponse_Full;
-import com.example.steamreplica.dtos.response.ResponseBase;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.DLC.DLCImage;
 import com.example.steamreplica.model.game.Game;

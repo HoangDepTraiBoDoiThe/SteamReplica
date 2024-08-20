@@ -1,7 +1,7 @@
 package com.example.steamreplica.controller;
 
 import com.example.steamreplica.dtos.request.GameRequest;
-import com.example.steamreplica.dtos.response.GameResponse_Full;
+import com.example.steamreplica.dtos.response.game.GameResponse_Full;
 import com.example.steamreplica.service.GameService;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;

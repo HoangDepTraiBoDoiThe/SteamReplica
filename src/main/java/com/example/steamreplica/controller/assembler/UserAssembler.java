@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-
 @Component
 public class UserAssembler {
     public <T extends UserResponse> EntityModel<T> toModel(T entity, Authentication authentication) {

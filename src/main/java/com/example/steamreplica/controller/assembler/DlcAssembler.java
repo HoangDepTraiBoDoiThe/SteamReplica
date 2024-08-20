@@ -2,7 +2,6 @@ package com.example.steamreplica.controller.assembler;
 
 import com.example.steamreplica.constants.HttpRequestTypes;
 import com.example.steamreplica.controller.DlcController;
-import com.example.steamreplica.dtos.response.ResponseBase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
