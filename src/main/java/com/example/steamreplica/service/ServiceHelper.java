@@ -2,10 +2,10 @@ package com.example.steamreplica.service;
 
 import com.example.steamreplica.controller.assembler.*;
 import com.example.steamreplica.dtos.response.*;
+import com.example.steamreplica.dtos.response.game.GameImageResponse_Full;
 import com.example.steamreplica.dtos.response.game.GameResponse_Basic;
 import com.example.steamreplica.dtos.response.game.GameResponse_Full;
 import com.example.steamreplica.dtos.response.game.GameResponse_Minimal;
-import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Basic;
 import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
 import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Minimal;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Basic;
@@ -15,10 +15,10 @@ import com.example.steamreplica.dtos.response.user.UserResponse_Minimal;
 import com.example.steamreplica.model.game.Category;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.Game;
+import com.example.steamreplica.model.game.GameImage;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.userApplication.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -47,9 +47,9 @@ public class ServiceHelper {
 
                 List<EntityModel<UserResponse_Minimal>> usersAsDevResponses = game.getPublishers().stream().map(user -> makeUserResponse(UserResponse_Minimal.class, user, authentication)).toList();
 
-                List<EntityModel<GameImageResponse>> gameImageResponses = game.getGameImages().stream().map(gameImage -> new GameImageResponse(game.getId(), gameImage)).toList();
-
-                response = (T) new GameResponse_Full(game, usersAsPublisherResponses, usersAsDevResponses, discountResponsesMinimal, categoryEntityModelList, gameImageCollectionModel);
+                List<EntityModel<GameResponse_Minimal>> gameImageResponses = game.getGameImages().stream().map(gameImage -> makeGameImageResponse(GameResponse_Minimal.class, gameImage, authentication)).toList();
+                
+                response = (T) new GameResponse_Full(game, usersAsPublisherResponses, usersAsDevResponses, discountResponsesMinimal, categoryEntityModelList, gameImageResponses);
             } else if (GameResponse_Basic.class.equals(responseType)) {
                 response = (T) new GameResponse_Basic(game, discountResponsesMinimal, categoryEntityModelList);
             } else {
@@ -62,6 +62,20 @@ public class ServiceHelper {
         }
     }
 
+    public <T extends BaseResponse> EntityModel<T> makeGameImageResponse(Class<T> responseType, GameImage gameImage, Authentication authentication) {
+        try {
+            T response;
+            if (GameImageResponse_Full.class.equals(responseType)) {
+                response = (T) new GameImageResponse_Full(gameImage, makeGameResponse(GameResponse_Minimal.class, gameImage.getGame(), authentication));
+            } else {
+                response = responseType.getDeclaredConstructor(GameImage.class).newInstance(gameImage);
+            }
+
+            return gameImageAssembler.toModel(response, authentication);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while creating response: ", e);
+        }
+    } 
 
     public <T extends BaseResponse> EntityModel<T> makeCategoryResponse(Class<T> responseType, Category category, Authentication authentication) {
         try {

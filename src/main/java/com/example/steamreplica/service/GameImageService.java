@@ -5,7 +5,9 @@ import com.example.steamreplica.controller.GameController;
 import com.example.steamreplica.controller.GameImageController;
 import com.example.steamreplica.controller.assembler.GameImageAssembler;
 import com.example.steamreplica.dtos.request.GameImageRequest;
-import com.example.steamreplica.dtos.response.GameImageResponse;
+import com.example.steamreplica.dtos.response.game.GameImageResponse_Basic;
+import com.example.steamreplica.dtos.response.game.GameImageResponse_Full;
+import com.example.steamreplica.dtos.response.game.GameResponse_Minimal;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.game.GameImage;
 import com.example.steamreplica.repository.GameImageRepository;
@@ -28,32 +30,23 @@ import java.util.Set;
 public class GameImageService {
     private final GameImageRepository gameImageRepository;
     private final GameRepository gameRepository;
-    private final GameImageAssembler gameImageAssembler;
+    private final ServiceHelper serviceHelper;
     
-    public EntityModel<GameImageResponse> getGameImageById(long gameId, Authentication authentication) {
+    public EntityModel<GameImageResponse_Full> getGameImageById(long gameId, Authentication authentication) {
         GameImage gameImage = gameImageRepository.findById(gameId).orElseThrow(() -> new ResourceNotFoundException(String.format("Game image with id [%d] not found", gameId)));
-        GameImageResponse gameImageResponse = new GameImageResponse(gameId, gameImage);
-        return gameImageAssembler.toModel(gameImageResponse, authentication);
+        return serviceHelper.makeGameImageResponse(GameImageResponse_Full.class, gameImage, authentication);
     }
     
-    public CollectionModel<EntityModel<GameImageResponse>> getAllImagesByGameId(long gameId, Authentication authentication) {
+    public List<EntityModel<GameImageResponse_Basic>> getAllImagesByGameId(long gameId, Authentication authentication) {
         Collection<GameImage> gameImages = gameImageRepository.findAllByGameId(gameId);
-        List<GameImageResponse> gameImageResponses = gameImages.stream().map(gameImage -> new GameImageResponse(gameId, gameImage)).toList();
-        return gameImageAssembler.toCollectionModel(gameImageResponses, authentication);
+        return gameImages.stream().map(gameImage -> serviceHelper.makeGameImageResponse(GameImageResponse_Basic.class, gameImage, authentication)).toList();
     }
-
-    public CollectionModel<EntityModel<GameImageResponse>> addGameImagesToGame(long GameId, List<GameImageRequest> gameImageRequests, Authentication authentication) {
+    
+    public List<EntityModel<GameImageResponse_Full>> addGameImagesToGame(long GameId, List<GameImageRequest> gameImageRequests, Authentication authentication) {
         Game game = gameRepository.findById(GameId).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with id [%d] not found", GameId)));
         List<GameImage> newGameImages = gameImageRequests.stream().map(gameImageRequest -> new GameImage(gameImageRequest.getImageName(), StaticHelper.convertToBlob(gameImageRequest.getImage()), game)).toList();
         List<GameImage> newCreatedGameImages = gameImageRepository.saveAll(newGameImages);
-        List<GameImageResponse> gameImageResponses = newCreatedGameImages.stream().map(gameImage -> new GameImageResponse(GameId, gameImage)).toList();
-
-        CollectionModel<?> collectionModel = gameImageAssembler.toCollectionModel(gameImageResponses, authentication);
-        collectionModel.add(
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameImageController.class).getAllImagesByGameId(GameId, authentication)).withSelfRel().withType(HttpRequestTypes.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGame(GameId, authentication)).withRel("Get game").withType(HttpRequestTypes.GET.name())
-        );
-        return gameImageAssembler.toCollectionModel(gameImageResponses, authentication);
+        return newCreatedGameImages.stream().map(gameImage -> serviceHelper.makeGameImageResponse(GameImageResponse_Full.class, gameImage, authentication)).toList();
     }
 
     public void deleteGameImages(Set<Long> imageIdsToDelete) {

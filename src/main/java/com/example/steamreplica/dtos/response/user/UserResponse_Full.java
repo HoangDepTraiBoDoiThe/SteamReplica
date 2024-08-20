@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
-@NoArgsConstructor
 public class UserResponse_Full extends UserResponse_Basic {
     public UserResponse_Full(User user) {
         super(user);
