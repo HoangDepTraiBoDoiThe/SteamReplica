@@ -4,8 +4,9 @@ import com.example.steamreplica.controller.assembler.DiscountAssembler;
 import com.example.steamreplica.controller.assembler.DlcAssembler;
 import com.example.steamreplica.controller.assembler.GameAssembler;
 import com.example.steamreplica.dtos.request.DlcRequest;
-import com.example.steamreplica.dtos.response.DiscountResponse;
-import com.example.steamreplica.dtos.response.DlcResponse_Full;
+import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
+import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Basic;
+import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Full;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.DLC.DLCImage;
 import com.example.steamreplica.model.game.Game;
@@ -18,6 +19,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,28 +28,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DlcService {
     private final DlcRepository dlcRepository;
-    private final DlcAssembler dlcAssembler;
-    private final DiscountAssembler discountAssembler;
-    private final GameAssembler gameAssembler;
+    private final ServiceHelper serviceHelper;
     private final GameService gameService;
     private final DlcImageService dlcImageService;
     
     public EntityModel<DlcResponse_Full> getDlcById(long id, Authentication authentication) {
         DLC dlc = dlcRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("DLC with id %d not found", id)));
-        DlcResponse_Full dlcResponseFull = makeDlcResponse(authentication, dlc);
-        return dlcAssembler.toModel(dlcResponseFull, authentication);
+        return serviceHelper.makeDlcResponse(DlcResponse_Full.class, dlc, authentication);
     }
 
-    public CollectionModel<EntityModel<DlcResponse_Full>> getAllDlcOfGame(long gameId, Authentication authentication) {
-        List<DlcResponse_Full> dlcResponsFulls = dlcRepository.getAllByGame_Id(gameId).stream().map(dlc -> makeDlcResponse(authentication, dlc)).toList();
-        return dlcAssembler.toCollectionModel(dlcResponsFulls, authentication);
+    public List<EntityModel<DlcResponse_Basic>> getAllDlcOfGame(long gameId, Authentication authentication) {
+        return dlcRepository.getAllByGame_Id(gameId).stream().map(dlc -> serviceHelper.makeDlcResponse(DlcResponse_Basic.class, dlc, authentication)).toList();
     }
     
-    public CollectionModel<EntityModel<DlcResponse_Full>> getAllDlc(Authentication authentication) {
-        List<DlcResponse_Full> dlcResponsFulls = dlcRepository.findAll().stream().map(dlc -> makeDlcResponse(authentication, dlc)).toList();
-        return dlcAssembler.toCollectionModel(dlcResponsFulls, authentication);
+    public List<EntityModel<DlcResponse_Basic>> getAllDlc(Authentication authentication) {
+        return dlcRepository.findAll().stream().map(dlc -> serviceHelper.makeDlcResponse(DlcResponse_Basic.class, dlc, authentication)).toList();
     }
 
+    @Transactional
     public EntityModel<DlcResponse_Full> addDlc(DlcRequest dlcRequest, Authentication authentication) {
         if (dlcRepository.findDLCByDlcName(dlcRequest.getDlcName()).isPresent()) throw new ResourceExitedException(String.format("DLC with name [%s] already exists", dlcRequest.getDlcName()));
         DLC newDlc = new DLC(dlcRequest.getDlcName(), dlcRequest.getDlcDescription(), dlcRequest.getDlcBasePrice(), StaticHelper.convertToBlob(dlcRequest.getDlcThumbnail()), dlcRequest.getReleaseDate());
@@ -57,10 +55,11 @@ public class DlcService {
         newDlc.setDlcImages(new HashSet<>(dlcImages));
        
         DLC newCreatedDlc = dlcRepository.save(newDlc);
-        
-        return dlcAssembler.toModel(makeDlcResponse(authentication, newCreatedDlc), authentication);
+
+        return serviceHelper.makeDlcResponse(DlcResponse_Full.class, newCreatedDlc, authentication);
     }
 
+    @Transactional
     public EntityModel<DlcResponse_Full> updateDlc(long id, DlcRequest dlcRequest, Authentication authentication) {
         DLC dlcToUpdate = dlcRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("DLC not found"));
         dlcToUpdate.setDlcName(dlcRequest.getDlcName());
@@ -69,7 +68,8 @@ public class DlcService {
         dlcToUpdate.setDlcThumbnail(StaticHelper.convertToBlob(dlcRequest.getDlcThumbnail()));
         dlcToUpdate.setReleaseDate(dlcRequest.getReleaseDate());
         DLC updatedDlc = dlcRepository.save(dlcToUpdate);
-        return dlcAssembler.toModel(makeDlcResponse(authentication, updatedDlc), authentication);
+        
+        return serviceHelper.makeDlcResponse(DlcResponse_Full.class, updatedDlc, authentication);
     }
 
     public void deleteDlc(long id) {
@@ -77,15 +77,4 @@ public class DlcService {
         dlcRepository.deleteById(id);
     }
 
-    public DlcResponse_Full makeDlcResponse(Authentication authentication, DLC dlc) {
-        List<DiscountResponse> discountResponses = dlc.getDiscounts().stream().map(DiscountResponse::new).toList();
-        CollectionModel<EntityModel<DiscountResponse>> discountCollectionModel = discountAssembler.toCollectionModel(discountResponses, authentication);
-        Game game = gameService.getGameById_entity(dlc.getGame().getId());
-        // todo: dlc images.
-
-        DlcResponse_Full dlcResponseFull = new DlcResponse_Full(dlc);
-        dlcResponseFull.setDiscounts(discountCollectionModel);
-        dlcResponseFull.setGame(gameAssembler.toModel(new ResponseBase(game.getId(), game.getGameName()), authentication));
-        return dlcResponseFull;
-    }
 }

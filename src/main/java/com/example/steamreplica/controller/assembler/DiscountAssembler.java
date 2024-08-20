@@ -3,7 +3,7 @@ package com.example.steamreplica.controller.assembler;
 import com.example.steamreplica.constants.HttpRequestTypes;
 import com.example.steamreplica.constants.SystemRole;
 import com.example.steamreplica.controller.DiscountController;
-import com.example.steamreplica.dtos.response.DiscountResponse;
+import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
 import com.example.steamreplica.util.StaticHelper;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -17,7 +17,7 @@ import java.util.stream.StreamSupport;
 
 @Component
 public class DiscountAssembler {
-    public <T extends DiscountResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
+    public <T extends DiscountResponse_Full> EntityModel<T> toModel(T entity, Authentication authentication) {
         Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
         
         EntityModel<T> responseEntityModel = EntityModel.of(entity,
@@ -35,7 +35,7 @@ public class DiscountAssembler {
         return responseEntityModel;
     }
 
-    public <T extends DiscountResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
+    public <T extends DiscountResponse_Full> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
 
         return StreamSupport.stream(entities.spliterator(), false) //
                 .map(t -> toModel(t, authentication)) //

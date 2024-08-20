@@ -6,7 +6,6 @@ import com.example.steamreplica.util.StaticHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.hateoas.CollectionModel;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,15 +14,15 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class GameResponse_Basic extends GameResponse_Minimal {
-    LocalDate releaseDate;
-    List<?> discounts;
-    List<?> categories;
+public class GameResponse_Minimal extends BaseResponse {
+    BigDecimal price;
+    String name;
+    String gameThumbnail;
 
-    public GameResponse_Basic(Game game, List<?> discounts, List<?> categories) {
-        super(game);
-        this.releaseDate = game.getReleaseDate();
-        this.discounts = discounts;
-        this.categories = categories;
+    public GameResponse_Minimal(Game game) {
+        super(game.getId());
+        this.name = game.getGameName();
+        this.price = game.getGameBasePrice();
+        this.gameThumbnail = StaticHelper.convertBlobToString(game.getGameThumbnail());
     }
 }

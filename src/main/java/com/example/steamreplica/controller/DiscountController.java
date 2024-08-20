@@ -1,7 +1,7 @@
 package com.example.steamreplica.controller;
 
 import com.example.steamreplica.dtos.request.DiscountRequest;
-import com.example.steamreplica.dtos.response.DiscountResponse;
+import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
 import com.example.steamreplica.service.DiscountService;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class DiscountController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getDiscount(@PathVariable long id, Authentication authentication) {
-        EntityModel<DiscountResponse> responseEntityModel = discountService.getDiscountById(id, authentication);
+        EntityModel<DiscountResponse_Full> responseEntityModel = discountService.getDiscountById(id, authentication);
         responseEntityModel.add(
 );
         return ResponseEntity.ok(responseEntityModel);
@@ -29,7 +29,7 @@ public class DiscountController {
     
     @GetMapping("/code/{code}")
     public ResponseEntity<?> getDiscountByCode(@PathVariable String code, Authentication authentication) {
-        EntityModel<DiscountResponse> responseEntityModel = discountService.getDiscountByCode(code, authentication);
+        EntityModel<DiscountResponse_Full> responseEntityModel = discountService.getDiscountByCode(code, authentication);
         return ResponseEntity.ok(responseEntityModel);
     }
     

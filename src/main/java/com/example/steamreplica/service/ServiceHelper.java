@@ -4,11 +4,17 @@ import com.example.steamreplica.controller.assembler.*;
 import com.example.steamreplica.dtos.response.*;
 import com.example.steamreplica.dtos.response.game.GameResponse_Basic;
 import com.example.steamreplica.dtos.response.game.GameResponse_Full;
+import com.example.steamreplica.dtos.response.game.GameResponse_Minimal;
+import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Basic;
+import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
+import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Minimal;
+import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Minimal;
-import com.example.steamreplica.dtos.response.user.UserResponse_Basic;
 import com.example.steamreplica.model.game.Category;
+import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.Game;
+import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.userApplication.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
@@ -26,13 +32,13 @@ public class ServiceHelper {
     private final DiscountAssembler discountAssembler;
     private final CategoryAssembler categoryAssembler;
     private final GameImageAssembler gameImageAssembler;
+    private final DlcAssembler dlcAssembler;
 
     public <T extends BaseResponse> EntityModel<T> makeGameResponse(Class<T> responseType, Game game, Authentication authentication) {
         try {
             T response;
 
-            List<DiscountResponse> discountResponses = game.getDiscounts().stream().map(DiscountResponse::new).toList();
-            CollectionModel<?> discountCollectionModel = discountAssembler.toCollectionModel(discountResponses, authentication);
+            List<DiscountResponse_Full> discountResponsFulls = game.getDiscounts().stream().map(discount -> ).toList();
 
             List<EntityModel<CategoryResponse_Minimal>> categoryEntityModelList = game.getCategories().stream().map(category -> makeCategoryResponse(CategoryResponse_Minimal.class, category, authentication)).toList();
             if (GameResponse_Full.class.equals(responseType)) {
@@ -45,12 +51,12 @@ public class ServiceHelper {
 
                 response = (T) new GameResponse_Full(game, usersAsPublisherResponses, usersAsDevResponses, discountCollectionModel, categoryEntityModelList, gameImageCollectionModel);
             } else if (GameResponse_Basic.class.equals(responseType)) {
-                response = (T) new GameResponse_Basic(game, discountCollectionModel, categoryCollectionModel);
+                response = (T) new GameResponse_Basic(game, discountCollectionModel, categoryEntityModelList);
             } else {
                 response = responseType.getDeclaredConstructor(Long.class).newInstance(game.getId());
             }
 
-            return EntityModel.of(response);
+            return gameAssembler.toModel(response, authentication);
         } catch (Exception e) {
             throw new RuntimeException("Error while creating response: ", e);
         }
@@ -84,6 +90,30 @@ public class ServiceHelper {
             }
 
             return userAssembler.toModel(response, authentication);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while creating response: ", e);
+        }
+    }
+
+    public <T extends BaseResponse> EntityModel<T> makeDlcResponse(Class<T> responseType, DLC dlc, Authentication authentication) {
+        try {
+            T response;
+            if (DlcResponse_Full.class.equals(responseType)) {
+                List<EntityModel<DiscountResponse_Minimal>> discountResponseBasics = dlc.getDiscounts().stream().map(discount -> makeDiscountResponse(DiscountResponse_Minimal.class, discount, authentication)).toList();
+                EntityModel<GameResponse_Minimal> GameResponse_Basic = makeGameResponse(GameResponse_Minimal.class, dlc.getGame(), authentication);
+                response = (T) new DlcResponse_Full(dlc, discountResponseBasics, null, GameResponse_Basic);
+            } else {
+                response = responseType.getDeclaredConstructor(DLC.class).newInstance(dlc);
+            } 
+            return dlcAssembler.toModel(response, authentication);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while creating response: ", e);
+        }
+    }
+
+    public <T extends BaseResponse> EntityModel<T> makeDiscountResponse(Class<T> responseType, Discount discount, Authentication authentication) {
+        try {
+            return null;
         } catch (Exception e) {
             throw new RuntimeException("Error while creating response: ", e);
         }

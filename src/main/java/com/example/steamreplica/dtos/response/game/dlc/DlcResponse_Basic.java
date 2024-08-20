@@ -1,5 +1,6 @@
-package com.example.steamreplica.dtos.response;
+package com.example.steamreplica.dtos.response.game.dlc;
 
+import com.example.steamreplica.dtos.response.BaseResponse;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.AllArgsConstructor;
@@ -13,19 +14,14 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DlcResponse_Full extends ResponseBase{
-    private String dlcDescription;
+public class DlcResponse_Basic extends BaseResponse {
+    private String name;
     private BigDecimal dlcBasePrice;
     private String dlcThumbnail;
-    private CollectionModel<?> discounts;
-    private CollectionModel<?> gameImages;
-    private EntityModel<?> game;
 
-    public DlcResponse_Full(DLC dlc) {
-        super(dlc.getId(), dlc.getDlcName());
-        this.id = dlc.getId();
+    public DlcResponse_Basic(DLC dlc) {
+        super(dlc.getId());
         this.name = dlc.getDlcName();
-        this.dlcDescription = dlc.getDlcDescription();
         this.dlcBasePrice = dlc.getDlcBasePrice();
         this.dlcThumbnail = StaticHelper.convertBlobToString(dlc.getDlcThumbnail());
     }
