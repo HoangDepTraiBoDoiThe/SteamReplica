@@ -2,7 +2,8 @@ package com.example.steamreplica.controller.assembler;
 
 import com.example.steamreplica.constants.HttpRequestTypes;
 import com.example.steamreplica.controller.UserController;
-import com.example.steamreplica.dtos.response.user.UserResponse;
+import com.example.steamreplica.dtos.response.BaseResponse;
+import com.example.steamreplica.dtos.response.user.UserResponse_Minimal;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -14,11 +15,11 @@ import java.util.stream.StreamSupport;
 
 @Component
 public class UserAssembler {
-    public <T extends UserResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
+    public <T extends BaseResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
         return EntityModel.of(entity, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(entity.getId())).withSelfRel().withType(HttpRequestTypes.GET.name()));
     }
 
-    public <T extends UserResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
+    public <T extends BaseResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
 
         return StreamSupport.stream(entities.spliterator(), false) //
                 .map(t -> toModel(t, authentication)) //

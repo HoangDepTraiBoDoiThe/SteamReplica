@@ -1,4 +1,5 @@
 package com.example.steamreplica.dtos.response.user;
+import com.example.steamreplica.model.userApplication.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -8,17 +9,8 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse_Full extends UserResponse {
-    private String userProfilePicture;
-    private String phoneNumber;
-    private String email;
-    private String Status;
-
-    public UserResponse_Full(long id, String userName, String userProfilePicture, String phoneNumber, String email, String status) {
-        super(id, userName);
-        this.userProfilePicture = userProfilePicture;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        Status = status;
+public class UserResponse_Full extends UserResponse_Basic {
+    public UserResponse_Full(User user) {
+        super(user);
     }
 }
