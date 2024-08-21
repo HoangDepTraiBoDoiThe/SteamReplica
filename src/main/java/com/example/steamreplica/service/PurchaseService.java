@@ -1,10 +1,12 @@
 package com.example.steamreplica.service;
 
-import com.example.steamreplica.controller.assembler.PurchaseAssembler;
 import com.example.steamreplica.dtos.request.PurchaseRequest;
 import com.example.steamreplica.dtos.response.purchases.PurchaseResponse_Basic;
 import com.example.steamreplica.dtos.response.purchases.PurchaseResponse_Full;
 import com.example.steamreplica.model.auth.AuthUserDetail;
+import com.example.steamreplica.model.game.DLC.DLC;
+import com.example.steamreplica.model.game.Game;
+import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
 import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import com.example.steamreplica.model.purchasedLibrary.Purchase;
@@ -28,6 +30,7 @@ public class PurchaseService {
     private final BoughtLibraryService boughtLibraryService;
     private final GameService gameService;
     private final DlcService dlcService;
+    private final DiscountService discountService;
     private final ServiceHelper serviceHelper;
     
     public List<EntityModel<PurchaseResponse_Basic>> getAllPurchases(Authentication authentication) {
@@ -43,10 +46,21 @@ public class PurchaseService {
     public EntityModel<PurchaseResponse_Full> createPurchase(PurchaseRequest request, Authentication authentication) {
         AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
         BoughtLibrary boughtLibrary = boughtLibraryService.getBoughtLibraryById(authUserDetail.getId());
-        Set<PurchasedGame> purchasedGames = request.getGameIds().stream().map(aLong -> new PurchasedGame(gameService.getGameById_entity(aLong))).collect(Collectors.toSet());
-        Set<PurchasedDLC> purchasedDLCSs = request.getDlcIds().stream().map(aLong -> new PurchasedDLC(dlcService.getDlcById_entity(aLong))).collect(Collectors.toSet());
         
-        Purchase purchase = new Purchase(ZonedDateTime.now(), "None", boughtLibrary, purchasedGames, purchasedDLCSs);
+        Set<PurchasedGame> purchasedGames = request.getGameIds().stream().map(aLong -> {
+            Game game = gameService.getGameById_entity(aLong);
+            double gameTotalDiscount = game.getDiscounts().stream().mapToDouble(Discount::getDiscountPercent).sum();
+            return new PurchasedGame(game, gameTotalDiscount);
+        }).collect(Collectors.toSet());
+        Set<PurchasedDLC> purchasedDLCSs = request.getDlcIds().stream().map(aLong -> {
+            DLC dlc = dlcService.getDlcById_entity(aLong);
+            double dlcTotalDiscount = dlc.getDiscounts().stream().mapToDouble(Discount::getDiscountPercent).sum();
+            return new PurchasedDLC(dlcService.getDlcById_entity(aLong), dlcTotalDiscount);
+        }).collect(Collectors.toSet());
+        
+        Discount additionalDiscount = discountService.getDiscountById_entity(request.getAdditionalDiscountId(), authentication);
+        
+        Purchase purchase = new Purchase(ZonedDateTime.now(), "None", boughtLibrary, purchasedGames, purchasedDLCSs, additionalDiscount);
         Purchase newCreatedPurchase = purchaseRepository.save(purchase);
         return serviceHelper.makePurchaseResponse(PurchaseResponse_Full.class, newCreatedPurchase, authentication);
     }

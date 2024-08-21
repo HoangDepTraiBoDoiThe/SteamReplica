@@ -156,14 +156,17 @@ public class ServiceHelper {
     public <T extends BaseResponse> EntityModel<T> makePurchaseResponse(Class<T> responseType, Purchase purchase, Authentication authentication) {
         try {
             T response;
-            BigDecimal totalDlcPrice = purchase.getPurchasedDLCs().stream().map(PurchasedDLC::getPriceAtTheTime).reduce(BigDecimal.ZERO, BigDecimal::add);
-            BigDecimal totalGamePrice = purchase.getPurchasedGames().stream().map(PurchasedGame::getGameBasePriceAtTheTime).reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal totalDlcPrice = purchase.getPurchasedDLCs().stream().map(purchasedDLC -> purchasedDLC.getPriceAtTheTime().multiply(BigDecimal.valueOf(100 - purchasedDLC.getDiscountPercent()))).reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal totalGamePrice = purchase.getPurchasedGames().stream().map(purchasedGame -> purchasedGame.getGameBasePriceAtTheTime().multiply(BigDecimal.valueOf(purchasedGame.getDiscountPercent()))).reduce(BigDecimal.ZERO, BigDecimal::add);
+            double additionalDiscountPercent = purchase.getAdditionalDiscount().getDiscountPercent();
+
+            BigDecimal purchasedTotalPrice = totalDlcPrice.add(totalGamePrice).multiply(BigDecimal.valueOf(100 - additionalDiscountPercent));
             if (PurchaseResponse_Full.class.equals(responseType)) {
                 List<EntityModel<PurchaseDlcResponse>> purchasedDLCs = purchase.getPurchasedDLCs().stream().map(purchasedDLC -> makePurchaseDlcResponse(PurchaseDlcResponse.class, purchasedDLC, authentication)).toList();
                 List<EntityModel<PurchaseGameResponse>> purchasedGames = purchase.getPurchasedGames().stream().map(purchasedGame -> makePurchaseGameResponse(PurchaseGameResponse.class, purchasedGame, authentication)).toList();
-                response = (T) new PurchaseResponse_Full(purchase, totalDlcPrice.add(totalGamePrice), purchasedGames, purchasedDLCs);
+                response = (T) new PurchaseResponse_Full(purchase, purchasedTotalPrice, purchasedGames, purchasedDLCs, additionalDiscountPercent);
             } else {
-                response = responseType.getDeclaredConstructor(Purchase.class).newInstance(purchase);
+                response = responseType.getDeclaredConstructor(Purchase.class, BigDecimal.class, double.class).newInstance(purchase, purchasedTotalPrice, additionalDiscountPercent);
             } 
             return purchaseAssembler.toModel(response, authentication);
         } catch (Exception e) {
@@ -177,7 +180,10 @@ public class ServiceHelper {
 
             EntityModel<GameResponse_Minimal> gameResponseMinimalEntityModel = makeGameResponse(GameResponse_Minimal.class, purchasedGame.getGame(), authentication);
             if (PurchaseGameResponse.class.equals(responseType)) {
-                response = (T) new PurchaseGameResponse(purchasedGame, gameResponseMinimalEntityModel);
+                double totalDiscount = purchasedGame.getGame().getDiscounts().stream().mapToDouble(Discount::getDiscountPercent).sum();
+                totalDiscount = Math.max(0, Math.min(totalDiscount, 100));
+                BigDecimal purchasedPrice = purchasedGame.getGameBasePriceAtTheTime().multiply(BigDecimal.valueOf(totalDiscount));
+                response = (T) new PurchaseGameResponse(purchasedGame, gameResponseMinimalEntityModel, totalDiscount, purchasedPrice);
             } else {
                 response = responseType.getDeclaredConstructor(PurchasedGame.class, EntityModel.class).newInstance(purchasedGame, gameResponseMinimalEntityModel);
             } 
@@ -193,9 +199,13 @@ public class ServiceHelper {
 
             EntityModel<DlcResponse_Basic> gameResponseMinimalEntityModel = makeDlcResponse(DlcResponse_Basic.class, purchasedDLC.getDlc(), authentication);
             if (PurchaseDlcResponse.class.equals(responseType)) {
-                response = (T) new PurchaseDlcResponse(purchasedDLC, gameResponseMinimalEntityModel);
+                double totalDiscount = purchasedDLC.getDlc().getDiscounts().stream().mapToDouble(Discount::getDiscountPercent).sum();
+                totalDiscount = Math.max(0, Math.min(totalDiscount, 100));
+                BigDecimal purchasedPrice = purchasedDLC.getPriceAtTheTime().multiply(BigDecimal.valueOf(totalDiscount));
+                response = (T) new PurchaseDlcResponse(purchasedDLC, gameResponseMinimalEntityModel, totalDiscount, purchasedPrice);
             } else {
-                response = responseType.getDeclaredConstructor(PurchasedDLC.class, EntityModel.class).newInstance(purchasedDLC, gameResponseMinimalEntityModel);
+                response = null;
+//                response = responseType.getDeclaredConstructor(PurchasedDLC.class, EntityModel.class).newInstance(purchasedDLC, gameResponseMinimalEntityModel);
             } 
             return purchaseDlcAssembler.toModel(response, authentication);
         } catch (Exception e) {
