@@ -2,10 +2,10 @@ package com.example.steamreplica.model.game.discount;
 
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.Game;
+import com.example.steamreplica.model.purchasedLibrary.Purchase;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,7 +24,7 @@ public class Discount {
     private String discountCode;
     private String discountDescription;
     @Column(nullable = false)
-    private BigDecimal discountPercent;
+    private Double discountPercent;
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
@@ -36,7 +36,12 @@ public class Discount {
     @ManyToMany(mappedBy = "discounts")
     private Set<DLC> discountedDlc = new HashSet<>();
 
-    public Discount(String discountName, String discountCode, String discountDescription, BigDecimal discountPercent) {
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @OneToMany(mappedBy = "additionalDiscount")
+    private Set<Purchase> purchases = new HashSet<>();
+
+    public Discount(String discountName, String discountCode, String discountDescription, Double discountPercent) {
         this.discountName = discountName;
         this.discountCode = discountCode;
         this.discountDescription = discountDescription;

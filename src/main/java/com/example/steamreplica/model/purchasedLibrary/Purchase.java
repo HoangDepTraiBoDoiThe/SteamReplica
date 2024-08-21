@@ -1,5 +1,6 @@
 package com.example.steamreplica.model.purchasedLibrary;
 
+import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import jakarta.persistence.*;
@@ -20,17 +21,18 @@ public class Purchase {
     private long id;
 
     private ZonedDateTime TransactionDate;
-    
+
     @NotBlank
     @Column(nullable = false)
     private String transactionType;
 
-    public Purchase(ZonedDateTime transactionDate, String transactionType, BoughtLibrary boughtLibrary, Set<PurchasedGame> purchasedGames, Set<PurchasedDLC> purchasedDLCs) {
+    public Purchase(ZonedDateTime transactionDate, String transactionType, BoughtLibrary boughtLibrary, Set<PurchasedGame> purchasedGames, Set<PurchasedDLC> purchasedDLCs, Discount additionalDiscount) {
         TransactionDate = transactionDate;
         this.transactionType = transactionType;
         this.boughtLibrary = boughtLibrary;
         this.purchasedGames = purchasedGames;
         this.purchasedDLCs = purchasedDLCs;
+        this.additionalDiscount = additionalDiscount;
     }
 
     @ManyToOne
@@ -46,4 +48,8 @@ public class Purchase {
     @ToString.Exclude
     @OneToMany(mappedBy = "transaction", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<PurchasedDLC> purchasedDLCs = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "additionalDiscount_id")
+    private Discount additionalDiscount;
 }
