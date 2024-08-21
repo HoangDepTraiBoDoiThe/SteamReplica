@@ -95,13 +95,13 @@ public class Game {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToMany
-    @JoinTable(inverseJoinColumns = @JoinColumn(name = "devOwner_id", referencedColumnName = "id"), joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"))
+    @JoinTable(joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "devOwner_id", referencedColumnName = "id"))
     private Set<DevOwnedLibrary> devOwners = new HashSet<>();
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToMany
-    @JoinTable(inverseJoinColumns = @JoinColumn(name = "publisherOwners_id", referencedColumnName = "id"), joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"))
+    @JoinTable(joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "publisherOwners_id", referencedColumnName = "id"))
     private Set<PublisherOwnedLibrary> publisherOwners = new HashSet<>();
 
     @EqualsAndHashCode.Exclude
