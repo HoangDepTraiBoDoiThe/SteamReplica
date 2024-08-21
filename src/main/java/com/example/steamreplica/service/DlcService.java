@@ -7,9 +7,11 @@ import com.example.steamreplica.dtos.request.DlcRequest;
 import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Basic;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Full;
+import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.DLC.DLCImage;
 import com.example.steamreplica.model.game.Game;
+import com.example.steamreplica.repository.BoughtLibraryRepository;
 import com.example.steamreplica.repository.DlcRepository;
 import com.example.steamreplica.service.exception.ResourceExitedException;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
@@ -31,6 +33,7 @@ public class DlcService {
     private final ServiceHelper serviceHelper;
     private final GameService gameService;
     private final DlcImageService dlcImageService;
+    private final BoughtLibraryRepository boughtLibraryRepository;
     
     public EntityModel<DlcResponse_Full> getDlcById(long id, Authentication authentication) {
         DLC dlc = dlcRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("DLC with id %d not found", id)));
@@ -81,4 +84,9 @@ public class DlcService {
         dlcRepository.deleteById(id);
     }
 
+    @Transactional
+    public List<EntityModel<DlcResponse_Basic>> getPurchasedDlcOfGame(long gameId, Authentication authentication) {
+        AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
+        return boughtLibraryRepository.findPurchasedDlcOfGame(authUserDetail.getId(), gameId).stream().map(dlc -> serviceHelper.makeDlcResponse(DlcResponse_Basic.class, dlc, authentication)).toList();
+    }
 }

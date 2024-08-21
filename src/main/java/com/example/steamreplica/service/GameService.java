@@ -4,23 +4,26 @@ import com.example.steamreplica.controller.assembler.*;
 import com.example.steamreplica.dtos.request.GameRequest;
 import com.example.steamreplica.dtos.response.game.GameResponse_Basic;
 import com.example.steamreplica.dtos.response.game.GameResponse_Full;
+import com.example.steamreplica.dtos.response.game.GameResponse_Minimal;
+import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.game.GameImage;
+import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
+import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import com.example.steamreplica.model.userApplication.User;
-import com.example.steamreplica.repository.CategoryRepository;
-import com.example.steamreplica.repository.DiscountRepository;
-import com.example.steamreplica.repository.UserRepository;
+import com.example.steamreplica.repository.*;
 import com.example.steamreplica.service.exception.GameException;
 import com.example.steamreplica.model.game.Game;
-import com.example.steamreplica.repository.GameRepository;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +32,7 @@ public class GameService {
     private final GameRepository gameRepository;
     private final UserService userService;
     private final DiscountService discountService;
+    private final BoughtLibraryRepository boughtLibraryRepository;
     private final CategoryService categoryService;
     private final ServiceHelper serviceHelper;
     
@@ -79,5 +83,11 @@ public class GameService {
     public void deleteGame(long id) {
         gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
         gameRepository.deleteById(id);
+    }
+
+    @Transactional
+    public List<EntityModel<GameResponse_Minimal>> getGamesPurchased(Authentication authentication) {
+        AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
+        return boughtLibraryRepository.findPurchasedGames(authUserDetail.getId()).stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
     }
 }

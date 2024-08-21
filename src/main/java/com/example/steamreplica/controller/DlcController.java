@@ -18,5 +18,10 @@ public class DlcController {
     @GetMapping("/{dlc_id}")
     public ResponseEntity<?> getDlcById(@PathVariable long dlc_id, Authentication authentication) {
         return ResponseEntity.ok(dlcService.getDlcById(dlc_id, authentication));
+    }   
+    
+    @GetMapping("/purchased-dlc")
+    public ResponseEntity<?> getPurchasedDlcOfGame(@PathVariable long game_id, Authentication authentication) {
+        return ResponseEntity.ok(dlcService.getPurchasedDlcOfGame(game_id, authentication));
     }
 }

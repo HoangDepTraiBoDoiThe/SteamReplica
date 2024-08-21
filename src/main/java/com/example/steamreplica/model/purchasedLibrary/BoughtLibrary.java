@@ -19,13 +19,13 @@ public class BoughtLibrary {
         this.user = user;
         this.id = user.getId();
     }
-    
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id", referencedColumnName = "id")
     private User user;
     
-    @OneToMany(mappedBy = "boughtLibrary")
+    @OneToMany(mappedBy = "boughtLibrary", fetch = FetchType.EAGER)
     private Set<Purchase> purchases = new HashSet<>();
 }
