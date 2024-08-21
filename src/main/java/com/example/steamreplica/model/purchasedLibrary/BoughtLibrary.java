@@ -13,17 +13,16 @@ import java.util.Set;
 @NoArgsConstructor
 public class BoughtLibrary {
     @Id
-    @GeneratedValue
     private long id;
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToOne
-    @JoinColumn(name = "user_Id", referencedColumnName = "id")
+    @MapsId("user_id")
     private User user;
     
     @OneToMany(mappedBy = "boughtLibrary")
-    private Set<Purchases> purchases = new HashSet<>();
+    private Set<Purchase> purchases = new HashSet<>();
 
     public BoughtLibrary(User user) {
         this.user = user;

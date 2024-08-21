@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0" version="24.7.7">
   <diagram name="Trang-1" id="Zf4HEIr6htCYJf661O6L">
-    <mxGraphModel dx="2053" dy="1891" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1869" dy="1783" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -698,7 +698,7 @@
         <mxCell id="9iDccagzdrMHLPE6jfmN-194" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="9iDccagzdrMHLPE6jfmN-193" target="9iDccagzdrMHLPE6jfmN-115" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="9iDccagzdrMHLPE6jfmN-193" value="Discount percent at the time" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="9iDccagzdrMHLPE6jfmN-193" value="Additional discount percent at the time" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="175" y="650.0000000000002" width="90" height="50" as="geometry" />
         </mxCell>
         <mxCell id="9iDccagzdrMHLPE6jfmN-198" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="9iDccagzdrMHLPE6jfmN-197" target="9iDccagzdrMHLPE6jfmN-115" edge="1">
@@ -1163,6 +1163,12 @@
         </mxCell>
         <mxCell id="YCW0oF5o9ma8P08t_MRB-3" value="Use" style="rhombus;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;" vertex="1" parent="1">
           <mxGeometry x="414" y="584" width="50" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="YCW0oF5o9ma8P08t_MRB-8" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" edge="1" parent="1" source="YCW0oF5o9ma8P08t_MRB-7" target="9iDccagzdrMHLPE6jfmN-115">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="YCW0oF5o9ma8P08t_MRB-7" value="Additional Discount Id" style="ellipse;whiteSpace=wrap;html=1;fontStyle=4" vertex="1" parent="1">
+          <mxGeometry x="304.79" y="800" width="90" height="50" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

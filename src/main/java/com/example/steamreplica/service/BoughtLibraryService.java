@@ -1,10 +1,10 @@
 package com.example.steamreplica.service;
 
 import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
-import com.example.steamreplica.model.purchasedLibrary.Purchases;
+import com.example.steamreplica.model.purchasedLibrary.Purchase;
 import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.BoughtLibraryRepository;
-import com.example.steamreplica.repository.PurchaseTransactionRepository;
+import com.example.steamreplica.repository.PurchaseRepository;
 import com.example.steamreplica.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoughtLibraryService {
     private final BoughtLibraryRepository boughtLibraryRepository;
-    private final PurchaseTransactionRepository purchaseTransactionRepository;
+    private final PurchaseRepository purchaseRepository;
     private final UserRepository userRepository;
 
     public BoughtLibrary saveBoughtLibrary(BoughtLibrary boughtLibrary) {
@@ -38,11 +38,11 @@ public class BoughtLibraryService {
         return boughtLibraryRepository.save(boughtLibrary);
     }
 
-    public void addPurchaseTransactionToBoughtLibrary(Long boughtLibraryId, Purchases purchases) {
+    public void addPurchaseTransactionToBoughtLibrary(Long boughtLibraryId, Purchase purchase) {
         BoughtLibrary boughtLibrary = boughtLibraryRepository.findById(boughtLibraryId).orElse(null);
         if (boughtLibrary != null) {
-            purchases.setBoughtLibrary(boughtLibrary);
-            purchaseTransactionRepository.save(purchases);
+            purchase.setBoughtLibrary(boughtLibrary);
+            purchaseRepository.save(purchase);
         }
     }
 

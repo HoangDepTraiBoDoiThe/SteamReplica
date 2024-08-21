@@ -14,7 +14,7 @@ import java.util.Set;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Purchases {
+public class Purchase {
     @Id
     @GeneratedValue
     private long id;
@@ -24,6 +24,14 @@ public class Purchases {
     @NotBlank
     @Column(nullable = false)
     private String transactionType;
+
+    public Purchase(ZonedDateTime transactionDate, String transactionType, BoughtLibrary boughtLibrary, Set<PurchasedGame> purchasedGames, Set<PurchasedDLC> purchasedDLCs) {
+        TransactionDate = transactionDate;
+        this.transactionType = transactionType;
+        this.boughtLibrary = boughtLibrary;
+        this.purchasedGames = purchasedGames;
+        this.purchasedDLCs = purchasedDLCs;
+    }
 
     @ManyToOne
     @JoinColumn(name = "boughtLibrary", referencedColumnName = "id")

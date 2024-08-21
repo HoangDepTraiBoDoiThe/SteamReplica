@@ -36,6 +36,10 @@ public class DlcService {
         DLC dlc = dlcRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("DLC with id %d not found", id)));
         return serviceHelper.makeDlcResponse(DlcResponse_Full.class, dlc, authentication);
     }
+    
+    public DLC getDlcById_entity(long id) {
+        return dlcRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("DLC with id %d not found", id)));
+    }
 
     public List<EntityModel<DlcResponse_Basic>> getAllDlcOfGame(long gameId, Authentication authentication) {
         return dlcRepository.getAllByGame_Id(gameId).stream().map(dlc -> serviceHelper.makeDlcResponse(DlcResponse_Basic.class, dlc, authentication)).toList();

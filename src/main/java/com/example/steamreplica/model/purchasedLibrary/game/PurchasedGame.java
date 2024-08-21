@@ -2,15 +2,12 @@ package com.example.steamreplica.model.purchasedLibrary.game;
 
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.game.GameReview;
-import com.example.steamreplica.model.game.discount.Discount;
-import com.example.steamreplica.model.purchasedLibrary.Purchases;
+import com.example.steamreplica.model.purchasedLibrary.Purchase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 @Entity
@@ -24,9 +21,14 @@ public class PurchasedGame {
     @PositiveOrZero
     private BigDecimal gameBasePriceAtTheTime;
 
+    public PurchasedGame(Game game) {
+        this.gameBasePriceAtTheTime = game.getGameBasePrice();
+        this.game = game;
+    }
+
     @ManyToOne
     @JoinColumn(name = "transaction_Id", referencedColumnName = "id")
-    private Purchases transaction;
+    private Purchase transaction;
 
     @ManyToOne
     @JoinColumn(name = "game_Id", referencedColumnName = "id")

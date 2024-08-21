@@ -5,7 +5,6 @@ import com.example.steamreplica.dtos.response.BaseResponse;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -13,14 +12,9 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Component
-public class PurchaseAssembler {
+public class PurchaseGameAssembler {
     public <T extends BaseResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
-        EntityModel<T> entityModel = EntityModel.of(entity,
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PurchaseController.class).getTransactionById(entity.getId(), authentication)).withSelfRel().withType(HttpMethod.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PurchaseController.class).getAllTransactions(authentication)).withRel("Get all transaction").withType(HttpMethod.GET.name())
-        );
-
-        return entityModel;
+        return null;
     }
 
     public <T extends BaseResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {

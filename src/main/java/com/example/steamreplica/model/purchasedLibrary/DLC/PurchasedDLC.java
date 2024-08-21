@@ -2,13 +2,12 @@ package com.example.steamreplica.model.purchasedLibrary.DLC;
 
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.DLC.DLCReview;
-import com.example.steamreplica.model.purchasedLibrary.Purchases;
+import com.example.steamreplica.model.purchasedLibrary.Purchase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
 @Data
 @Entity
@@ -23,9 +22,14 @@ public class PurchasedDLC {
     @PositiveOrZero
     private BigDecimal priceAtTheTime;
 
+    public PurchasedDLC(DLC dlc) {
+        this.priceAtTheTime = dlc.getDlcBasePrice();
+        this.dlc = dlc;
+    }
+
     @ManyToOne
     @JoinColumn(name = "transaction_Id", referencedColumnName = "id")
-    private Purchases transaction;
+    private Purchase transaction;
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
