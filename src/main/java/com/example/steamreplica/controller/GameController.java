@@ -2,13 +2,6 @@ package com.example.steamreplica.controller;
 
 import com.example.steamreplica.dtos.request.GameRequest;
 import com.example.steamreplica.dtos.response.game.GameResponse_Full;
-import com.example.steamreplica.dtos.response.game.GameResponse_Minimal;
-import com.example.steamreplica.model.auth.AuthUserDetail;
-import com.example.steamreplica.model.game.Game;
-import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
-import com.example.steamreplica.model.purchasedLibrary.Purchase;
-import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
-import com.example.steamreplica.repository.BoughtLibraryRepository;
 import com.example.steamreplica.service.GameService;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +9,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +31,21 @@ public class GameController {
     public ResponseEntity<?> getGamesPurchased(Authentication authentication) {
         return ResponseEntity.ok(gameService.getGamesPurchased(authentication));
     }
+
+    @GetMapping("/purchased-games")
+    public ResponseEntity<?> getPublisherOwnedGames(Authentication authentication) {
+        return ResponseEntity.ok(gameService.getPublisherOwnedGames(authentication));
+    }
+
+    @GetMapping("/dev-owned-games")
+    public ResponseEntity<?> getDevOwnedGames(Authentication authentication) {
+        return ResponseEntity.ok(gameService.getDevOwnedGames(authentication));
+    }
+
+//    @GetMapping("/{id}/reviews")
+//    public ResponseEntity<?> getGameReviews(Authentication authentication) {
+//        return ResponseEntity.ok(gameService.getGamesPurchased(authentication));
+//    }
 
     @GetMapping
     public ResponseEntity<?> getGames(Authentication authentication) {

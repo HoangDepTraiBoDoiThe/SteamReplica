@@ -1,6 +1,8 @@
 package com.example.steamreplica.model.game;
 
 import com.example.steamreplica.model.game.DLC.DLC;
+import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
+import com.example.steamreplica.model.purchasedLibrary.PublisherOwnedLibrary;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.userApplication.User;
@@ -89,6 +91,18 @@ public class Game {
     @ToString.Exclude
     @OneToMany(mappedBy = "game")
     private Set<PurchasedGame> purchasedGame = new HashSet<>();
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @ManyToMany
+    @JoinTable(inverseJoinColumns = @JoinColumn(name = "devOwner_id", referencedColumnName = "id"), joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"))
+    private Set<DevOwnedLibrary> devOwners = new HashSet<>();
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @ManyToMany
+    @JoinTable(inverseJoinColumns = @JoinColumn(name = "publisherOwners_id", referencedColumnName = "id"), joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"))
+    private Set<PublisherOwnedLibrary> publisherOwners = new HashSet<>();
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude

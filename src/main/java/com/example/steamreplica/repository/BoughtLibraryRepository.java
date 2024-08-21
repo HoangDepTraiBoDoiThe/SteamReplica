@@ -15,8 +15,8 @@ public interface BoughtLibraryRepository extends JpaRepository<BoughtLibrary, Lo
     @Query("SELECT DISTINCT pg.game FROM BoughtLibrary bl" +
     " JOIN bl.purchases p" + 
     " JOIN p.purchasedGames pg" + 
-    " where bl.id = :id")
-    Collection<Game> findPurchasedGames(@Param("id") long id);
+    " where bl.id = :library_id")
+    Collection<Game> findPurchasedGames(@Param("library_id") long library_id);
 
     @Query("SELECT pdlc.dlc FROM BoughtLibrary bl"
     + " JOIN bl.purchases p"

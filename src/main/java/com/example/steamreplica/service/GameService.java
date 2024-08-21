@@ -8,6 +8,8 @@ import com.example.steamreplica.dtos.response.game.GameResponse_Minimal;
 import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.game.GameImage;
 import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
+import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
+import com.example.steamreplica.model.purchasedLibrary.PublisherOwnedLibrary;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.*;
@@ -33,6 +35,8 @@ public class GameService {
     private final UserService userService;
     private final DiscountService discountService;
     private final BoughtLibraryRepository boughtLibraryRepository;
+    private final DevLibraryRepository devLibraryRepository;
+    private final PublisherLibraryRepository publisherLibraryRepository;
     private final CategoryService categoryService;
     private final ServiceHelper serviceHelper;
     
@@ -48,7 +52,8 @@ public class GameService {
     public Game getGameById_entity(long id) {
         return gameRepository.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
     }
-    
+
+    @Transactional
     public EntityModel<GameResponse_Full> addGame(GameRequest gameRequest, Authentication authentication) {
         if (gameRepository.findGameByGameName(gameRequest.getName()).isPresent()) throw new GameException("Game already exists");
         Game newGame = gameRequest.toModel();
@@ -64,6 +69,7 @@ public class GameService {
         return serviceHelper.makeGameResponse(GameResponse_Full.class, newCreatedGame, authentication);
     }
 
+    @Transactional
     public EntityModel<GameResponse_Full> updateGame(long id, GameRequest gameRequest, Authentication authentication) {
         Game gameToUpdate = gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Game not found"));
 
@@ -90,4 +96,26 @@ public class GameService {
         AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
         return boughtLibraryRepository.findPurchasedGames(authUserDetail.getId()).stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
     }
+
+    @Transactional
+    public List<EntityModel<GameResponse_Minimal>> getDevOwnedGames(Authentication authentication) {
+        AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
+        DevOwnedLibrary devOwnedLibrary = devLibraryRepository.findById(authUserDetail.getId()).orElseThrow(() -> new ResourceNotFoundException("Dev Library not found"));
+        return devOwnedLibrary.getGames().stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
+    }
+    
+    @Transactional
+    public List<EntityModel<GameResponse_Minimal>> getPublisherOwnedGames(Authentication authentication) {
+        AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
+        PublisherOwnedLibrary publisherOwnedLibrary = publisherLibraryRepository.findById(authUserDetail.getId()).orElseThrow(() -> new ResourceNotFoundException("Publisher Library not found"));
+        return publisherOwnedLibrary.getGames().stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
+    }
+    
+    @Transactional
+    public List<EntityModel<GameResponse_Minimal>> getGameReviews(long id, Authentication authentication) {
+        // Todo: WIP
+        AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
+        return boughtLibraryRepository.findPurchasedGames(authUserDetail.getId()).stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
+    }
+
 }
