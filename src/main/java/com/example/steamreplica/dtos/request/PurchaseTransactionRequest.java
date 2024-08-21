@@ -1,6 +1,6 @@
 package com.example.steamreplica.dtos.request;
 
-import com.example.steamreplica.model.purchasedLibrary.PurchaseTransaction;
+import com.example.steamreplica.model.purchasedLibrary.Purchases;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +21,7 @@ public class PurchaseTransactionRequest {
     @NotBlank(message = "Bought library id is required")
     private long boughtLibraryId;
 
-    public PurchaseTransaction toPurchaseTransaction() {
+    public Purchases toPurchaseTransaction() {
         return null;
     }
 

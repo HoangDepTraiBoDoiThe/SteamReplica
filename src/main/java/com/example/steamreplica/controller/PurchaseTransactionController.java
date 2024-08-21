@@ -2,7 +2,7 @@ package com.example.steamreplica.controller;
 
 import com.example.steamreplica.controller.assembler.PurchaseTransactionAssembler;
 import com.example.steamreplica.dtos.request.PurchaseTransactionRequest;
-import com.example.steamreplica.model.purchasedLibrary.PurchaseTransaction;
+import com.example.steamreplica.model.purchasedLibrary.Purchases;
 import com.example.steamreplica.service.PurchaseTransactionService;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +23,8 @@ public class PurchaseTransactionController {
     public ResponseEntity<?> getTransactionById(@PathVariable long id) {
 //        if (result.hasErrors()) return ResponseEntity.badRequest().body(StaticHelper.extractBindingErrorMessages(result));
 
-        PurchaseTransaction purchaseTransaction = purchaseTransactionService.getPurchaseTransactionById(id);
-        return ResponseEntity.ok(purchaseTransactionAssembler.toModel(purchaseTransaction));
+        Purchases purchases = purchaseTransactionService.getPurchaseTransactionById(id);
+        return ResponseEntity.ok(purchaseTransactionAssembler.toModel(purchases));
     }
 
     @GetMapping
@@ -38,16 +38,16 @@ public class PurchaseTransactionController {
     public ResponseEntity<?> createTransaction(@RequestBody @Validated PurchaseTransactionRequest purchaseTransactionRequest, BindingResult result) {
         var errors = StaticHelper.extractBindingErrorMessages(result);
         if (!errors.isEmpty()) return ResponseEntity.badRequest().body(errors);
-        PurchaseTransaction newPurchaseTransaction = purchaseTransactionService.createPurchaseTransaction(purchaseTransactionRequest.toPurchaseTransaction());
-        return ResponseEntity.ok(purchaseTransactionAssembler.toModel(newPurchaseTransaction));
+        Purchases newPurchases = purchaseTransactionService.createPurchaseTransaction(purchaseTransactionRequest.toPurchaseTransaction());
+        return ResponseEntity.ok(purchaseTransactionAssembler.toModel(newPurchases));
     }
     
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTransaction(@PathVariable long id, @RequestBody @Validated PurchaseTransactionRequest purchaseTransactionRequest, BindingResult result) {
         var errors = StaticHelper.extractBindingErrorMessages(result);
         if (!errors.isEmpty()) return ResponseEntity.badRequest().body(errors);
-        PurchaseTransaction updatedPurchaseTransaction = purchaseTransactionService.updatePurchaseTransaction(id, purchaseTransactionRequest.toPurchaseTransaction());
-        return ResponseEntity.ok(purchaseTransactionAssembler.toModel(updatedPurchaseTransaction));
+        Purchases updatedPurchases = purchaseTransactionService.updatePurchaseTransaction(id, purchaseTransactionRequest.toPurchaseTransaction());
+        return ResponseEntity.ok(purchaseTransactionAssembler.toModel(updatedPurchases));
     }
 
     @DeleteMapping("/{id}")

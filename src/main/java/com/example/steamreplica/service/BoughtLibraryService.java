@@ -1,7 +1,7 @@
 package com.example.steamreplica.service;
 
 import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
-import com.example.steamreplica.model.purchasedLibrary.PurchaseTransaction;
+import com.example.steamreplica.model.purchasedLibrary.Purchases;
 import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.BoughtLibraryRepository;
 import com.example.steamreplica.repository.PurchaseTransactionRepository;
@@ -38,11 +38,11 @@ public class BoughtLibraryService {
         return boughtLibraryRepository.save(boughtLibrary);
     }
 
-    public void addPurchaseTransactionToBoughtLibrary(Long boughtLibraryId, PurchaseTransaction purchaseTransaction) {
+    public void addPurchaseTransactionToBoughtLibrary(Long boughtLibraryId, Purchases purchases) {
         BoughtLibrary boughtLibrary = boughtLibraryRepository.findById(boughtLibraryId).orElse(null);
         if (boughtLibrary != null) {
-            purchaseTransaction.setBoughtLibrary(boughtLibrary);
-            purchaseTransactionRepository.save(purchaseTransaction);
+            purchases.setBoughtLibrary(boughtLibrary);
+            purchaseTransactionRepository.save(purchases);
         }
     }
 

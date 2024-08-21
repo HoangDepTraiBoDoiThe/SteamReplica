@@ -14,19 +14,18 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PurchasedGameDiscount {
-    @Id
-    @GeneratedValue
-    private long id;
+    @EmbeddedId
+    PurchasedGameDiscountKey id;
 
     @Column(nullable = false)
     @PositiveOrZero(message = "Discount percent at the time must be positive or zero")
     private BigDecimal discountPercentAtTheTime;
 
     @ManyToOne
-    @JoinColumn(name = "discount_Id", referencedColumnName = "id")
+    @MapsId("discountId")
     private Discount discount;
     
     @ManyToOne
-    @JoinColumn(name = "purchasedGame_Id", referencedColumnName = "id")
+    @MapsId("purchasedGameId")
     private PurchasedGame purchasedGame;
 }

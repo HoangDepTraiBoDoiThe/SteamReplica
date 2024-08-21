@@ -1,6 +1,6 @@
 package com.example.steamreplica.service;
 
-import com.example.steamreplica.model.purchasedLibrary.PurchaseTransaction;
+import com.example.steamreplica.model.purchasedLibrary.Purchases;
 import com.example.steamreplica.repository.PurchaseTransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,36 +12,36 @@ import java.util.List;
 public class PurchaseTransactionService {
     private final PurchaseTransactionRepository purchaseTransactionRepository;
     
-    public List<PurchaseTransaction> getAllPurchaseTransactions() {
+    public List<Purchases> getAllPurchaseTransactions() {
         return purchaseTransactionRepository.findAll();
     }
     
-    public PurchaseTransaction getPurchaseTransactionById(long id) {
+    public Purchases getPurchaseTransactionById(long id) {
         return purchaseTransactionRepository.findById(id).orElseThrow(() -> new RuntimeException("Purchase Transaction not found"));
     }
     
-    public PurchaseTransaction createPurchaseTransaction(PurchaseTransaction newPurchaseTransaction) {
-        return purchaseTransactionRepository.save(newPurchaseTransaction);
+    public Purchases createPurchaseTransaction(Purchases newPurchases) {
+        return purchaseTransactionRepository.save(newPurchases);
     }
     
-    public PurchaseTransaction updatePurchaseTransaction(long id, PurchaseTransaction newPurchaseTransactionData) {
-        PurchaseTransaction existingPurchaseTransaction = purchaseTransactionRepository.findById(id).orElseThrow(() -> new RuntimeException("Purchase Transaction not found"));
+    public Purchases updatePurchaseTransaction(long id, Purchases newPurchasesData) {
+        Purchases existingPurchases = purchaseTransactionRepository.findById(id).orElseThrow(() -> new RuntimeException("Purchase Transaction not found"));
         
-        if (existingPurchaseTransaction != null) {
-            existingPurchaseTransaction.setPurchasedGames(newPurchaseTransactionData.getPurchasedGames());
-            existingPurchaseTransaction.setTransactionDate(newPurchaseTransactionData.getTransactionDate());
-            existingPurchaseTransaction.setBoughtLibrary(newPurchaseTransactionData.getBoughtLibrary());
+        if (existingPurchases != null) {
+            existingPurchases.setPurchasedGames(newPurchasesData.getPurchasedGames());
+            existingPurchases.setTransactionDate(newPurchasesData.getTransactionDate());
+            existingPurchases.setBoughtLibrary(newPurchasesData.getBoughtLibrary());
             
-            return purchaseTransactionRepository.save(existingPurchaseTransaction);
+            return purchaseTransactionRepository.save(existingPurchases);
         }
         
         return null;
     }
     
     public void deletePurchaseTransaction(long id) {
-        PurchaseTransaction existingPurchaseTransaction = purchaseTransactionRepository.findById(id).orElse(null);
+        Purchases existingPurchases = purchaseTransactionRepository.findById(id).orElse(null);
         
-        if (existingPurchaseTransaction != null) {
+        if (existingPurchases != null) {
             purchaseTransactionRepository.deleteById(id);
         }
     }
