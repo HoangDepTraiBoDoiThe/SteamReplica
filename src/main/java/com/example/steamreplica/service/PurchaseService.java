@@ -9,22 +9,22 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class PurchaseTransactionService {
+public class PurchaseService {
     private final PurchaseTransactionRepository purchaseTransactionRepository;
     
-    public List<Purchases> getAllPurchaseTransactions() {
+    public List<Purchases> getAllPurchases() {
         return purchaseTransactionRepository.findAll();
     }
     
-    public Purchases getPurchaseTransactionById(long id) {
+    public Purchases getPurchaseById(long id) {
         return purchaseTransactionRepository.findById(id).orElseThrow(() -> new RuntimeException("Purchase Transaction not found"));
     }
     
-    public Purchases createPurchaseTransaction(Purchases newPurchases) {
+    public Purchases createPurchase(Purchases newPurchases) {
         return purchaseTransactionRepository.save(newPurchases);
     }
     
-    public Purchases updatePurchaseTransaction(long id, Purchases newPurchasesData) {
+    public Purchases updatePurchas(long id, Purchases newPurchasesData) {
         Purchases existingPurchases = purchaseTransactionRepository.findById(id).orElseThrow(() -> new RuntimeException("Purchase Transaction not found"));
         
         if (existingPurchases != null) {
@@ -38,7 +38,7 @@ public class PurchaseTransactionService {
         return null;
     }
     
-    public void deletePurchaseTransaction(long id) {
+    public void deletePurchase(long id) {
         Purchases existingPurchases = purchaseTransactionRepository.findById(id).orElse(null);
         
         if (existingPurchases != null) {
