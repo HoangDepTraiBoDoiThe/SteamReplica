@@ -32,7 +32,7 @@ public class GameController {
         return ResponseEntity.ok(gameService.getGamesPurchased(authentication));
     }
 
-    @GetMapping("/purchased-games")
+    @GetMapping("/publisher-owned-games")
     public ResponseEntity<?> getPublisherOwnedGames(Authentication authentication) {
         return ResponseEntity.ok(gameService.getPublisherOwnedGames(authentication));
     }
