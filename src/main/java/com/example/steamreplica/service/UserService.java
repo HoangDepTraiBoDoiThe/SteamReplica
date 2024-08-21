@@ -35,8 +35,9 @@ public class UserService {
         if (userRepository.findUserByEmail(request.getEmail()).isEmpty()) {
             User user = request.toUser(passwordEncoder);
             user.setRoles(roles);
-            user.setBoughtLibrary(new BoughtLibrary());
-            return userRepository.save(user);
+            User newCreatedUser = userRepository.save(user);
+            newCreatedUser.setBoughtLibrary(new BoughtLibrary(newCreatedUser));
+            return userRepository.save(newCreatedUser);
         } else {
             throw new RuntimeException("User with this email already exists");
         }

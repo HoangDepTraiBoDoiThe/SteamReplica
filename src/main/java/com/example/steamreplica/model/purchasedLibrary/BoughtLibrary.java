@@ -15,16 +15,18 @@ public class BoughtLibrary {
     @Id
     private long id;
 
+    public BoughtLibrary(User user) {
+        this.user = user;
+        this.id = user.getId();
+    }
+    
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToOne
-    @MapsId("user_id")
+    @JoinColumn(name = "user_Id", referencedColumnName = "id")
     private User user;
     
     @OneToMany(mappedBy = "boughtLibrary")
     private Set<Purchase> purchases = new HashSet<>();
 
-    public BoughtLibrary(User user) {
-        this.user = user;
-    }
 }

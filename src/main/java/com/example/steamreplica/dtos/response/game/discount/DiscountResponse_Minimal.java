@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class DiscountResponse_Minimal extends BaseResponse {
     private String discountName;
-    private BigDecimal discountPercent;
+    private double discountPercent;
 
     public DiscountResponse_Minimal(Discount discount) {
         super(discount.getId());

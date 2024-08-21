@@ -26,5 +26,5 @@ public class DiscountRequest {
     private String discountDescription;
 
     @PositiveOrZero(message = "Discount percent value must be a positive value.")
-    private BigDecimal discountPercent;
+    private double discountPercent;
 }
