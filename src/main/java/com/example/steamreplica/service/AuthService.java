@@ -46,21 +46,20 @@ public class AuthService {
         roles.add(role);
 
         User user = userService.createNewUserWithRoles(registerRequest, roles);
-        BaseResponse registerResponse = new BaseResponse("User created successfully");
-        EntityModel<BaseResponse> responseEntityModel = EntityModel.of(registerResponse,
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(user.getId())).withSelfRel(),
+        BaseResponse registerResponse = new BaseResponse(user.getId(), "User created successfully");
+        return EntityModel.of(registerResponse,
+                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(user.getId(), null)).withSelfRel(),
                 WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(AuthController.class).login(new LoginRequest(user.getEmail(), registerRequest.getPassword()), null)).withRel("Login").withType(HttpRequestTypes.POST.name())
         );
-
-        return responseEntityModel;
     }
 
     public EntityModel<LoginResponse> login(LoginRequest loginRequest) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
-        AuthUserDetail authUserDetail = (AuthUserDetail) authenticationManager.authenticate(authenticationToken);
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+        AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal(); 
         String token = authUtil.generateToken(authUserDetail);
         return EntityModel.of(new LoginResponse(authUserDetail.getId(), "Login successful", token),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(authUserDetail.getId())).withSelfRel().withType(HttpMethod.GET.name())
+                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(authUserDetail.getId(), null)).withSelfRel().withType(HttpMethod.GET.name())
         );
     }
 

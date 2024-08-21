@@ -47,6 +47,10 @@ public class ServiceHelper {
     private final PurchaseGameAssembler purchaseGameAssembler;
     private final PurchaseDlcAssembler purchaseDlcAssembler;
 
+    public BaseResponse makeBaseResponse(long id, String message) {
+        return new BaseResponse(id, message);
+    }
+
     public <T extends BaseResponse> EntityModel<T> makeGameResponse(Class<T> responseType, Game game, Authentication authentication) {
         try {
             T response;
@@ -55,9 +59,9 @@ public class ServiceHelper {
 
             List<EntityModel<CategoryResponse_Minimal>> categoryEntityModelList = game.getCategories().stream().map(category -> makeCategoryResponse(CategoryResponse_Minimal.class, category, authentication)).toList();
             if (GameResponse_Full.class.equals(responseType)) {
-                List<EntityModel<UserResponse_Minimal>> usersAsPublisherResponses = game.getPublishers().stream().map(user -> makeUserResponse(UserResponse_Minimal.class, user, authentication)).toList();
+                List<EntityModel<UserResponse_Minimal>> usersAsPublisherResponses = game.getPublishers().stream().map(user -> makeUserResponse(UserResponse_Minimal.class, user, authentication, "")).toList();
 
-                List<EntityModel<UserResponse_Minimal>> usersAsDevResponses = game.getPublishers().stream().map(user -> makeUserResponse(UserResponse_Minimal.class, user, authentication)).toList();
+                List<EntityModel<UserResponse_Minimal>> usersAsDevResponses = game.getPublishers().stream().map(user -> makeUserResponse(UserResponse_Minimal.class, user, authentication, "")).toList();
 
                 List<EntityModel<GameResponse_Minimal>> gameImageResponses = game.getGameImages().stream().map(gameImage -> makeGameImageResponse(GameResponse_Minimal.class, gameImage, authentication)).toList();
                 
@@ -121,12 +125,13 @@ public class ServiceHelper {
         }
     }
 
-    public <T extends BaseResponse> EntityModel<T> makeUserResponse(Class<T> responseType, User user, Authentication authentication) {
+    public <T extends BaseResponse> EntityModel<T> makeUserResponse(Class<T> responseType, User user, Authentication authentication, String message) {
         try {
             T response;
 
             if (UserResponse_Full.class.equals(responseType)) {
                 response = (T) new UserResponse_Full(user);
+                response.setMessage(message);
             } else {
                 response = responseType.getDeclaredConstructor(User.class).newInstance(user);
             }

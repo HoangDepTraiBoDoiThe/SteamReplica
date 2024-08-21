@@ -16,7 +16,7 @@ import java.util.stream.StreamSupport;
 @Component
 public class UserAssembler {
     public <T extends BaseResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
-        return EntityModel.of(entity, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(entity.getId())).withSelfRel().withType(HttpRequestTypes.GET.name()));
+        return EntityModel.of(entity, WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(entity.getId(), authentication)).withSelfRel().withType(HttpRequestTypes.GET.name()));
     }
 
     public <T extends BaseResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {

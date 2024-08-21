@@ -3,6 +3,8 @@ package com.example.steamreplica.model.userApplication;
 import com.example.steamreplica.constants.UserStatus;
 import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
+import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
+import com.example.steamreplica.model.purchasedLibrary.PublisherOwnedLibrary;
 import com.example.steamreplica.util.StaticHelper;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -64,12 +66,12 @@ public class User {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private BoughtLibrary devOwnedLibrary;
+    private DevOwnedLibrary devOwnedLibrary;
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private BoughtLibrary publisherOwnedLibrary;
+    private PublisherOwnedLibrary publisherOwnedLibrary;
 
     public void setBoughtLibrary(BoughtLibrary boughtLibrary) {
         this.boughtLibrary = boughtLibrary;
