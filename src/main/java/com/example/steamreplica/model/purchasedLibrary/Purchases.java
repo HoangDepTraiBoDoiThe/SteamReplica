@@ -14,7 +14,7 @@ import java.util.Set;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class PurchaseTransaction {
+public class Purchases {
     @Id
     @GeneratedValue
     private long id;
