@@ -1,12 +1,9 @@
 package com.example.steamreplica.controller.assembler;
 
-import com.example.steamreplica.constants.HttpRequestTypes;
-import com.example.steamreplica.controller.GameImageController;
 import com.example.steamreplica.dtos.response.BaseResponse;
-import com.example.steamreplica.dtos.response.game.GameImageResponse_Full;
+import com.example.steamreplica.dtos.response.game.GameImageResponse;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +17,7 @@ public class GameImageAssembler {
         return null;
     }
     
-    public <T extends GameImageResponse_Full> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
+    public <T extends GameImageResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
         return StreamSupport.stream(entities.spliterator(), false) //
                 .map(t -> toModel(t, authentication)) //
                 .collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::of));

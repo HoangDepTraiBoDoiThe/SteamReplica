@@ -2,7 +2,7 @@ package com.example.steamreplica.service;
 
 import com.example.steamreplica.controller.assembler.*;
 import com.example.steamreplica.dtos.response.*;
-import com.example.steamreplica.dtos.response.game.GameImageResponse_Full;
+import com.example.steamreplica.dtos.response.game.GameImageResponse;
 import com.example.steamreplica.dtos.response.game.GameResponse_Basic;
 import com.example.steamreplica.dtos.response.game.GameResponse_Full;
 import com.example.steamreplica.dtos.response.game.GameResponse_Minimal;
@@ -17,6 +17,7 @@ import com.example.steamreplica.dtos.response.user.UserResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Minimal;
 import com.example.steamreplica.model.game.Category;
 import com.example.steamreplica.model.game.DLC.DLC;
+import com.example.steamreplica.model.game.DLC.DLCImage;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.game.GameImage;
 import com.example.steamreplica.model.game.discount.Discount;
@@ -30,6 +31,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.util.List;
 
 @Component
@@ -75,10 +77,25 @@ public class ServiceHelper {
     public <T extends BaseResponse> EntityModel<T> makeGameImageResponse(Class<T> responseType, GameImage gameImage, Authentication authentication) {
         try {
             T response;
-            if (GameImageResponse_Full.class.equals(responseType)) {
-                response = (T) new GameImageResponse_Full(gameImage, makeGameResponse(GameResponse_Minimal.class, gameImage.getGame(), authentication));
+            if (GameImageResponse.class.equals(responseType)) {
+                response = (T) new GameImageResponse(gameImage, makeGameResponse(GameResponse_Minimal.class, gameImage.getGame(), authentication));
             } else {
-                response = responseType.getDeclaredConstructor(GameImage.class).newInstance(gameImage);
+                response = responseType.getDeclaredConstructor(Long.class, String.class, Blob.class).newInstance(gameImage.getId(), gameImage.getImageName(), gameImage.getImage());
+            }
+
+            return gameImageAssembler.toModel(response, authentication);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while creating response: ", e);
+        }
+    } 
+
+    public <T extends BaseResponse> EntityModel<T> makeDlcImageResponse(Class<T> responseType, DLCImage dlcImage, Authentication authentication) {
+        try {
+            T response;
+            if (DlcImageResponse.class.equals(responseType)) {
+                response = (T) new DlcImageResponse(dlcImage, makeDlcResponse(DlcResponse_Basic.class, dlcImage.getDlc(), authentication));
+            } else {
+                response = responseType.getDeclaredConstructor(Long.class, String.class, Blob.class).newInstance(dlcImage.getId(), dlcImage.getImageName(), dlcImage.getImage());
             }
 
             return gameImageAssembler.toModel(response, authentication);

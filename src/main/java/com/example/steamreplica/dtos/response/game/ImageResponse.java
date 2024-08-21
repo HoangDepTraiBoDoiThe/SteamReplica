@@ -8,17 +8,19 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.sql.Blob;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GameImageResponse_Basic extends BaseResponse {
+public class ImageResponse extends BaseResponse {
     private String imageName;
     private String image;
 
-    public GameImageResponse_Basic(GameImage gameImage) {
-        super(gameImage.getId());
-        this.imageName = gameImage.getImageName();
-        this.image = StaticHelper.convertBlobToString(gameImage.getImage());
+    public ImageResponse(long id, String imageName, Blob imageBlob) {
+        super(id);
+        this.imageName = imageName;
+        this.image = StaticHelper.convertBlobToString(imageBlob);
     }
 }
