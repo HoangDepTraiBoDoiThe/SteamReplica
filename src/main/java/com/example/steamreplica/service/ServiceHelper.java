@@ -131,11 +131,10 @@ public class ServiceHelper {
 
             if (UserResponse_Full.class.equals(responseType)) {
                 response = (T) new UserResponse_Full(user);
-                response.setMessage(message);
             } else {
                 response = responseType.getDeclaredConstructor(User.class).newInstance(user);
             }
-
+            response.setMessage(message);
             return userAssembler.toModel(response, authentication);
         } catch (Exception e) {
             throw new RuntimeException("Error while creating response: ", e);

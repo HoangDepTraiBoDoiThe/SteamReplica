@@ -44,27 +44,24 @@ public class UserService {
     }
 
     @Transactional
-    public EntityModel<BaseResponse> RequestToBecomeDev(long id, Authentication authentication) {
-        try {
-            User user = findUsersWithById_entity(id);
-            DevOwnedLibrary devOwnedLibrary = new DevOwnedLibrary(user);
-            user.setDevOwnedLibrary(devOwnedLibrary);
-            return serviceHelper.makeUserResponse(BaseResponse.class, userRepository.save(user), authentication, "User is now a developer");
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to request to become a developer");
-        }
+    public EntityModel<UserResponse_Minimal> RequestToBecomeDev(long id, Authentication authentication) {
+        User user = findUsersWithById_entity(id);
+        if (user.getDevOwnedLibrary() != null) throw new RuntimeException("User is already a developer");
+
+        DevOwnedLibrary devOwnedLibrary = new DevOwnedLibrary(user);
+        user.setDevOwnedLibrary(devOwnedLibrary);
+        User updatedUser = userRepository.save(user);
+        return serviceHelper.makeUserResponse(UserResponse_Minimal.class, updatedUser, authentication, "User is now a developer");
     }
 
     @Transactional
-    public EntityModel<BaseResponse> RequestToBecomePublisher(long id, Authentication authentication) {
-        try {
-            User user = findUsersWithById_entity(id);
-            DevOwnedLibrary devOwnedLibrary = new DevOwnedLibrary(user);
-            user.setDevOwnedLibrary(devOwnedLibrary);
-            return serviceHelper.makeUserResponse(BaseResponse.class, userRepository.save(user), authentication, "User is now a publisher");
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to request to become a developer");
-        }
+    public EntityModel<UserResponse_Minimal> RequestToBecomePublisher(long id, Authentication authentication) {
+        User user = findUsersWithById_entity(id);
+        if (user.getPublisherOwnedLibrary() != null) throw new RuntimeException("User is already a publisher");
+
+        DevOwnedLibrary devOwnedLibrary = new DevOwnedLibrary(user);
+        user.setDevOwnedLibrary(devOwnedLibrary);
+        return serviceHelper.makeUserResponse(UserResponse_Minimal.class, userRepository.save(user), authentication, "User is now a publisher");
     }
 
     @Transactional

@@ -2,6 +2,7 @@ package com.example.steamreplica.controller;
 
 import com.example.steamreplica.dtos.response.BaseResponse;
 import com.example.steamreplica.dtos.response.user.UserResponse_Full;
+import com.example.steamreplica.dtos.response.user.UserResponse_Minimal;
 import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.service.GameService;
 import com.example.steamreplica.service.UserService;
@@ -33,12 +34,12 @@ public class UserController {
     }
 
     @PostMapping("/{id}/become-dev")
-    public ResponseEntity<EntityModel<BaseResponse>> requestToBecomeDev(@PathVariable long id, Authentication authentication) {
+    public ResponseEntity<EntityModel<UserResponse_Minimal>> requestToBecomeDev(@PathVariable long id, Authentication authentication) {
         return ResponseEntity.ok(userService.RequestToBecomeDev(id, authentication));
     }
 
     @PostMapping("/{id}/become-publisher")
-    public ResponseEntity<EntityModel<BaseResponse>> requestToBecomePublisher(@PathVariable long id, Authentication authentication) {
+    public ResponseEntity<EntityModel<UserResponse_Minimal>> requestToBecomePublisher(@PathVariable long id, Authentication authentication) {
         return ResponseEntity.ok(userService.RequestToBecomePublisher(id, authentication));
     }
 
