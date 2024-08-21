@@ -18,20 +18,12 @@ public class BoughtLibraryService {
     private final PurchaseRepository purchaseRepository;
     private final UserRepository userRepository;
 
-    public BoughtLibrary saveBoughtLibrary(BoughtLibrary boughtLibrary) {
-        return boughtLibraryRepository.save(boughtLibrary);
-    }
-
     public BoughtLibrary getBoughtLibraryById(Long id) {
         return boughtLibraryRepository.findById(id).orElse(null);
     }
 
     public List<BoughtLibrary> getAllBoughtLibraries() {
         return boughtLibraryRepository.findAll();
-    }
-
-    public void deleteBoughtLibrary(Long id) {
-        boughtLibraryRepository.deleteById(id);
     }
 
     public BoughtLibrary updateBoughtLibrary(BoughtLibrary boughtLibrary) {

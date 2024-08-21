@@ -28,5 +28,4 @@ public class BoughtLibrary {
     
     @OneToMany(mappedBy = "boughtLibrary")
     private Set<Purchase> purchases = new HashSet<>();
-
 }
