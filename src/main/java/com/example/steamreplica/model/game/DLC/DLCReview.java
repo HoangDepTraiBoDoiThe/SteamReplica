@@ -3,9 +3,7 @@ package com.example.steamreplica.model.game.DLC;
 import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Entity
@@ -22,7 +20,9 @@ public class DLCReview {
     @NotBlank
     @Column(nullable = false)
     private boolean recommended;
-    
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToOne
     @PrimaryKeyJoinColumn(name = "purchased_dlc", referencedColumnName = "id")
     private PurchasedDLC purchasedDLC;

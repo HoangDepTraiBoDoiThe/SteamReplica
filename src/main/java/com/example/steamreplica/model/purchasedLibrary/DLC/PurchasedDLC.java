@@ -5,9 +5,7 @@ import com.example.steamreplica.model.game.DLC.DLCReview;
 import com.example.steamreplica.model.purchasedLibrary.Purchases;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Set;
@@ -29,13 +27,14 @@ public class PurchasedDLC {
     @JoinColumn(name = "transaction_Id", referencedColumnName = "id")
     private Purchases transaction;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "dlc_Id", referencedColumnName = "id")
     private DLC dlc;
 
-    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true, mappedBy = "purchasedDLC")
-    private Set<PurchasedDLCDiscount> purchasedDlcDiscounts;
-
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToOne(orphanRemoval = true, mappedBy = "purchasedDLC", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private DLCReview DLCReview;
 }

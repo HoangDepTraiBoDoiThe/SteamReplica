@@ -1,8 +1,6 @@
 package com.example.steamreplica.model.game.discount;
 
 import com.example.steamreplica.model.game.DLC.DLC;
-import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLCDiscount;
-import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGameDiscount;
 import com.example.steamreplica.model.game.Game;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,18 +33,8 @@ public class Discount {
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    private Set<PurchasedGameDiscount> purchasedGameDiscounts;
-
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
     @ManyToMany(mappedBy = "discounts")
     private Set<DLC> discountedDlc = new HashSet<>();
-
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    private Set<PurchasedDLCDiscount> purchasedDLCDiscounts = new HashSet<>();
 
     public Discount(String discountName, String discountCode, String discountDescription, BigDecimal discountPercent) {
         this.discountName = discountName;

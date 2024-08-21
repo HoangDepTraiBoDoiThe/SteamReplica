@@ -31,15 +31,6 @@ public class PurchasedGame {
     @ManyToOne
     @JoinColumn(name = "game_Id", referencedColumnName = "id")
     private Game game;
-
-    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
-    private Set<PurchasedGameDiscount> GameDiscounts = new HashSet<>();
-
-    public void addDiscount(Discount discount) {
-        PurchasedGameDiscountKey key = new PurchasedGameDiscountKey(game.getId(), discount.getId());
-        PurchasedGameDiscount purchasedGameDiscount = new PurchasedGameDiscount(key, discount.getDiscountPercent(), discount, this);
-        GameDiscounts.add(purchasedGameDiscount);
-    }
     
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
