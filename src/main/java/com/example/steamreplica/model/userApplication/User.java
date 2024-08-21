@@ -61,6 +61,16 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private BoughtLibrary boughtLibrary;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private BoughtLibrary devOwnedLibrary;
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private BoughtLibrary publisherOwnedLibrary;
+
     public void setBoughtLibrary(BoughtLibrary boughtLibrary) {
         this.boughtLibrary = boughtLibrary;
         if (boughtLibrary != null) this.boughtLibrary.setUser(this);
