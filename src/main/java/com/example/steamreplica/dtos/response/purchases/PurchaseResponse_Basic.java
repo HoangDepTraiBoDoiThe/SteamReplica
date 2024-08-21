@@ -8,11 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.hateoas.EntityModel;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.List;
 
 
 @Data
@@ -23,9 +21,12 @@ public class PurchaseResponse_Basic extends BaseResponse {
     private ZonedDateTime TransactionDate;
     private String transactionType;
     private BigDecimal totalPrice;
-    public PurchaseResponse_Basic(Purchase purchase, BigDecimal totalPrice) {
+    private double additionalDiscountPercent;
+    public PurchaseResponse_Basic(Purchase purchase, BigDecimal totalPrice, double additionalDiscountPercent) {
         super(purchase.getId());
         this.TransactionDate = purchase.getTransactionDate();
+        this.totalPrice = totalPrice;
         this.transactionType = purchase.getTransactionType();
+        this.additionalDiscountPercent = additionalDiscountPercent;
     }
 }

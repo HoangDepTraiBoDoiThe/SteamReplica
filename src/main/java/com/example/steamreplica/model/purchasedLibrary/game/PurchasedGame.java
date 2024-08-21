@@ -21,9 +21,13 @@ public class PurchasedGame {
     @PositiveOrZero
     private BigDecimal gameBasePriceAtTheTime;
 
-    public PurchasedGame(Game game) {
+    @PositiveOrZero
+    private double discountPercent;
+
+    public PurchasedGame(Game game, double discountPercent) {
         this.gameBasePriceAtTheTime = game.getGameBasePrice();
         this.game = game;
+        this.discountPercent = discountPercent;
     }
 
     @ManyToOne

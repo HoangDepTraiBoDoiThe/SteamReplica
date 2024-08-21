@@ -22,8 +22,12 @@ public class PurchasedDLC {
     @PositiveOrZero
     private BigDecimal priceAtTheTime;
 
-    public PurchasedDLC(DLC dlc) {
+    @PositiveOrZero
+    private double discountPercent;
+
+    public PurchasedDLC(DLC dlc, double discountPercent) {
         this.priceAtTheTime = dlc.getDlcBasePrice();
+        this.discountPercent = discountPercent;
         this.dlc = dlc;
     }
 

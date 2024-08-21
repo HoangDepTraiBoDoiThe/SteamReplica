@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 
 import java.math.BigDecimal;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 
@@ -23,8 +22,8 @@ public class PurchaseResponse_Full extends PurchaseResponse_Basic {
     private List<EntityModel<PurchaseGameResponse>> purchasedGames;
     private List<EntityModel<PurchaseDlcResponse>> purchasedDlc;
 
-    public PurchaseResponse_Full(Purchase purchase, BigDecimal totalPrice, List<EntityModel<PurchaseGameResponse>> purchasedGames, List<EntityModel<PurchaseDlcResponse>> purchasedDlc) {
-        super(purchase, totalPrice);
+    public PurchaseResponse_Full(Purchase purchase, BigDecimal totalPrice, List<EntityModel<PurchaseGameResponse>> purchasedGames, List<EntityModel<PurchaseDlcResponse>> purchasedDlc, double additionalDiscountPercent) {
+        super(purchase, totalPrice, additionalDiscountPercent);
         this.purchasedGames = purchasedGames;
         this.purchasedDlc = purchasedDlc;
     }

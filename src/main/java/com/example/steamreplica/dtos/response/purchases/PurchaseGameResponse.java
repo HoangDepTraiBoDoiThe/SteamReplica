@@ -17,11 +17,15 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class PurchaseGameResponse extends BaseResponse {
     private BigDecimal basePriceAtTheTime;
+    private BigDecimal purchasedPrice;
     private EntityModel<GameResponse_Minimal> game;
+    private double discountPercent;
 
-    public PurchaseGameResponse(PurchasedGame purchasedGame, EntityModel<GameResponse_Minimal> game) {
+    public PurchaseGameResponse(PurchasedGame purchasedGame, EntityModel<GameResponse_Minimal> gameResponse, double discountPercent, BigDecimal purchasedPrice) {
         super(purchasedGame.getId());
         this.basePriceAtTheTime = purchasedGame.getGameBasePriceAtTheTime();
-        this.game = game;
+        this.discountPercent = discountPercent;
+        this.purchasedPrice = purchasedPrice;
+        this.game = gameResponse;
     }
 }
