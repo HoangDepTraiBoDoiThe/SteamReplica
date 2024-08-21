@@ -4,9 +4,7 @@ import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.ZonedDateTime;
 import java.util.HashSet;
@@ -31,9 +29,13 @@ public class PurchaseTransaction {
     @JoinColumn(name = "boughtLibrary", referencedColumnName = "id")
     private BoughtLibrary boughtLibrary;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToMany(mappedBy = "transaction", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<PurchasedGame> purchasedGames = new HashSet<>();
-    
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToMany(mappedBy = "transaction", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<PurchasedDLC> purchasedDLCs = new HashSet<>();
 }

@@ -5,9 +5,7 @@ import com.example.steamreplica.model.game.GameReview;
 import com.example.steamreplica.model.purchasedLibrary.PurchaseTransaction;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Set;
@@ -35,6 +33,8 @@ public class PurchasedGame {
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, orphanRemoval = true)
     private Set<PurchasedGameDiscount> purchasedGameDiscounts;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToOne(orphanRemoval = true, mappedBy = "purchasedGame")
     private GameReview gameReview;
 }
