@@ -11,7 +11,9 @@ import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
 import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import com.example.steamreplica.model.purchasedLibrary.Purchase;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
+import com.example.steamreplica.repository.BoughtLibraryRepository;
 import com.example.steamreplica.repository.PurchaseRepository;
+import com.example.steamreplica.service.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PurchaseService {
     private final PurchaseRepository purchaseRepository;
-    private final BoughtLibraryService boughtLibraryService;
+    private final BoughtLibraryRepository boughtLibraryRepository;
     private final GameService gameService;
     private final DlcService dlcService;
     private final DiscountService discountService;
@@ -45,7 +47,7 @@ public class PurchaseService {
     @Transactional
     public EntityModel<PurchaseResponse_Full> createPurchase(PurchaseRequest request, Authentication authentication) {
         AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
-        BoughtLibrary boughtLibrary = boughtLibraryService.getBoughtLibraryById(authUserDetail.getId());
+        BoughtLibrary boughtLibrary = boughtLibraryRepository.findById(authUserDetail.getId()).orElseThrow(() -> new ResourceNotFoundException("Can not get Library"));
         
         Set<PurchasedGame> purchasedGames = request.getGameIds().stream().map(aLong -> {
             Game game = gameService.getGameById_entity(aLong);
