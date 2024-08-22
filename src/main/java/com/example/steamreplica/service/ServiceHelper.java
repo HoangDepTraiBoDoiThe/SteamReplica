@@ -242,26 +242,28 @@ public class ServiceHelper {
         }
     }
 
-    public <T extends BaseCacheableModel> void updateCacheSelective(String entityCacheName, String entityListCacheName, T objectToCache) {
+    public <T extends BaseCacheableModel> void updateCacheSelective(T objectToCache, String entityCacheName, String... entityListCacheNames) {
         try {
             // Fetch the entity cache
             Optional.ofNullable(cacheManager.getCache(entityCacheName))
                     .ifPresent(entityCache -> entityCache.put(objectToCache.getId(), objectToCache));
 
-            // Fetch the entity list cache
-            Optional.ofNullable(cacheManager.getCache(entityListCacheName))
-                    .map(entityListCache -> entityListCache.get(entityListCacheName, List.class))
-                    .map(cacheList -> {
-                        // Replace the item in the list and return the modified list
-                        return replaceInList(cacheList, objectToCache, T::getId);
-                    })
-                    .ifPresent(modifiedList -> {
-                        // Update the cache with the modified list
-                        Cache entityListCache = cacheManager.getCache(entityListCacheName);
-                        if (entityListCache != null) {
-                            entityListCache.put(entityListCacheName, modifiedList);
-                        }
-                    });
+            for (String entityListCacheName : entityListCacheNames) {
+                // Fetch the entity list cache
+                Optional.ofNullable(cacheManager.getCache(entityListCacheName))
+                        .map(entityListCache -> entityListCache.get(entityListCacheName, List.class))
+                        .map(cacheList -> {
+                            // Replace the item in the list and return the modified list
+                            return replaceInList(cacheList, objectToCache, T::getId);
+                        })
+                        .ifPresent(modifiedList -> {
+                            // Update the cache with the modified list
+                            Cache entityListCache = cacheManager.getCache(entityListCacheName);
+                            if (entityListCache != null) {
+                                entityListCache.put(entityListCacheName, modifiedList);
+                            }
+                        });
+            }
         } catch (Exception e) {
             throw new CacheException("Error while updating cache.", e);
         }
@@ -274,18 +276,20 @@ public class ServiceHelper {
         return list;
     }
 
-    public <T extends BaseCacheableModel> void deleteCacheSelective(String entityCacheName, String entityListCacheName, T objectToCache) {
+    public <T extends BaseCacheableModel> void deleteCacheSelective(T objectToCache, String entityCacheName, String... entityListCacheName) {
         try {
             Cache entityCache = cacheManager.getCache(entityCacheName);
-            Cache entityListCache = cacheManager.getCache(entityListCacheName);
+            Optional.ofNullable(entityCache).ifPresent(cache -> cache.evict(objectToCache.getId()));
 
-            if (entityCache != null) entityCache.evict(objectToCache.getId());
-            if (entityListCache != null) {
+            for (String cacheName : entityListCacheName) {
+                Cache entityListCache = cacheManager.getCache(cacheName);
+                if (entityListCache == null) continue;
+                
                 List<T> cacheList = entityListCache.get(entityListCacheName, List.class);
-                if (cacheList != null) {
-                    cacheList.remove(objectToCache);
-                    entityListCache.put(entityListCacheName, cacheList);
-                }
+                if (cacheList == null) continue;
+                
+                cacheList.remove(objectToCache);
+                if (!cacheList.isEmpty()) entityListCache.put(entityListCacheName, cacheList);
             }
         } catch (Exception e) {
             throw new CacheException("Error while deleting cache.", e);
