@@ -46,6 +46,13 @@ public class ApplicationExceptionHandler {
         return new ResponseEntity<>(exceptionData, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(CacheException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    ResponseEntity<?> handleOtherException(CacheException ex, WebRequest webRequest) {
+        ErrorDataType exceptionData = extractErrorData(ex, webRequest);
+        return new ResponseEntity<>(exceptionData, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
     ErrorDataType extractErrorData(Exception ex, WebRequest webRequest) {
         String errorMessage = String.format(serverExceptionMessage, ex.getMessage());
         String causerMessage = String.format(serverExceptionMessage, ex.getMessage());
