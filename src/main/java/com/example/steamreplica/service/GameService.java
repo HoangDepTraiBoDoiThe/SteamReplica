@@ -83,14 +83,14 @@ public class GameService {
         gameToUpdate.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, authentication)).collect(Collectors.toSet()));
     
         Game updatedGame = gameRepository.save(gameToUpdate);
-        serviceHelper.updateCacheSelective("gameCache", "gameListCache", updatedGame);
+        serviceHelper.updateCacheSelective(updatedGame, "gameCache", "gameListCache");
         return serviceHelper.makeGameResponse(GameResponse_Full.class, updatedGame, authentication);
     }
 
     @Transactional
     public void deleteGame(long id) {
         Game game = gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
-        serviceHelper.deleteCacheSelective("gameCache", "gameListCache", game);
+        serviceHelper.deleteCacheSelective(game, "gameCache", "gameListCache");
         gameRepository.deleteById(id);
     }
 
