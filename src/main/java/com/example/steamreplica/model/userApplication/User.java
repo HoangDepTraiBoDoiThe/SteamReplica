@@ -1,6 +1,7 @@
 package com.example.steamreplica.model.userApplication;
 
 import com.example.steamreplica.constants.UserStatus;
+import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
 import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
@@ -15,17 +16,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "Users")
-public class User {
-
-    @Id
-    @GeneratedValue
-    private long id;
-
+public class User extends BaseCacheableModel {
     @NotBlank(message = "User name can not be empty")
     private String userName;
 
@@ -95,7 +92,7 @@ public class User {
 
     public AuthUserDetail toAuthUserDetail () {
         AuthUserDetail authUserDetail = new AuthUserDetail();
-        authUserDetail.setId(id);
+        authUserDetail.setId(super.getId());
         authUserDetail.setUsername(email);
         authUserDetail.setPassword(password);
         authUserDetail.setEmail(email);

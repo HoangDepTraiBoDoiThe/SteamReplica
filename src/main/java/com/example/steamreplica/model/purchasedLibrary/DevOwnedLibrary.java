@@ -23,6 +23,7 @@ public class DevOwnedLibrary {
     
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @MapsId
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id", referencedColumnName = "id")
     private User user;

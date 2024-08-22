@@ -20,8 +20,10 @@ public class PublisherOwnedLibrary {
         this.user = user;
         this.id = user.getId();
     }
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @MapsId
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id", referencedColumnName = "id")
     private User user;

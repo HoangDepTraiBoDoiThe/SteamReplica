@@ -1,5 +1,6 @@
 package com.example.steamreplica.model.purchasedLibrary;
 
+import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
@@ -11,29 +12,17 @@ import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Purchase {
-    @Id
-    @GeneratedValue
-    private long id;
-
+public class Purchase extends BaseCacheableModel {
     private ZonedDateTime TransactionDate;
 
     @NotBlank
     @Column(nullable = false)
     private String transactionType;
-
-    public Purchase(ZonedDateTime transactionDate, String transactionType, BoughtLibrary boughtLibrary, Set<PurchasedGame> purchasedGames, Set<PurchasedDLC> purchasedDLCs, Discount additionalDiscount) {
-        TransactionDate = transactionDate;
-        this.transactionType = transactionType;
-        this.boughtLibrary = boughtLibrary;
-        this.purchasedGames = purchasedGames;
-        this.purchasedDLCs = purchasedDLCs;
-        this.additionalDiscount = additionalDiscount;
-    }
 
     @ManyToOne
     @JoinColumn(name = "boughtLibrary", referencedColumnName = "id")

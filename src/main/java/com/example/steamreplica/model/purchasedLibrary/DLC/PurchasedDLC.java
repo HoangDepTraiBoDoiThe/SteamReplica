@@ -1,5 +1,6 @@
 package com.example.steamreplica.model.purchasedLibrary.DLC;
 
+import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.DLC.DLCReview;
 import com.example.steamreplica.model.purchasedLibrary.Purchase;
@@ -9,16 +10,13 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "purchased_dlc")
-public class PurchasedDLC {
-    @Id
-    @GeneratedValue
-    private long id;
-
+public class PurchasedDLC extends BaseCacheableModel {
     @PositiveOrZero
     private BigDecimal priceAtTheTime;
 

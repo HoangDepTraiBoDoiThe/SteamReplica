@@ -1,5 +1,6 @@
 package com.example.steamreplica.model.game.DLC;
 
+import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
@@ -14,16 +15,13 @@ import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "game_dlc")
 @AllArgsConstructor
 @NoArgsConstructor
-public class DLC {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class DLC extends BaseCacheableModel {
     @NotBlank(message = "DLC name is required")
     @Column(nullable = false)
     private String dlcName;

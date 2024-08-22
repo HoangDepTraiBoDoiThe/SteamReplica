@@ -1,29 +1,21 @@
 package com.example.steamreplica.model.game;
 
+import com.example.steamreplica.model.BaseCacheableModel;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Blob;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class GameImage {
-    @Id
-    @GeneratedValue
-    private long id;
-
+public class GameImage extends BaseCacheableModel {
     private String imageName;
 
     @Lob
     private Blob image;
-
-    public GameImage(String imageName, Blob image, Game game) {
-        this.imageName = imageName;
-        this.image = image;
-        this.game = game;
-    }
 
     @ManyToOne
     @ToString.Exclude

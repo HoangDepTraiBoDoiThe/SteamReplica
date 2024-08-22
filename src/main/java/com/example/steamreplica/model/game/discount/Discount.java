@@ -1,5 +1,6 @@
 package com.example.steamreplica.model.game.discount;
 
+import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.purchasedLibrary.Purchase;
@@ -9,15 +10,12 @@ import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Discount {
-    @Id
-    @GeneratedValue
-    private long id;
-
+public class Discount extends BaseCacheableModel {
     @Column(nullable = false)
     private String discountName;
     @Column(unique = true, nullable = false)

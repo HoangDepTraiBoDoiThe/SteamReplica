@@ -1,22 +1,21 @@
 package com.example.steamreplica.model.game.DLC;
 
+import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.Game;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.sql.Blob;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class DLCImage {
-    @Id
-    @GeneratedValue
-    private long id;
-
+public class DLCImage extends BaseCacheableModel {
     private String imageName;
 
     @Lob

@@ -1,5 +1,6 @@
 package com.example.steamreplica.model.purchasedLibrary.game;
 
+import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.game.GameReview;
 import com.example.steamreplica.model.purchasedLibrary.Purchase;
@@ -9,15 +10,12 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class PurchasedGame {
-    @Id
-    @GeneratedValue
-    private long id;
-
+public class PurchasedGame extends BaseCacheableModel {
     @PositiveOrZero
     private BigDecimal gameBasePriceAtTheTime;
 

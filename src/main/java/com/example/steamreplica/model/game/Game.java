@@ -1,5 +1,6 @@
 package com.example.steamreplica.model.game;
 
+import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
 import com.example.steamreplica.model.purchasedLibrary.PublisherOwnedLibrary;
@@ -15,15 +16,12 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Game {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class Game extends BaseCacheableModel {
     @Column(nullable = false, unique = true)
     private String gameName;
 
@@ -45,17 +43,6 @@ public class Game {
         this.gameDescription = gameDescription;
         this.releaseDate = releaseDate;
         this.gameThumbnail = gameThumbnail;
-    }
-
-    public Game(Long id, String gameName, BigDecimal gameBasePrice, String gameDescription, LocalDate releaseDate, Set<User> developers, Set<User> publishers, Blob gameThumbnail) {
-        this.id = id;
-        this.gameName = gameName;
-        this.gameBasePrice = gameBasePrice;
-        this.gameDescription = gameDescription;
-        this.gameThumbnail = gameThumbnail;
-        this.releaseDate = releaseDate;
-        this.developers = developers;
-        this.publishers = publishers;
     }
 
     @EqualsAndHashCode.Exclude
