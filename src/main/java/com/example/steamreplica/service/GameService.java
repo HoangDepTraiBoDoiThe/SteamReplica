@@ -1,6 +1,5 @@
 package com.example.steamreplica.service;
 
-import com.example.steamreplica.controller.assembler.*;
 import com.example.steamreplica.dtos.request.GameRequest;
 import com.example.steamreplica.dtos.response.game.GameResponse_Basic;
 import com.example.steamreplica.dtos.response.game.GameResponse_Full;
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,11 +38,12 @@ public class GameService {
     private final CategoryService categoryService;
     private final ServiceHelper serviceHelper;
     
+    @Cacheable(value = "gameListCache")
     public List<EntityModel<GameResponse_Basic>> getAllGames(Authentication authentication) {
         return gameRepository.findAll().stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
 
-    @Cacheable(value = "gameByid", key = "#id")
+    @Cacheable(value = "gameCache", key = "#id")
     public EntityModel<GameResponse_Full> getGameById(long id, Authentication authentication) {
         Game game = gameRepository.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
         return serviceHelper.makeGameResponse(GameResponse_Full.class, game, authentication);
@@ -70,7 +69,6 @@ public class GameService {
         return serviceHelper.makeGameResponse(GameResponse_Full.class, newCreatedGame, authentication);
     }
 
-    @CachePut(value = "updateGame", key = "#id")
     @Transactional
     public EntityModel<GameResponse_Full> updateGame(long id, GameRequest gameRequest, Authentication authentication) {
         Game gameToUpdate = gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Game not found"));
@@ -85,12 +83,14 @@ public class GameService {
         gameToUpdate.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, authentication)).collect(Collectors.toSet()));
     
         Game updatedGame = gameRepository.save(gameToUpdate);
+        serviceHelper.updateCacheSelective("gameCache", "gameListCache", updatedGame);
         return serviceHelper.makeGameResponse(GameResponse_Full.class, updatedGame, authentication);
     }
 
-    @CacheEvict(value = "deleteGame", key = "#id")
+    @Transactional
     public void deleteGame(long id) {
-        gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
+        Game game = gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
+        serviceHelper.deleteCacheSelective("gameCache", "gameListCache", game);
         gameRepository.deleteById(id);
     }
 
