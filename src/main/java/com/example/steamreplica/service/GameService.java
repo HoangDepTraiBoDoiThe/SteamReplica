@@ -7,17 +7,17 @@ import com.example.steamreplica.dtos.response.game.GameResponse_Full;
 import com.example.steamreplica.dtos.response.game.GameResponse_Minimal;
 import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.game.GameImage;
-import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
 import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
 import com.example.steamreplica.model.purchasedLibrary.PublisherOwnedLibrary;
-import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
-import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.*;
 import com.example.steamreplica.service.exception.GameException;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -44,6 +44,7 @@ public class GameService {
         return gameRepository.findAll().stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
 
+    @Cacheable(value = "gameByid", key = "#id")
     public EntityModel<GameResponse_Full> getGameById(long id, Authentication authentication) {
         Game game = gameRepository.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
         return serviceHelper.makeGameResponse(GameResponse_Full.class, game, authentication);
@@ -69,6 +70,7 @@ public class GameService {
         return serviceHelper.makeGameResponse(GameResponse_Full.class, newCreatedGame, authentication);
     }
 
+    @CachePut(value = "updateGame", key = "#id")
     @Transactional
     public EntityModel<GameResponse_Full> updateGame(long id, GameRequest gameRequest, Authentication authentication) {
         Game gameToUpdate = gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Game not found"));
@@ -86,6 +88,7 @@ public class GameService {
         return serviceHelper.makeGameResponse(GameResponse_Full.class, updatedGame, authentication);
     }
 
+    @CacheEvict(value = "deleteGame", key = "#id")
     public void deleteGame(long id) {
         gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
         gameRepository.deleteById(id);

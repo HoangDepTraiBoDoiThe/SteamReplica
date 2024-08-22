@@ -1,5 +1,6 @@
-package com.example.steamreplica.Auth;
+package com.example.steamreplica.config;
 
+import com.example.steamreplica.Auth.JwtAuthFilter;
 import com.example.steamreplica.util.MyPermissionEvaluator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
