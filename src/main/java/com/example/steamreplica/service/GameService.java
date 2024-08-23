@@ -12,10 +12,10 @@ import com.example.steamreplica.repository.*;
 import com.example.steamreplica.service.exception.GameException;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
+import com.example.steamreplica.util.CacheHelper;
+import com.example.steamreplica.util.ServiceHelper;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
@@ -37,6 +37,7 @@ public class GameService {
     private final PublisherLibraryRepository publisherLibraryRepository;
     private final CategoryService categoryService;
     private final ServiceHelper serviceHelper;
+    private final CacheHelper cacheHelper;
     
     @Cacheable(value = "gameListCache")
     public List<EntityModel<GameResponse_Basic>> getAllGames(Authentication authentication) {
@@ -83,14 +84,14 @@ public class GameService {
         gameToUpdate.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, authentication)).collect(Collectors.toSet()));
     
         Game updatedGame = gameRepository.save(gameToUpdate);
-        serviceHelper.updateCacheSelective(updatedGame, "gameCache", "gameListCache");
+        cacheHelper.updateCacheSelective(updatedGame, "gameCache", "gameListCache");
         return serviceHelper.makeGameResponse(GameResponse_Full.class, updatedGame, authentication);
     }
 
     @Transactional
     public void deleteGame(long id) {
         Game game = gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
-        serviceHelper.deleteCacheSelective(game, "gameCache", "gameListCache");
+        cacheHelper.deleteCacheSelective(game, "gameCache", "gameListCache");
         gameRepository.deleteById(id);
     }
 

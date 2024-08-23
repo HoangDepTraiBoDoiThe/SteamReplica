@@ -5,6 +5,7 @@ import com.example.steamreplica.dtos.response.game.ImageResponse;
 import com.example.steamreplica.model.game.DLC.DLCImage;
 import com.example.steamreplica.repository.DlcImageRepository;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
+import com.example.steamreplica.util.ServiceHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;

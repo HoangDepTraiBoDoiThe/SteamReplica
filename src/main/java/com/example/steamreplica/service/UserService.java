@@ -1,16 +1,14 @@
 package com.example.steamreplica.service;
 
 import com.example.steamreplica.dtos.request.RegisterRequest;
-import com.example.steamreplica.dtos.response.BaseResponse;
 import com.example.steamreplica.dtos.response.user.UserResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Minimal;
-import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
 import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
 import com.example.steamreplica.model.userApplication.ApplicationRole;
 import com.example.steamreplica.model.userApplication.User;
-import com.example.steamreplica.repository.BoughtLibraryRepository;
 import com.example.steamreplica.repository.UserRepository;
+import com.example.steamreplica.util.ServiceHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;

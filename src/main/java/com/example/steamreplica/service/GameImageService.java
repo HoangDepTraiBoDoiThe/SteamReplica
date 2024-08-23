@@ -8,6 +8,7 @@ import com.example.steamreplica.model.game.GameImage;
 import com.example.steamreplica.repository.GameImageRepository;
 import com.example.steamreplica.repository.GameRepository;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
+import com.example.steamreplica.util.ServiceHelper;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;

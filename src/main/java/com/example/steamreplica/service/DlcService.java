@@ -1,10 +1,6 @@
 package com.example.steamreplica.service;
 
-import com.example.steamreplica.controller.assembler.DiscountAssembler;
-import com.example.steamreplica.controller.assembler.DlcAssembler;
-import com.example.steamreplica.controller.assembler.GameAssembler;
 import com.example.steamreplica.dtos.request.DlcRequest;
-import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Basic;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Full;
 import com.example.steamreplica.model.auth.AuthUserDetail;
@@ -15,10 +11,11 @@ import com.example.steamreplica.repository.BoughtLibraryRepository;
 import com.example.steamreplica.repository.DlcRepository;
 import com.example.steamreplica.service.exception.ResourceExitedException;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
+import com.example.steamreplica.util.CacheHelper;
+import com.example.steamreplica.util.ServiceHelper;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -35,6 +32,7 @@ public class DlcService {
     private final GameService gameService;
     private final DlcImageService dlcImageService;
     private final BoughtLibraryRepository boughtLibraryRepository;
+    private final CacheHelper cacheHelper;
     
     @Cacheable(value = "dlcCache", key = "#id")
     public EntityModel<DlcResponse_Full> getDlcById(long id, Authentication authentication) {
@@ -81,7 +79,7 @@ public class DlcService {
         dlcToUpdate.setReleaseDate(dlcRequest.getReleaseDate());
         DLC updatedDlc = dlcRepository.save(dlcToUpdate);
 
-        serviceHelper.updateCacheSelective(updatedDlc, "dlcCache", "dlcListCache", "dlcListOfGameCache", "dlcPurchasedListCache");
+        cacheHelper.updateCacheSelective(updatedDlc, "dlcCache", "dlcListCache", "dlcListOfGameCache", "dlcPurchasedListCache");
         return serviceHelper.makeDlcResponse(DlcResponse_Full.class, updatedDlc, authentication);
     }
 
@@ -89,7 +87,7 @@ public class DlcService {
     public void deleteDlc(long id) {
         DLC dlc = dlcRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("DLC not found"));
         dlcRepository.deleteById(id);
-        serviceHelper.deleteCacheSelective(dlc,"dlcCache",  "dlcListCache", "dlcListOfGameCache", "dlcPurchasedListCache");
+        cacheHelper.deleteCacheSelective(dlc,"dlcCache",  "dlcListCache", "dlcListOfGameCache", "dlcPurchasedListCache");
     }
 
     @Cacheable(value = "dlcPurchasedListCache")

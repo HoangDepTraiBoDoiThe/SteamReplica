@@ -14,6 +14,7 @@ import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import com.example.steamreplica.repository.BoughtLibraryRepository;
 import com.example.steamreplica.repository.PurchaseRepository;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
+import com.example.steamreplica.util.ServiceHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
