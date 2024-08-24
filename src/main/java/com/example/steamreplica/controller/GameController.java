@@ -47,11 +47,21 @@ public class GameController {
 //        return ResponseEntity.ok(gameService.getGamesPurchased(authentication));
 //    }
 
-    @GetMapping
-    public ResponseEntity<?> getGames(Authentication authentication) {
-        Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
-        return ResponseEntity.ok(gameService.getAllGames(authentication));
+    @GetMapping("/new-and-trending")
+    public ResponseEntity<?> getNewAndTrendingGames(@RequestParam int page, Authentication authentication) {
+        return ResponseEntity.ok(gameService.getGames(page, authentication));
     }
+
+    @GetMapping("/top-seller")
+    public ResponseEntity<?> getTopSellerGames(@RequestParam int page, Authentication authentication) {
+        return ResponseEntity.ok(gameService.getGames(page, authentication));
+    }
+
+    @GetMapping("/special")
+    public ResponseEntity<?> getSpecialGames(@RequestParam int page, Authentication authentication) {
+        return ResponseEntity.ok(gameService.getGames(page, authentication));
+    }
+
 
     @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
     @PostMapping("/create")

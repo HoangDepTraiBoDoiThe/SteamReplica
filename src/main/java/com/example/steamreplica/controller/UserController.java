@@ -1,6 +1,5 @@
 package com.example.steamreplica.controller;
 
-import com.example.steamreplica.dtos.response.BaseResponse;
 import com.example.steamreplica.dtos.response.user.UserResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Minimal;
 import com.example.steamreplica.model.userApplication.User;
@@ -42,11 +41,4 @@ public class UserController {
     public ResponseEntity<EntityModel<UserResponse_Minimal>> requestToBecomePublisher(@PathVariable long id, Authentication authentication) {
         return ResponseEntity.ok(userService.RequestToBecomePublisher(id, authentication));
     }
-
-    @GetMapping("{id}/games")
-    public ResponseEntity<?> getGamesByOwnerId(@PathVariable String id, Authentication authentication) {
-        Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
-        return ResponseEntity.ok(gameService.getAllGames(authentication));
-    }
-
 }

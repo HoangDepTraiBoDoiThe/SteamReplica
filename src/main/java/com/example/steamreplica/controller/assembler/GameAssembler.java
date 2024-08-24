@@ -24,7 +24,7 @@ public class GameAssembler {
         
         EntityModel<T> gameResponseEntityModel = EntityModel.of(entity,
                 WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGame(entity.getId(), authentication)).withSelfRel().withType(HttpRequestTypes.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGames(authentication)).withRel("Get all Games").withType(HttpRequestTypes.GET.name())
+                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getNewAndTrendingGames(1, authentication)).withRel("Get all Games").withType(HttpRequestTypes.GET.name())
         );
 
         if (roles.contains(SystemRole.ADMIN.name()) || roles.contains(SystemRole.GAME_DEVELOPER.name()) || roles.contains(SystemRole.PUBLISHER.name())) {

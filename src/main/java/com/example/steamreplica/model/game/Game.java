@@ -33,6 +33,9 @@ public class Game extends BaseCacheableModel {
 
     @Column(nullable = false)
     private LocalDate releaseDate;
+
+    @Column
+    private int downloadedCount = 0;
     
     @Lob
     private Blob gameThumbnail;

@@ -14,6 +14,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     Optional<Game> findGameByGameName(String gameName);
 
     Page<Game> findAllByOrderByReleaseDate(Pageable pageable);
+    Page<Game> findAllByOrderByDownloadedCountDesc(Pageable pageable);
+    Page<Game> findAllByOrderByDownloadedCountDescReleaseDateDesc(Pageable pageable);
 
     @EntityGraph(attributePaths = {"gameImages"})
     Optional<Game> findGameWithAllImagesById(long id);
