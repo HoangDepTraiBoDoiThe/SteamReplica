@@ -16,6 +16,8 @@ import com.example.steamreplica.util.CacheHelper;
 import com.example.steamreplica.util.ServiceHelper;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
@@ -38,8 +40,14 @@ public class GameService {
     private final CategoryService categoryService;
     private final ServiceHelper serviceHelper;
     private final CacheHelper cacheHelper;
+    private final CacheManager cacheManager;
+
+    private final String GAME_LIST_CACHE = "gameListCache";
+    private final String GAME_PAGINATION_CACHE_PREFIX = "game";
+    private final Integer PAGE_RANGE = 10;
+    private final Integer CACHE_SIZE = 10;
     
-    @Cacheable(value = "gameListCache")
+    @Cacheable(value = GAME_LIST_CACHE)
     public List<EntityModel<GameResponse_Basic>> getAllGames(Authentication authentication) {
         return gameRepository.findAll().stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
@@ -84,14 +92,17 @@ public class GameService {
         gameToUpdate.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, authentication)).collect(Collectors.toSet()));
     
         Game updatedGame = gameRepository.save(gameToUpdate);
-        cacheHelper.updateCacheSelective(updatedGame, "gameCache", "gameListCache");
+//        cacheHelper.updateCacheSelective(updatedGame, "gameCache", "gameListCache");
+        cacheHelper.updatePaginationCachesSelective(GAME_PAGINATION_CACHE_PREFIX, GAME_LIST_CACHE, updatedGame, PAGE_RANGE);
         return serviceHelper.makeGameResponse(GameResponse_Full.class, updatedGame, authentication);
     }
+
 
     @Transactional
     public void deleteGame(long id) {
         Game game = gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
-        cacheHelper.deleteCacheSelective(game, "gameCache", "gameListCache");
+        cacheHelper.deleteCacheSelective(game, "gameCache", GAME_LIST_CACHE);
+        cacheHelper.deletePaginationCachesSelective(game, GAME_PAGINATION_CACHE_PREFIX, GAME_LIST_CACHE, PAGE_RANGE);
         gameRepository.deleteById(id);
     }
 
@@ -121,5 +132,4 @@ public class GameService {
         AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
         return boughtLibraryRepository.findPurchasedGames(authUserDetail.getId()).stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
     }
-
 }

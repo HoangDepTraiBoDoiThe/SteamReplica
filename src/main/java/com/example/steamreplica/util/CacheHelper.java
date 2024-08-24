@@ -58,6 +58,25 @@ public class CacheHelper {
         }
     }
 
+    public <T extends BaseCacheableModel> void updatePaginationCachesSelective(String prefix, String cacheContainerName, T updatedObject, Integer pageRange) {
+        try {
+            String cacheKeyNamePrefix = prefix + "_Pagination_Cache_";
+            Cache cacheContainer = cacheManager.getCache(cacheContainerName);
+            if (cacheContainer == null) return;
+            for (int i = 1; i <= pageRange; i++) {
+                String cacheKeyName = cacheKeyNamePrefix + i;
+
+                List<T> list = cacheContainer.get(cacheKeyName, List.class);
+                if (list == null) return; 
+                List<T> modifiedList = replaceInList(list, updatedObject, T::getId);
+
+                cacheContainer.put(cacheKeyName, modifiedList);
+            }
+        } catch (Exception e) {
+            throw new CacheException("Error while updating cache.", e);
+        }
+    }
+
     private <T extends BaseCacheableModel, ID> List<T> replaceInList(List<T> list, T objectToCache, Function<T, ID> idExtractor) {
         if (list != null) {
             list.replaceAll(o -> idExtractor.apply(o).equals(idExtractor.apply(objectToCache)) ? objectToCache : o);
@@ -85,14 +104,27 @@ public class CacheHelper {
             for (String cacheName : entityListCacheNames) {
                 Cache entityListCache = cacheManager.getCache(cacheName);
                 if (entityListCache == null) continue;
-
                 List<T> cacheList = entityListCache.get(cacheName, List.class);
                 if (cacheList == null) continue;
-
-                cacheList.remove(objectToCache);
-                if (!cacheList.isEmpty()) entityListCache.put(cacheName, cacheList);
+                if (cacheList.contains(objectToCache)) entityListCache.clear();
             }
-        } catch (Exception e) {
+        } catch (Exception e) { 
+            throw new CacheException("Error while deleting cache.", e);
+        }
+    }
+
+    public <T extends BaseCacheableModel> void deletePaginationCachesSelective(T objectToCache, String prefix, String cacheContainerName, Integer pageRange) {
+        try {
+            String cacheKeyNamePrefix = prefix + "_Pagination_Cache_";
+            Cache cache = cacheManager.getCache(cacheContainerName);
+            if (cache == null) return;
+            
+            for (int i = 1; i <= pageRange; i++) {
+                String cacheKeyName = cacheKeyNamePrefix + i;
+                List<T> list = cache.get(cacheKeyName, List.class);
+                if (list != null && list.contains(objectToCache)) cache.evict(cacheKeyName);
+            }
+        } catch (Exception e) { 
             throw new CacheException("Error while deleting cache.", e);
         }
     }
