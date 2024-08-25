@@ -201,7 +201,7 @@ public class CacheHelper {
         }));
     }
 
-    public void deleteCaches(String cachePrefix, long id, String cacheListPrefix) {
+    public void deleteCaches(String cachePrefix, Object id, String cacheListPrefix) {
         String cacheKey = makeCacheKey(cachePrefix);
         String cacheList = makeListCacheKey(cacheListPrefix);
         redisTemplate.opsForHash().delete(cacheKey, id);
