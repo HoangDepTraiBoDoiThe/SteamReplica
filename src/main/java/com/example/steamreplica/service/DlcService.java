@@ -48,7 +48,7 @@ public class DlcService {
     
     @EventListener
     private void handleCacheListener(GameUpdateEvent gameUpdateEvent) {
-        cacheHelper.clearAllCachesSelectiveOnUpdatedEventReceived(DLC_CACHE, List.of(DLC_PAGINATION_CACHE_PREFIX), List.of(DLC_LIST_CACHE), PAGE_RANGE, gameUpdateEvent.getId(), (entity, id) -> {
+        cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(DLC_CACHE, List.of(DLC_PAGINATION_CACHE_PREFIX), List.of(DLC_LIST_CACHE), PAGE_RANGE, gameUpdateEvent.getId(), (entity, id) -> {
             DLC dlc = (DLC) entity;
             return Objects.equals(dlc.getGame().getId(), id);
         });

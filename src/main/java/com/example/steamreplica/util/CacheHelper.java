@@ -48,13 +48,13 @@ public class CacheHelper {
      * @param cacheKeyPrefix  The prefix for the cache key to identify the cache entries.
      * @param helperInterface The interface used to check the relationship between cache entries and the specified ID.
      */
-    public <T extends BaseCacheableModel> void clearAllCachesSelectiveOnUpdatedEventReceived(String cacheKeyPrefix, List<String> paginationCacheKeyPrefix, List<String> listCacheKeyPrefix, int pageRange, long id, HelperInterface<T> helperInterface) {
-        clearCacheOnUpdatedEventReceived(cacheKeyPrefix, id, helperInterface);
-        clearListCachesOnUpdatedEventReceived(listCacheKeyPrefix);
-        clearPaginationCacheOnUpdatedEventReceived(paginationCacheKeyPrefix, pageRange, id, helperInterface);
+    public <T extends BaseCacheableModel> void refreshAllCachesSelectiveOnUpdatedEventReceived(String cacheKeyPrefix, List<String> paginationCacheKeyPrefix, List<String> listCacheKeyPrefix, int pageRange, long id, HelperInterface<T> helperInterface) {
+        refreshCacheOnUpdatedEventReceived(cacheKeyPrefix, id, helperInterface);
+        refreshListCachesOnUpdatedEventReceived(listCacheKeyPrefix);
+        refreshPaginationCacheOnUpdatedEventReceived(paginationCacheKeyPrefix, pageRange, id, helperInterface);
     }
 
-    public <T extends BaseCacheableModel> void clearPaginationCacheOnUpdatedEventReceived(List<String> paginationCacheKeyPrefix, int pageRange, long id, HelperInterface<T> helperInterface) {
+    public <T extends BaseCacheableModel> void refreshPaginationCacheOnUpdatedEventReceived(List<String> paginationCacheKeyPrefix, int pageRange, long id, HelperInterface<T> helperInterface) {
         paginationCacheKeyPrefix.stream()
                 .parallel()
                 .forEach(prefix -> {
@@ -69,11 +69,11 @@ public class CacheHelper {
                 });
     }
 
-    public void clearListCachesOnUpdatedEventReceived(List<String> listCacheKeyPrefix) {
+    public void refreshListCachesOnUpdatedEventReceived(List<String> listCacheKeyPrefix) {
         listCacheKeyPrefix.forEach(prefix -> CompletableFuture.runAsync(() -> redisTemplate.delete(makeListCacheKey(prefix))));
     }
 
-    public <T extends BaseCacheableModel> void clearCacheOnUpdatedEventReceived(String cacheKeyPrefix, long id, HelperInterface<T> helperInterface) {
+    public <T extends BaseCacheableModel> void refreshCacheOnUpdatedEventReceived(String cacheKeyPrefix, long id, HelperInterface<T> helperInterface) {
         String cacheKey = makeCacheKey(cacheKeyPrefix);
 
         Map<Object, Object> map = redisTemplate.opsForHash().entries(cacheKey);

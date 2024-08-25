@@ -33,7 +33,7 @@ public class CategoryService {
 
     @EventListener
     private void handleCacheListener(GameUpdateEvent gameUpdateEvent) {
-        cacheHelper.clearCacheOnUpdatedEventReceived(CATEGORY_LIST_CACHE, gameUpdateEvent.getId(), (entity, id) -> {
+        cacheHelper.refreshCacheOnUpdatedEventReceived(CATEGORY_LIST_CACHE, gameUpdateEvent.getId(), (entity, id) -> {
             DLC dlc = (DLC) entity;
             return Objects.equals(dlc.getGame().getId(), id);
         });
