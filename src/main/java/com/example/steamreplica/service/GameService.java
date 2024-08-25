@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
 public class GameService {
     private final GameRepository gameRepository;
     private final UserService userService;
+    private final DevOwnedLibraryService devOwnedLibraryService;
+    private final PublisherOwnedLibraryService publisherOwnedLibraryService;
     private final DiscountService discountService;
     private final BoughtLibraryRepository boughtLibraryRepository;
     private final DevLibraryRepository devLibraryRepository;
@@ -85,8 +87,8 @@ public class GameService {
         if (gameRepository.findGameByGameName(gameRequest.getName()).isPresent()) throw new GameException("Game already exists");
         Game newGame = gameRequest.toModel();
 
-        newGame.setDevOwners(gameRequest.getDeveloperIds().stream().map(userService::findUsersWithById_entity).collect(Collectors.toSet()));
-        newGame.setPublisherOwners(gameRequest.getPublisherIds().stream().map(userService::findUsersWithById_entity).collect(Collectors.toSet()));
+        newGame.setDevOwners(gameRequest.getDeveloperIds().stream().map(devOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
+        newGame.setPublisherOwners(gameRequest.getPublisherIds().stream().map(publisherOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
         newGame.setDiscounts(gameRequest.getDiscountIds().stream().map(aLong -> discountService.getDiscountById_entity(aLong, authentication)).collect(Collectors.toSet()));
         newGame.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, authentication)).collect(Collectors.toSet()));
         List<GameImage> newGameImages = gameRequest.getGameImagesRequest().stream().map(image -> new GameImage(image.getImageName(), StaticHelper.convertToBlob(image.getImage()), newGame)).toList();
@@ -104,8 +106,8 @@ public class GameService {
         gameToUpdate.setGameDescription(gameRequest.getDescription());
         gameToUpdate.setGameBasePrice(gameRequest.getPrice());
         gameToUpdate.setReleaseDate(gameRequest.getReleaseDate());
-        gameToUpdate.setDevelopers(gameRequest.getDeveloperIds().stream().map(userService::findUsersWithById_entity).collect(Collectors.toSet()));
-        gameToUpdate.setPublishers(gameRequest.getPublisherIds().stream().map(userService::findUsersWithById_entity).collect(Collectors.toSet()));
+        gameToUpdate.setDevOwners(gameRequest.getDeveloperIds().stream().map(devOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
+        gameToUpdate.setPublisherOwners(gameRequest.getPublisherIds().stream().map(publisherOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
         gameToUpdate.setDiscounts(gameRequest.getDiscountIds().stream().map(aLong -> discountService.getDiscountById_entity(aLong, authentication)).collect(Collectors.toSet())); 
         gameToUpdate.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, authentication)).collect(Collectors.toSet()));
     
