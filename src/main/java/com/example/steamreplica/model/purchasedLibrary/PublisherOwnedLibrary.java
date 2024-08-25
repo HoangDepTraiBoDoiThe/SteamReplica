@@ -24,10 +24,10 @@ public class PublisherOwnedLibrary {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @MapsId
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id", referencedColumnName = "id")
     private User user;
     
-    @ManyToMany(mappedBy = "publisherOwners")
+    @ManyToMany(mappedBy = "publisherOwners", fetch = FetchType.EAGER)
     private Set<Game> games = new HashSet<>();
 }

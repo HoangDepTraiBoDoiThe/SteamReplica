@@ -19,11 +19,11 @@ import java.util.List;
 @NoArgsConstructor
 public class DlcResponse_Full extends DlcResponse_Basic {
     private String dlcDescription;
-    private List<EntityModel<BaseResponse>> discounts;
-    private List<EntityModel<BaseResponse>> gameImages;
-    private EntityModel<BaseResponse> game;
+    private List<?> discounts;
+    private List<?> gameImages;
+    private EntityModel<?> game;
 
-    public DlcResponse_Full(DLC dlc, List<EntityModel<BaseResponse>> discounts, List<EntityModel<BaseResponse>> gameImages, EntityModel<BaseResponse> game) {
+    public DlcResponse_Full(DLC dlc, List<?> discounts, List<?> gameImages, EntityModel<?> game) {
         super(dlc);
         this.discounts = discounts;
         this.gameImages = gameImages;

@@ -12,6 +12,7 @@ import com.example.steamreplica.dtos.response.purchases.PurchaseGameResponse;
 import com.example.steamreplica.dtos.response.purchases.PurchaseResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Minimal;
+import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.Category;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.DLC.DLCImage;
@@ -22,14 +23,20 @@ import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import com.example.steamreplica.model.purchasedLibrary.Purchase;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import com.example.steamreplica.model.userApplication.User;
+import com.example.steamreplica.service.exception.CacheException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.sql.Blob;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
@@ -53,11 +60,12 @@ public class ServiceHelper {
         try {
             T response;
 
-            List<EntityModel<BaseResponse>> discountResponsesMinimal = game.getDiscounts().stream().map(discount -> makeDiscountResponse(BaseResponse.class, discount, authentication)).toList();
-            List<EntityModel<BaseResponse>> categoryEntityModelList = game.getCategories().stream().map(category -> makeCategoryResponse(BaseResponse.class, category, authentication)).toList();
+            List<DiscountResponse_Minimal> discountResponsesMinimal = game.getDiscounts().stream().map(DiscountResponse_Minimal::new).toList();
+
+            List<EntityModel<CategoryResponse_Minimal>> categoryEntityModelList = game.getCategories().stream().map(category -> makeCategoryResponse(CategoryResponse_Minimal.class, category, authentication)).toList();
             if (GameResponse_Full.class.equals(responseType)) {
-                List<EntityModel<BaseResponse>> usersAsPublisherResponses = game.getPublisherOwners().stream().map(library -> makeUserResponse(BaseResponse.class, library.getUser(), authentication, "")).toList();
-                List<EntityModel<BaseResponse>> usersAsDevResponses = game.getDevOwners().stream().map(library -> makeUserResponse(BaseResponse.class, library.getUser(), authentication, "")).toList();
+                List<EntityModel<UserResponse_Minimal>> usersAsPublisherResponses = game.getPublishers().stream().map(user -> makeUserResponse(UserResponse_Minimal.class, user, authentication, "")).toList();
+                List<EntityModel<UserResponse_Minimal>> usersAsDevResponses = game.getPublishers().stream().map(user -> makeUserResponse(UserResponse_Minimal.class, user, authentication, "")).toList();
                 List<EntityModel<ImageResponse>> gameImageResponses = game.getGameImages().stream().map(gameImage -> makeGameImageResponse(ImageResponse.class, gameImage, authentication)).toList();
                 
                 response = (T) new GameResponse_Full(game, usersAsPublisherResponses, usersAsDevResponses, discountResponsesMinimal, categoryEntityModelList, gameImageResponses);
@@ -77,7 +85,7 @@ public class ServiceHelper {
         try {
             T response;
             if (GameImageResponse.class.equals(responseType)) {
-                response = (T) new GameImageResponse(gameImage, makeGameResponse(BaseResponse.class, gameImage.getGame(), authentication));
+                response = (T) new GameImageResponse(gameImage, makeGameResponse(GameResponse_Minimal.class, gameImage.getGame(), authentication));
             } else {
                 response = responseType.getDeclaredConstructor(Long.class, String.class, Blob.class).newInstance(gameImage.getId(), gameImage.getImageName(), gameImage.getImage());
             }
@@ -92,7 +100,7 @@ public class ServiceHelper {
         try {
             T response;
             if (DlcImageResponse.class.equals(responseType)) {
-                response = (T) new DlcImageResponse(dlcImage, makeDlcResponse(BaseResponse.class, dlcImage.getDlc(), authentication));
+                response = (T) new DlcImageResponse(dlcImage, makeDlcResponse(DlcResponse_Basic.class, dlcImage.getDlc(), authentication));
             } else {
                 response = responseType.getDeclaredConstructor(Long.class, String.class, Blob.class).newInstance(dlcImage.getId(), dlcImage.getImageName(), dlcImage.getImage());
             }
@@ -107,8 +115,9 @@ public class ServiceHelper {
         try {
             T response;
 
-            if (CategoryResponse.class.equals(responseType)) {
-                response = (T) new CategoryResponse(category);
+            if (CategoryResponse_Full.class.equals(responseType)) {
+                List<EntityModel<GameResponse_Basic>> gameResponses = category.getGames().stream().map(game -> makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
+                response = (T) new CategoryResponse_Full(category, gameResponses);
             } else {
                 response = responseType.getDeclaredConstructor(Category.class).newInstance(category);
             }
@@ -139,8 +148,8 @@ public class ServiceHelper {
         try {
             T response;
             if (DlcResponse_Full.class.equals(responseType)) {
-                List<EntityModel<BaseResponse>> discountResponseMinimal = dlc.getDiscounts().stream().map(discount -> makeDiscountResponse(BaseResponse.class, discount, authentication)).toList();
-                EntityModel<BaseResponse> gameResponse_minimal = makeGameResponse(BaseResponse.class, dlc.getGame(), authentication);
+                List<EntityModel<DiscountResponse_Minimal>> discountResponseMinimal = dlc.getDiscounts().stream().map(discount -> makeDiscountResponse(DiscountResponse_Minimal.class, discount, authentication)).toList();
+                EntityModel<GameResponse_Minimal> gameResponse_minimal = makeGameResponse(GameResponse_Minimal.class, dlc.getGame(), authentication);
                 response = (T) new DlcResponse_Full(dlc, discountResponseMinimal, null, gameResponse_minimal);
             } else {
                 response = responseType.getDeclaredConstructor(DLC.class).newInstance(dlc);
@@ -156,8 +165,8 @@ public class ServiceHelper {
         
         try {
             if (DiscountResponse_Full.class.equals(responseType)) {
-                List<EntityModel<BaseResponse>> gameEntityModelList = discount.getDiscountedGames().stream().map(game -> makeGameResponse(BaseResponse.class, game, authentication)).toList();
-                List<EntityModel<BaseResponse>> dlcEntityModelList = discount.getDiscountedDlc().stream().map(dlc -> makeDlcResponse(BaseResponse.class, dlc, authentication)).toList();
+                List<EntityModel<GameResponse_Minimal>> gameEntityModelList = discount.getDiscountedGames().stream().map(game -> makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
+                List<EntityModel<DlcResponse_Basic>> dlcEntityModelList = discount.getDiscountedDlc().stream().map(dlc -> makeDlcResponse(DlcResponse_Basic.class, dlc, authentication)).toList();
                 response = (T) new DiscountResponse_Full(discount, gameEntityModelList, dlcEntityModelList);
             } else {
                 response = responseType.getDeclaredConstructor(Discount.class).newInstance(discount);

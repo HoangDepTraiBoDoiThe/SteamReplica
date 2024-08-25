@@ -4,6 +4,7 @@ import com.example.steamreplica.constants.HttpRequestTypes;
 import com.example.steamreplica.constants.SystemRole;
 import com.example.steamreplica.controller.CategoryController;
 import com.example.steamreplica.dtos.response.BaseResponse;
+import com.example.steamreplica.dtos.response.CategoryResponse_Full;
 import com.example.steamreplica.util.StaticHelper;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;

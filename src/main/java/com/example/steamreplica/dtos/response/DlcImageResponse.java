@@ -6,9 +6,9 @@ import com.example.steamreplica.model.game.DLC.DLCImage;
 import org.springframework.hateoas.EntityModel;
 
 public class DlcImageResponse extends ImageResponse {
-    private EntityModel<BaseResponse> dlc;
+    private EntityModel<DlcResponse_Basic> dlc;
 
-    public DlcImageResponse(DLCImage dlcImage, EntityModel<BaseResponse> dlc) {
+    public DlcImageResponse(DLCImage dlcImage, EntityModel<DlcResponse_Basic> dlc) {
         super(dlcImage.getId(), dlcImage.getImageName(), dlcImage.getImage());
         this.dlc = dlc;
     }

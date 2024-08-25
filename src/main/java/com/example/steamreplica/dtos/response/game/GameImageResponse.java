@@ -1,6 +1,5 @@
 package com.example.steamreplica.dtos.response.game;
 
-import com.example.steamreplica.dtos.response.BaseResponse;
 import com.example.steamreplica.model.game.GameImage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,9 +12,9 @@ import org.springframework.hateoas.EntityModel;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GameImageResponse extends ImageResponse {
-    private EntityModel<BaseResponse> game;
+    private EntityModel<GameResponse_Minimal> game;
 
-    public GameImageResponse(GameImage gameImage, EntityModel<BaseResponse> game) {
+    public GameImageResponse(GameImage gameImage, EntityModel<GameResponse_Minimal> game) {
         super(gameImage.getId(), gameImage.getImageName(), gameImage.getImage());
         this.game = game;
     }

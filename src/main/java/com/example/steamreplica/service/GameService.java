@@ -44,7 +44,7 @@ public class GameService {
 
     private final String GAME_LIST_CACHE = "gameListCache";
     private final String GAME_CACHE = "gameCache";
-    private final String GAME_PAGINATION_CACHE_PREFIX = "gamePaginationCache";
+    private final String GAME_PAGINATION_CACHE_PREFIX = "game";
     private final String NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX = "newAndTrending";
     private final String TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX = "topSeller";
     private final String SPECIAL_GAME_PAGINATION_CACHE_PREFIX = "Special";
@@ -53,6 +53,7 @@ public class GameService {
     
     public List<EntityModel<GameResponse_Basic>> getGames(int page, Authentication authentication) {
         List<Game> games = gameRepository.findAll(PageRequest.of(page, PAGE_SIZE)).getContent();
+        
         return games.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
     
@@ -87,8 +88,13 @@ public class GameService {
         if (gameRepository.findGameByGameName(gameRequest.getName()).isPresent()) throw new GameException("Game already exists");
         Game newGame = gameRequest.toModel();
 
+<<<<<<< HEAD
         newGame.setDevOwners(gameRequest.getDeveloperIds().stream().map(devOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
         newGame.setPublisherOwners(gameRequest.getPublisherIds().stream().map(publisherOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
+=======
+        newGame.setDevelopers(gameRequest.getDeveloperIds().stream().map(userService::findUsersWithById_entity).collect(Collectors.toSet()));
+        newGame.setPublishers(gameRequest.getPublisherIds().stream().map(userService::findUsersWithById_entity).collect(Collectors.toSet()));
+>>>>>>> parent of 273e59f (feat(service): remove redundant code in ServiceHelper and DTOs)
         newGame.setDiscounts(gameRequest.getDiscountIds().stream().map(aLong -> discountService.getDiscountById_entity(aLong, authentication)).collect(Collectors.toSet()));
         newGame.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, authentication)).collect(Collectors.toSet()));
         List<GameImage> newGameImages = gameRequest.getGameImagesRequest().stream().map(image -> new GameImage(image.getImageName(), StaticHelper.convertToBlob(image.getImage()), newGame)).toList();
