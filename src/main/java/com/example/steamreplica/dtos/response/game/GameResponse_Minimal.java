@@ -15,14 +15,16 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class GameResponse_Minimal extends BaseResponse {
-    BigDecimal price;
     String name;
     String gameThumbnail;
+    BigDecimal price;
+    int downloadCount;
 
     public GameResponse_Minimal(Game game) {
         super(game.getId());
         this.name = game.getGameName();
         this.price = game.getGameBasePrice();
+        this.downloadCount = game.getDownloadedCount();
         this.gameThumbnail = StaticHelper.convertBlobToString(game.getGameThumbnail());
     }
 }

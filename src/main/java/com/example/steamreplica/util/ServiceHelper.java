@@ -2,10 +2,7 @@ package com.example.steamreplica.util;
 
 import com.example.steamreplica.controller.assembler.*;
 import com.example.steamreplica.dtos.response.*;
-import com.example.steamreplica.dtos.response.game.GameImageResponse;
-import com.example.steamreplica.dtos.response.game.GameResponse_Basic;
-import com.example.steamreplica.dtos.response.game.GameResponse_Full;
-import com.example.steamreplica.dtos.response.game.GameResponse_Minimal;
+import com.example.steamreplica.dtos.response.game.*;
 import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
 import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Minimal;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Basic;
@@ -68,10 +65,8 @@ public class ServiceHelper {
             List<EntityModel<CategoryResponse_Minimal>> categoryEntityModelList = game.getCategories().stream().map(category -> makeCategoryResponse(CategoryResponse_Minimal.class, category, authentication)).toList();
             if (GameResponse_Full.class.equals(responseType)) {
                 List<EntityModel<UserResponse_Minimal>> usersAsPublisherResponses = game.getPublishers().stream().map(user -> makeUserResponse(UserResponse_Minimal.class, user, authentication, "")).toList();
-
                 List<EntityModel<UserResponse_Minimal>> usersAsDevResponses = game.getPublishers().stream().map(user -> makeUserResponse(UserResponse_Minimal.class, user, authentication, "")).toList();
-
-                List<EntityModel<GameResponse_Minimal>> gameImageResponses = game.getGameImages().stream().map(gameImage -> makeGameImageResponse(GameResponse_Minimal.class, gameImage, authentication)).toList();
+                List<EntityModel<ImageResponse>> gameImageResponses = game.getGameImages().stream().map(gameImage -> makeGameImageResponse(ImageResponse.class, gameImage, authentication)).toList();
                 
                 response = (T) new GameResponse_Full(game, usersAsPublisherResponses, usersAsDevResponses, discountResponsesMinimal, categoryEntityModelList, gameImageResponses);
             } else if (GameResponse_Basic.class.equals(responseType)) {
