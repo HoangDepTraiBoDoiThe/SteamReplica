@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
-public abstract class BaseCacheableModel {
+public class BaseCacheableModel {
     @Id
     @GeneratedValue
     private long id;
