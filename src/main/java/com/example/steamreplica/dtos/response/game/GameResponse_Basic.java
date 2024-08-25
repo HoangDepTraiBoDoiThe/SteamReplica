@@ -1,16 +1,12 @@
 package com.example.steamreplica.dtos.response.game;
 
-import com.example.steamreplica.dtos.response.BaseResponse;
 import com.example.steamreplica.dtos.response.CategoryResponse_Minimal;
 import com.example.steamreplica.model.game.Game;
-import com.example.steamreplica.util.StaticHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 

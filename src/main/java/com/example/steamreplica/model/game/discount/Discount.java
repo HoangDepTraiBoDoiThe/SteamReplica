@@ -24,6 +24,13 @@ public class Discount extends BaseCacheableModel {
     @Column(nullable = false)
     private Double discountPercent;
 
+    public Discount(String discountName, String discountCode, String discountDescription, Double discountPercent) {
+        this.discountName = discountName;
+        this.discountCode = discountCode;
+        this.discountDescription = discountDescription;
+        this.discountPercent = discountPercent;
+    }
+    
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToMany(mappedBy = "discounts")
@@ -38,11 +45,4 @@ public class Discount extends BaseCacheableModel {
     @ToString.Exclude
     @OneToMany(mappedBy = "additionalDiscount")
     private Set<Purchase> purchases = new HashSet<>();
-
-    public Discount(String discountName, String discountCode, String discountDescription, Double discountPercent) {
-        this.discountName = discountName;
-        this.discountCode = discountCode;
-        this.discountDescription = discountDescription;
-        this.discountPercent = discountPercent;
-    }
 }

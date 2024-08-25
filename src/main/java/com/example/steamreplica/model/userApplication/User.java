@@ -41,6 +41,32 @@ public class User extends BaseCacheableModel {
     @NotBlank(message = "Password name can not be empty")
     private String password;
 
+    public User(String userName, String phoneNumber, String email, String password, Blob userProfileBlob) {
+        this.userName = userName;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.password = password;
+        this.userProfilePicture = userProfileBlob;
+    }
+    public User(String userName, String phoneNumber, String email, String password) {
+        this.userName = userName;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.password = password;
+        this.userProfilePicture = StaticHelper.convertToBlob("");
+    }
+
+    public AuthUserDetail toAuthUserDetail () {
+        AuthUserDetail authUserDetail = new AuthUserDetail();
+        authUserDetail.setId(super.getId());
+        authUserDetail.setUsername(email);
+        authUserDetail.setPassword(password);
+        authUserDetail.setEmail(email);
+        authUserDetail.setPhoneNumber(phoneNumber);
+        authUserDetail.setRoles(roles.stream().map(ApplicationRole::getRoleName).collect(Collectors.toSet()));
+        return authUserDetail;
+    }
+    
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
@@ -73,31 +99,5 @@ public class User extends BaseCacheableModel {
     public void setBoughtLibrary(BoughtLibrary boughtLibrary) {
         this.boughtLibrary = boughtLibrary;
         if (boughtLibrary != null) this.boughtLibrary.setUser(this);
-    }
-
-    public User(String userName, String phoneNumber, String email, String password, Blob userProfileBlob) {
-        this.userName = userName;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.password = password;
-        this.userProfilePicture = userProfileBlob;
-    }
-    public User(String userName, String phoneNumber, String email, String password) {
-        this.userName = userName;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.password = password;
-        this.userProfilePicture = StaticHelper.convertToBlob("");
-    }
-
-    public AuthUserDetail toAuthUserDetail () {
-        AuthUserDetail authUserDetail = new AuthUserDetail();
-        authUserDetail.setId(super.getId());
-        authUserDetail.setUsername(email);
-        authUserDetail.setPassword(password);
-        authUserDetail.setEmail(email);
-        authUserDetail.setPhoneNumber(phoneNumber);
-        authUserDetail.setRoles(roles.stream().map(ApplicationRole::getRoleName).collect(Collectors.toSet()));
-        return authUserDetail;
     }
 }

@@ -67,18 +67,6 @@ public class Game extends BaseCacheableModel {
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.EAGER)
-    @JoinTable(name = "game_Developer", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "user_Id", referencedColumnName = "id"))
-    private Set<User> developers = new HashSet<>();
-
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.EAGER)
-    @JoinTable(name = "game_Publisher", joinColumns = @JoinColumn(name = "game_Id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "user_Id", referencedColumnName = "id"))
-    private Set<User> publishers = new HashSet<>();
-
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
     @OneToMany(mappedBy = "game")
     private Set<PurchasedGame> purchasedGame = new HashSet<>();
 

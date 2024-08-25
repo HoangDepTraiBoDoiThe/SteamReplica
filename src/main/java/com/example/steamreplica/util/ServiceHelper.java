@@ -12,7 +12,6 @@ import com.example.steamreplica.dtos.response.purchases.PurchaseGameResponse;
 import com.example.steamreplica.dtos.response.purchases.PurchaseResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Minimal;
-import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.Category;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.DLC.DLCImage;
@@ -23,20 +22,14 @@ import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import com.example.steamreplica.model.purchasedLibrary.Purchase;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import com.example.steamreplica.model.userApplication.User;
-import com.example.steamreplica.service.exception.CacheException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.sql.Blob;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
@@ -64,8 +57,8 @@ public class ServiceHelper {
 
             List<EntityModel<CategoryResponse_Minimal>> categoryEntityModelList = game.getCategories().stream().map(category -> makeCategoryResponse(CategoryResponse_Minimal.class, category, authentication)).toList();
             if (GameResponse_Full.class.equals(responseType)) {
-                List<EntityModel<UserResponse_Minimal>> usersAsPublisherResponses = game.getPublishers().stream().map(user -> makeUserResponse(UserResponse_Minimal.class, user, authentication, "")).toList();
-                List<EntityModel<UserResponse_Minimal>> usersAsDevResponses = game.getPublishers().stream().map(user -> makeUserResponse(UserResponse_Minimal.class, user, authentication, "")).toList();
+                List<EntityModel<UserResponse_Minimal>> usersAsPublisherResponses = game.getPublisherOwners().stream().map(library -> makeUserResponse(UserResponse_Minimal.class, library.getUser(), authentication, "")).toList();
+                List<EntityModel<UserResponse_Minimal>> usersAsDevResponses = game.getDevOwners().stream().map(library -> makeUserResponse(UserResponse_Minimal.class, library.getUser(), authentication, "")).toList();
                 List<EntityModel<ImageResponse>> gameImageResponses = game.getGameImages().stream().map(gameImage -> makeGameImageResponse(ImageResponse.class, gameImage, authentication)).toList();
                 
                 response = (T) new GameResponse_Full(game, usersAsPublisherResponses, usersAsDevResponses, discountResponsesMinimal, categoryEntityModelList, gameImageResponses);
@@ -116,8 +109,7 @@ public class ServiceHelper {
             T response;
 
             if (CategoryResponse_Full.class.equals(responseType)) {
-                List<EntityModel<GameResponse_Basic>> gameResponses = category.getGames().stream().map(game -> makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
-                response = (T) new CategoryResponse_Full(category, gameResponses);
+                response = (T) new CategoryResponse_Full(category);
             } else {
                 response = responseType.getDeclaredConstructor(Category.class).newInstance(category);
             }
