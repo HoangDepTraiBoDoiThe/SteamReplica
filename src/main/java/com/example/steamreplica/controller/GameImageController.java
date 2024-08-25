@@ -18,7 +18,8 @@ public class GameImageController {
     
     @GetMapping()
     @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
-    public ResponseEntity<?> getAllImagesByGameId(@PathVariable long id, Authentication authentication) {
-        return ResponseEntity.ok(gameImageService.getAllImagesByGameId(id, authentication));
+    public ResponseEntity<?> x(@PathVariable long id, Authentication authentication) {
+        // todo: add and update image to game
+        return null;
     }
 }

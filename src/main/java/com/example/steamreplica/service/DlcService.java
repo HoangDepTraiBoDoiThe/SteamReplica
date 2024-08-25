@@ -16,7 +16,6 @@ import com.example.steamreplica.util.CacheHelper;
 import com.example.steamreplica.util.ServiceHelper;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.EntityModel;
@@ -45,11 +44,11 @@ public class DlcService {
     private final String TOP_SELLER_DLC_PAGINATION_CACHE_PREFIX = "topSeller";
     private final String SPECIAL_DLC_PAGINATION_CACHE_PREFIX = "Special";
     private final Integer PAGE_RANGE = 10;
-    private final Integer CACHE_SIZE = 10;
+    private final Integer PAGE_SIZE = 10;
     
     @EventListener
     private void handleCacheListener(GameUpdateEvent gameUpdateEvent) {
-        cacheHelper.clearCache(DLC_CACHE, gameUpdateEvent.getId(), (entity, id) -> {
+        cacheHelper.clearAllCachesSelectiveOnUpdatedEventReceived(DLC_CACHE, List.of(DLC_PAGINATION_CACHE_PREFIX), List.of(DLC_LIST_CACHE), PAGE_RANGE, gameUpdateEvent.getId(), (entity, id) -> {
             DLC dlc = (DLC) entity;
             return Objects.equals(dlc.getGame().getId(), id);
         });
@@ -66,7 +65,7 @@ public class DlcService {
 
     @Transactional
     public List<EntityModel<DlcResponse_Basic>> getAllDlcOfGame(long gameId, int page, Authentication authentication) {
-        List<DLC> dlcs = cacheHelper.getPaginationCache(DLC_PAGINATION_CACHE_PREFIX, page, dlcRepository, repo -> repo.findAllByGame_Id(gameId, PageRequest.of(page, PAGE_RANGE)).getContent());
+        List<DLC> dlcs = cacheHelper.getPaginationCache(DLC_PAGINATION_CACHE_PREFIX, page, dlcRepository, repo -> repo.findAllByGame_Id(gameId, PageRequest.of(page, PAGE_SIZE)).getContent());
         return dlcs.stream().map(dlc -> serviceHelper.makeDlcResponse(DlcResponse_Basic.class, dlc, authentication)).toList();
     }
 

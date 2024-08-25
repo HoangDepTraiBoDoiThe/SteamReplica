@@ -47,27 +47,27 @@ public class GameService {
     private final String TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX = "topSeller";
     private final String SPECIAL_GAME_PAGINATION_CACHE_PREFIX = "Special";
     private final Integer PAGE_RANGE = 10;
-    private final Integer CACHE_SIZE = 10;
+    private final Integer PAGE_SIZE = 10;
     
     public List<EntityModel<GameResponse_Basic>> getGames(int page, Authentication authentication) {
-        List<Game> games = gameRepository.findAll(PageRequest.of(page, CACHE_SIZE)).getContent();
+        List<Game> games = gameRepository.findAll(PageRequest.of(page, PAGE_SIZE)).getContent();
         
         return games.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
     
     public List<EntityModel<GameResponse_Basic>> getNewAndTrendingGames(int page, Authentication authentication) {
-        List<Game> games = cacheHelper.getPaginationCache(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDescReleaseDateDesc(PageRequest.of(page, CACHE_SIZE)).toList());
+        List<Game> games = cacheHelper.getPaginationCache(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDescReleaseDateDesc(PageRequest.of(page, PAGE_SIZE)).toList());
         return games.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
     
     public List<EntityModel<GameResponse_Basic>> getTopSellerGames(int page, Authentication authentication) {
-        List<Game> games = cacheHelper.getPaginationCache(TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDesc(PageRequest.of(page, CACHE_SIZE)).toList());
+        List<Game> games = cacheHelper.getPaginationCache(TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDesc(PageRequest.of(page, PAGE_SIZE)).toList());
         return games.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
     
     public List<EntityModel<GameResponse_Basic>> getSpecialGames(int page, Authentication authentication) {
         // todo: WIP
-        List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(SPECIAL_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDesc(PageRequest.of(page, CACHE_SIZE)).toList());
+        List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(SPECIAL_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDesc(PageRequest.of(page, PAGE_SIZE)).toList());
         return mostDownloadedGames.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
 

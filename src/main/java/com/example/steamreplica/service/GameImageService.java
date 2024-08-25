@@ -26,16 +26,6 @@ public class GameImageService {
     private final GameRepository gameRepository;
     private final ServiceHelper serviceHelper;
     
-    public EntityModel<GameImageResponse> getGameImageById(long gameId, Authentication authentication) {
-        GameImage gameImage = gameImageRepository.findById(gameId).orElseThrow(() -> new ResourceNotFoundException(String.format("Game image with id [%d] not found", gameId)));
-        return serviceHelper.makeGameImageResponse(GameImageResponse.class, gameImage, authentication);
-    }
-    
-    public List<EntityModel<ImageResponse>> getAllImagesByGameId(long gameId, Authentication authentication) {
-        Collection<GameImage> gameImages = gameImageRepository.findAllByGameId(gameId);
-        return gameImages.stream().map(gameImage -> serviceHelper.makeGameImageResponse(ImageResponse.class, gameImage, authentication)).toList();
-    }
-    
     public List<EntityModel<GameImageResponse>> addGameImagesToGame(long GameId, List<GameImageRequest> gameImageRequests, Authentication authentication) {
         Game game = gameRepository.findById(GameId).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with id [%d] not found", GameId)));
         List<GameImage> newGameImages = gameImageRequests.stream().map(gameImageRequest -> new GameImage(gameImageRequest.getImageName(), StaticHelper.convertToBlob(gameImageRequest.getImage()), game)).toList();
