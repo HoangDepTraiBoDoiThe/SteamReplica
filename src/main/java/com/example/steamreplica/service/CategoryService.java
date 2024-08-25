@@ -44,8 +44,14 @@ public class CategoryService {
         return serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, category, authentication);
     }
 
+    @Transactional
     public Category getCategoryById_entity(long id, Authentication authentication) {
         return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
+    }
+
+    @Transactional
+    public Category getCategoryById_entityFull(long id) {
+        return categoryRepository.findById_full(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
     }
     
     public List<EntityModel<CategoryResponse_Minimal>> getAllCategories(Authentication authentication) {

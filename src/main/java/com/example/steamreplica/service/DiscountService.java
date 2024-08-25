@@ -10,7 +10,6 @@ import com.example.steamreplica.util.CacheHelper;
 import com.example.steamreplica.util.ServiceHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -67,5 +66,10 @@ public class DiscountService {
         Discount discount = discountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Discount not found"));
 
         discountRepository.deleteById(id);
+    }
+
+    @Transactional
+    public Discount getDiscountById_entityFull(long id) {
+        return discountRepository.findById_full(id).orElseThrow(() -> new ResourceNotFoundException("Discount not found"));
     }
 }

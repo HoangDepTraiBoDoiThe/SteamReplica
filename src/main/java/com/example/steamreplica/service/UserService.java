@@ -36,6 +36,11 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(() -> new RuntimeException(String.format("User with id [%d] not found", id)));
     }
     
+    @Transactional
+    public User findUsersWithById_entityFull(long id) {
+        return userRepository.findById_full(id).orElseThrow(() -> new RuntimeException(String.format("User with id [%d] not found", id)));
+    }
+    
     public EntityModel<UserResponse_Full> findUsersWithById(long id, Authentication authentication) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException(String.format("User with id [%d] not found", id)));
         return serviceHelper.makeUserResponse(UserResponse_Full.class, user, authentication, "");
