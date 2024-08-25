@@ -2,11 +2,13 @@ package com.example.steamreplica.dtos.response.game.discount;
 import com.example.steamreplica.model.game.discount.Discount;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

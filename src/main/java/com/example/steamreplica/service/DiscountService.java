@@ -24,7 +24,6 @@ public class DiscountService {
     private final ServiceHelper serviceHelper;
     private final CacheHelper cacheHelper;
 
-    @Cacheable(value = "discountCache", key = "#id")
     public EntityModel<DiscountResponse_Full> getDiscountById(long id, Authentication authentication) {
         Discount discount = discountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with id [%s]", id)));
         return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, discount, authentication);
@@ -34,13 +33,11 @@ public class DiscountService {
         return discountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with id [%s]", id)));
     }
 
-    @Cacheable(value = "discountOfCodeCache", key = "#code")
     public EntityModel<DiscountResponse_Full> getDiscountByCode(String code, Authentication authentication) {
         Discount discount = discountRepository.findDiscountByDiscountCode(code).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with code [%s]", code)));
         return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, discount, authentication);
     }
 
-    @Cacheable(value = "discountListCache")
     public List<EntityModel<DiscountResponse_Minimal>> getAllDiscounts(Authentication authentication) {
         List<Discount> discounts = discountRepository.findAll();
         return discounts.stream().map(discount -> serviceHelper.makeDiscountResponse(DiscountResponse_Minimal.class, discount, authentication)).toList();
@@ -62,7 +59,6 @@ public class DiscountService {
         discountToUpdate.setDiscountPercent(discountRequest.getDiscountPercent());
         Discount updatedDiscount = discountRepository.save(discountToUpdate);
 
-        cacheHelper.updateCacheSelective(updatedDiscount, List.of("discountOfCodeCache", "discountCache"), "discountListCache");
         return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, updatedDiscount, authentication);
     }
 
@@ -70,7 +66,6 @@ public class DiscountService {
     public void deleteDiscount(long id) {
         Discount discount = discountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Discount not found"));
 
-        cacheHelper.deleteCacheSelective(discount, List.of("discountOfCodeCache", "discountCache"), "discountListCache");
         discountRepository.deleteById(id);
     }
 }

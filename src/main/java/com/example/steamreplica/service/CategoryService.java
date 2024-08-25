@@ -24,7 +24,6 @@ public class CategoryService {
     private final ServiceHelper serviceHelper;
     private final CacheHelper cacheHelper;
     
-    @Cacheable(value = "categoryCache", key = "#id")
     public EntityModel<CategoryResponse_Full> getCategoryById(long id, Authentication authentication) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
         return serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, category, authentication);
@@ -34,7 +33,6 @@ public class CategoryService {
         return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
     }
     
-    @Cacheable(value = "categoryListCache")
     public List<EntityModel<CategoryResponse_Minimal>> getAllCategories(Authentication authentication) {
         List<Category> categories = categoryRepository.findAll();
         return categories.stream().map(category -> serviceHelper.makeCategoryResponse(CategoryResponse_Minimal.class, category, authentication)).toList();
@@ -53,7 +51,6 @@ public class CategoryService {
         categoryToUpdate.setCategoryDescription(categoryRequest.getCategoryDescription());
         Category updateCategory = categoryRepository.save(categoryToUpdate);
 
-        cacheHelper.updateCacheSelective(updateCategory, "categoryCache", "categoryListCache");
         return serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, updateCategory, authentication);
     }
 
@@ -61,7 +58,6 @@ public class CategoryService {
     public void deleteCategoryById(long id) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
 
-        cacheHelper.deleteCacheSelective(category, "categoryCache", "categoryListCache");
         categoryRepository.deleteById(id);
     }
 }
