@@ -1,11 +1,10 @@
 package com.example.steamreplica.service;
 
 import com.example.steamreplica.dtos.request.CategoryRequest;
-import com.example.steamreplica.dtos.response.CategoryResponse_Full;
+import com.example.steamreplica.dtos.response.CategoryResponse;
 import com.example.steamreplica.dtos.response.CategoryResponse_Minimal;
 import com.example.steamreplica.event.GameUpdateEvent;
 import com.example.steamreplica.model.game.Category;
-import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.repository.CategoryRepository;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
 import com.example.steamreplica.util.CacheHelper;
@@ -30,18 +29,12 @@ public class CategoryService {
 
     private final String CATEGORY_LIST_CACHE = "categoryListCache";
     private final String CATEGORY_CACHE = "categoryCache";
-
-    @EventListener
-    private void handleCacheListener(GameUpdateEvent gameUpdateEvent) {
-        cacheHelper.refreshCacheOnUpdatedEventReceived(CATEGORY_LIST_CACHE, gameUpdateEvent.getId(), (entity, id) -> {
-            DLC dlc = (DLC) entity;
-            return Objects.equals(dlc.getGame().getId(), id);
-        });
-    }
+    private final Integer PAGE_RANGE = 10;
+    private final Integer PAGE_SIZE = 10;
     
-    public EntityModel<CategoryResponse_Full> getCategoryById(long id, Authentication authentication) {
+    public EntityModel<CategoryResponse> getCategoryById(long id, Authentication authentication) {
         Category category = cacheHelper.getCache(CATEGORY_CACHE, id, categoryRepository, repo -> repo.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id))));
-        return serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, category, authentication);
+        return serviceHelper.makeCategoryResponse(CategoryResponse.class, category, authentication);
     }
 
     public Category getCategoryById_entity(long id, Authentication authentication) {
@@ -54,20 +47,20 @@ public class CategoryService {
     }
 
     @Transactional
-    public EntityModel<CategoryResponse_Full> createCategory(CategoryRequest categoryRequest, Authentication authentication) {
+    public EntityModel<CategoryResponse> createCategory(CategoryRequest categoryRequest, Authentication authentication) {
         Category newCategory = categoryRequest.toModel();
-        return serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, newCategory, authentication);
+        return serviceHelper.makeCategoryResponse(CategoryResponse.class, newCategory, authentication);
     }
 
     @Transactional
-    public EntityModel<CategoryResponse_Full> updateCategory(long id, CategoryRequest categoryRequest, Authentication authentication) {
+    public EntityModel<CategoryResponse> updateCategory(long id, CategoryRequest categoryRequest, Authentication authentication) {
         Category categoryToUpdate = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
         categoryToUpdate.setCategoryName(categoryRequest.getCategoryName());
         categoryToUpdate.setCategoryDescription(categoryRequest.getCategoryDescription());
         Category updateCategory = categoryRepository.save(categoryToUpdate);
 
         cacheHelper.updateCache(updateCategory, CATEGORY_CACHE, CATEGORY_LIST_CACHE);
-        return serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, updateCategory, authentication);
+        return serviceHelper.makeCategoryResponse(CategoryResponse.class, updateCategory, authentication);
     }
 
     @Transactional
