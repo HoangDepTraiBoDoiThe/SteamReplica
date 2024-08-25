@@ -50,4 +50,9 @@ public class DlcImageService {
         dlcImageRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("DLC Image with id %d not found", id)));
         dlcImageRepository.deleteById(id);
     }
+
+    @Transactional
+    public DLCImage findById_entityFull(long id) {
+        return dlcImageRepository.findById_full(id).orElseThrow(() -> new ResourceNotFoundException(String.format("DLC Image with id %d not found", id)));
+    }
 }

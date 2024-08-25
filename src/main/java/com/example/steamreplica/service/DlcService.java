@@ -3,11 +3,14 @@ package com.example.steamreplica.service;
 import com.example.steamreplica.dtos.request.DlcRequest;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Basic;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Full;
+import com.example.steamreplica.event.DiscountUpdateEvent;
 import com.example.steamreplica.event.GameUpdateEvent;
+import com.example.steamreplica.event.DlcImageUpdateEvent;
 import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.DLC.DLCImage;
 import com.example.steamreplica.model.game.Game;
+import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.repository.BoughtLibraryRepository;
 import com.example.steamreplica.repository.DlcRepository;
 import com.example.steamreplica.service.exception.ResourceExitedException;
@@ -36,6 +39,7 @@ public class DlcService {
     private final DlcImageService dlcImageService;
     private final BoughtLibraryRepository boughtLibraryRepository;
     private final CacheHelper cacheHelper;
+    private final DiscountService discountService;
 
     private final String DLC_LIST_CACHE = "dlcListCache";
     private final String DLC_CACHE = "dlcCache";
@@ -45,6 +49,47 @@ public class DlcService {
     private final String SPECIAL_DLC_PAGINATION_CACHE_PREFIX = "Special";
     private final Integer PAGE_RANGE = 10;
     private final Integer PAGE_SIZE = 10;
+
+    @EventListener
+    private void gameUpdated(GameUpdateEvent updateEvent) {
+        cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
+                DLC_CACHE,
+                List.of(DLC_PAGINATION_CACHE_PREFIX),
+                List.of(DLC_LIST_CACHE),
+                PAGE_RANGE,
+                updateEvent.getId(),
+                (entity, id) -> {
+                    Game game = gameService.findGameWithById_entityFull(id);
+                    return game.getDlcs().stream().anyMatch(dlc -> Objects.equals(dlc.getId(), entity.getId()));
+                });
+    }
+    @EventListener
+    private void imageUpdated(DlcImageUpdateEvent updateEvent) {
+        cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
+                DLC_CACHE,
+                List.of(DLC_PAGINATION_CACHE_PREFIX),
+                List.of(DLC_LIST_CACHE),
+                PAGE_RANGE,
+                updateEvent.getId(),
+                (entity, id) -> {
+                    DLCImage dlcImage = dlcImageService.findById_entityFull(id);
+                    return Objects.equals(dlcImage.getDlc().getId(), entity.getId());
+                });
+    }
+    @EventListener
+    private void discountUpdated(DiscountUpdateEvent updateEvent) {
+        cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
+                DLC_CACHE,
+                List.of(DLC_PAGINATION_CACHE_PREFIX),
+                List.of(DLC_LIST_CACHE),
+                PAGE_RANGE,
+                updateEvent.getId(),
+                (entity, id) -> {
+                    Game game = (Game) entity;
+                    Discount discount = discountService.getDiscountById_entityFull(id);
+                    return discount.getDiscountedGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId()));
+                });
+    }
     
     @EventListener
     private void handleCacheListener(GameUpdateEvent gameUpdateEvent) {

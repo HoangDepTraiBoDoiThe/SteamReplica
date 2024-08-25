@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface GameRepository extends JpaRepository<Game, Long> {
     Optional<Game> findGameByGameName(String gameName);
+    Optional<Game> findById_full(long id);
 
     Page<Game> findAllByOrderByReleaseDate(Pageable pageable);
     Page<Game> findAllByOrderByDownloadedCountDesc(Pageable pageable);

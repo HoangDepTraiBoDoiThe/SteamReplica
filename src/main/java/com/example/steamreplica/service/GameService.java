@@ -206,4 +206,9 @@ public class GameService {
         AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
         return boughtLibraryRepository.findPurchasedGames(authUserDetail.getId()).stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
     }
+
+    @Transactional
+    public Game findGameWithById_entityFull(long id) {
+        return gameRepository.findById_full(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
+    }
 }
