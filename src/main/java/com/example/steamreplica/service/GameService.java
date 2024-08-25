@@ -4,11 +4,17 @@ import com.example.steamreplica.dtos.request.GameRequest;
 import com.example.steamreplica.dtos.response.game.GameResponse_Basic;
 import com.example.steamreplica.dtos.response.game.GameResponse_Full;
 import com.example.steamreplica.dtos.response.game.GameResponse_Minimal;
+import com.example.steamreplica.event.CategoryUpdateEvent;
+import com.example.steamreplica.event.DiscountUpdateEvent;
 import com.example.steamreplica.event.GameUpdateEvent;
+import com.example.steamreplica.event.UserUpdateEvent;
 import com.example.steamreplica.model.auth.AuthUserDetail;
+import com.example.steamreplica.model.game.Category;
 import com.example.steamreplica.model.game.GameImage;
+import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
 import com.example.steamreplica.model.purchasedLibrary.PublisherOwnedLibrary;
+import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.*;
 import com.example.steamreplica.service.exception.GameException;
 import com.example.steamreplica.model.game.Game;
@@ -17,6 +23,7 @@ import com.example.steamreplica.util.CacheHelper;
 import com.example.steamreplica.util.ServiceHelper;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
@@ -25,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,29 +52,73 @@ public class GameService {
 
     private final String GAME_LIST_CACHE = "gameListCache";
     private final String GAME_CACHE = "gameCache";
-    private final String GAME_PAGINATION_CACHE_PREFIX = "game";
+    private final String GAME_PAGINATION_CACHE_PREFIX = "gamePaginationCache";
     private final String NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX = "newAndTrending";
     private final String TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX = "topSeller";
     private final String SPECIAL_GAME_PAGINATION_CACHE_PREFIX = "Special";
     private final Integer PAGE_RANGE = 10;
     private final Integer PAGE_SIZE = 10;
-    
+
+    @EventListener
+    private void userUpdated(UserUpdateEvent updateEvent) {
+        cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
+                GAME_CACHE,
+                List.of(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, SPECIAL_GAME_PAGINATION_CACHE_PREFIX, GAME_PAGINATION_CACHE_PREFIX),
+                List.of(GAME_LIST_CACHE),
+                PAGE_RANGE,
+                updateEvent.getId(),
+                (entity, id) -> {
+                    Game game = (Game) entity;
+                    User user = userService.findUsersWithById_entityFull(id);
+                    boolean matched = user.getPublisherOwnedLibrary().getGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId())) || 
+                            user.getDevOwnedLibrary().getGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId()));
+                    return matched;
+                });
+    }
+    @EventListener
+    private void categoryUpdated(CategoryUpdateEvent updateEvent) {
+        cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
+                GAME_CACHE,
+                List.of(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, SPECIAL_GAME_PAGINATION_CACHE_PREFIX, GAME_PAGINATION_CACHE_PREFIX),
+                List.of(GAME_LIST_CACHE),
+                PAGE_RANGE,
+                updateEvent.getId(),
+                (entity, id) -> {
+                    Game game = (Game) entity;
+                    Category category = categoryService.getCategoryById_entityFull(id);
+                    return category.getGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId()));
+                });
+    }
+    @EventListener
+    private void discountUpdated(DiscountUpdateEvent updateEvent) {
+        cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
+                GAME_CACHE,
+                List.of(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, SPECIAL_GAME_PAGINATION_CACHE_PREFIX, GAME_PAGINATION_CACHE_PREFIX),
+                List.of(GAME_LIST_CACHE),
+                PAGE_RANGE,
+                updateEvent.getId(),
+                (entity, id) -> {
+                    Game game = (Game) entity;
+                    Discount discount = discountService.getDiscountById_entityFull(id);
+                    return discount.getDiscountedGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId()));
+                });
+    }
+
     public List<EntityModel<GameResponse_Basic>> getGames(int page, Authentication authentication) {
         List<Game> games = gameRepository.findAll(PageRequest.of(page, PAGE_SIZE)).getContent();
-        
         return games.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
-    
+
     public List<EntityModel<GameResponse_Basic>> getNewAndTrendingGames(int page, Authentication authentication) {
         List<Game> games = cacheHelper.getPaginationCache(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDescReleaseDateDesc(PageRequest.of(page, PAGE_SIZE)).toList());
         return games.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
-    
+
     public List<EntityModel<GameResponse_Basic>> getTopSellerGames(int page, Authentication authentication) {
         List<Game> games = cacheHelper.getPaginationCache(TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDesc(PageRequest.of(page, PAGE_SIZE)).toList());
         return games.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
-    
+
     public List<EntityModel<GameResponse_Basic>> getSpecialGames(int page, Authentication authentication) {
         // todo: WIP
         List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(SPECIAL_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDesc(PageRequest.of(page, PAGE_SIZE)).toList());
@@ -85,16 +137,12 @@ public class GameService {
 
     @Transactional
     public EntityModel<GameResponse_Full> addGame(GameRequest gameRequest, Authentication authentication) {
-        if (gameRepository.findGameByGameName(gameRequest.getName()).isPresent()) throw new GameException("Game already exists");
+        if (gameRepository.findGameByGameName(gameRequest.getName()).isPresent())
+            throw new GameException("Game already exists");
         Game newGame = gameRequest.toModel();
 
-<<<<<<< HEAD
         newGame.setDevOwners(gameRequest.getDeveloperIds().stream().map(devOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
         newGame.setPublisherOwners(gameRequest.getPublisherIds().stream().map(publisherOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
-=======
-        newGame.setDevelopers(gameRequest.getDeveloperIds().stream().map(userService::findUsersWithById_entity).collect(Collectors.toSet()));
-        newGame.setPublishers(gameRequest.getPublisherIds().stream().map(userService::findUsersWithById_entity).collect(Collectors.toSet()));
->>>>>>> parent of 273e59f (feat(service): remove redundant code in ServiceHelper and DTOs)
         newGame.setDiscounts(gameRequest.getDiscountIds().stream().map(aLong -> discountService.getDiscountById_entity(aLong, authentication)).collect(Collectors.toSet()));
         newGame.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, authentication)).collect(Collectors.toSet()));
         List<GameImage> newGameImages = gameRequest.getGameImagesRequest().stream().map(image -> new GameImage(image.getImageName(), StaticHelper.convertToBlob(image.getImage()), newGame)).toList();
@@ -114,9 +162,9 @@ public class GameService {
         gameToUpdate.setReleaseDate(gameRequest.getReleaseDate());
         gameToUpdate.setDevOwners(gameRequest.getDeveloperIds().stream().map(devOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
         gameToUpdate.setPublisherOwners(gameRequest.getPublisherIds().stream().map(publisherOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
-        gameToUpdate.setDiscounts(gameRequest.getDiscountIds().stream().map(aLong -> discountService.getDiscountById_entity(aLong, authentication)).collect(Collectors.toSet())); 
+        gameToUpdate.setDiscounts(gameRequest.getDiscountIds().stream().map(aLong -> discountService.getDiscountById_entity(aLong, authentication)).collect(Collectors.toSet()));
         gameToUpdate.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, authentication)).collect(Collectors.toSet()));
-    
+
         Game updatedGame = gameRepository.save(gameToUpdate);
         cacheHelper.updateCache(updatedGame, GAME_CACHE, GAME_LIST_CACHE);
         cacheHelper.updatePaginationCache(updatedGame, PAGE_RANGE, NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, SPECIAL_GAME_PAGINATION_CACHE_PREFIX);
@@ -144,14 +192,14 @@ public class GameService {
         DevOwnedLibrary devOwnedLibrary = devLibraryRepository.findById(authUserDetail.getId()).orElseThrow(() -> new ResourceNotFoundException("Dev Library not found"));
         return devOwnedLibrary.getGames().stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
     }
-    
+
     @Transactional
     public List<EntityModel<GameResponse_Minimal>> getPublisherOwnedGames(Authentication authentication) {
         AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
         PublisherOwnedLibrary publisherOwnedLibrary = publisherLibraryRepository.findById(authUserDetail.getId()).orElseThrow(() -> new ResourceNotFoundException("Publisher Library not found"));
         return publisherOwnedLibrary.getGames().stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
     }
-    
+
     @Transactional
     public List<EntityModel<GameResponse_Minimal>> getGameReviews(long id, Authentication authentication) {
         // Todo: WIP
