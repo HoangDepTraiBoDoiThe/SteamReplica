@@ -7,6 +7,7 @@ import com.example.steamreplica.model.purchasedLibrary.Purchase;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,6 +24,8 @@ public class Discount extends BaseCacheableModel {
     private String discountDescription;
     @Column(nullable = false)
     private Double discountPercent;
+    private LocalDate discountStartDate;
+    private LocalDate discountEndDate;
 
     public Discount(String discountName, String discountCode, String discountDescription, Double discountPercent) {
         this.discountName = discountName;
