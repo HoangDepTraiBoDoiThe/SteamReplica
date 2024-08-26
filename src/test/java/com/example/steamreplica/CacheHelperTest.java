@@ -1,13 +1,18 @@
 package com.example.steamreplica;
 import com.example.steamreplica.model.BaseCacheableModel;
+import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.service.exception.CacheException;
 import com.example.steamreplica.util.CacheHelper;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.HashOperations;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.*;
 
 public class CacheHelperTest {
 
@@ -42,9 +47,8 @@ public class CacheHelperTest {
         when(mockRedisTemplate.opsForHash()).thenReturn(mockHashOperations);
         String cacheKeyPrefix = "prefix";
         String key = "key";
-        BaseCacheableModel newObject = new BaseCacheableModel();
+        Game newObject = new Game("testname", BigDecimal.valueOf(100.00), "Desc", LocalDate.now(), null);
         Function<Object, BaseCacheableModel> trFunction = repo -> newObject;
-        when(mockHashOperations.get(cacheKeyPrefix + "::", key)).thenReturn(null);
         CacheHelper cacheHelper = MakeCacheHelperWithMockRedisTemplate(mockRedisTemplate);
 
         // Act
@@ -63,7 +67,7 @@ public class CacheHelperTest {
         when(mockRedisTemplate.opsForHash()).thenReturn(mockHashOperations);
         String cacheKeyPrefix = "prefix";
         String key = "key";
-        Function<Object, BaseCacheableModel> trFunction = repo -> new BaseCacheableModel();
+        Function<Object, Game> trFunction = repo -> new Game("testname", BigDecimal.valueOf(100.00), "Desc", LocalDate.now(), null);
         when(mockHashOperations.get(cacheKeyPrefix + "::", key)).thenThrow(new RuntimeException("Redis error"));
         CacheHelper cacheHelper = MakeCacheHelperWithMockRedisTemplate(mockRedisTemplate);
 

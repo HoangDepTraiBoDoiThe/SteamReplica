@@ -93,8 +93,8 @@ public class GameTests {
         assertEquals("New Game", savedGame.getGameName());
         assertEquals(gameRequest.getPrice(), savedGame.getGameBasePrice());
         assertEquals(gameRequest.getReleaseDate(), savedGame.getReleaseDate());
-        assertEquals(1, savedGame.getDevelopers().size());
-        assertEquals(1, savedGame.getPublishers().size());
+        assertEquals(1, savedGame.getDevOwners().size());
+        assertEquals(1, savedGame.getPublisherOwners().size());
         assertEquals(1, savedGame.getDiscounts().size());
         assertEquals(1, savedGame.getCategories().size());
         assertEquals(1, savedGame.getGameImages().size());
