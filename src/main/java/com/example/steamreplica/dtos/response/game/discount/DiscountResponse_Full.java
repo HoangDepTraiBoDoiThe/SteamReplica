@@ -14,13 +14,11 @@ import java.util.List;
 @NoArgsConstructor
 public class DiscountResponse_Full extends DiscountResponse_Basic {
     private String discountCode;
-    private List<?> games;
-    private List<?> dlcs;
+//    private List<?> games;
+//    private List<?> dlcs;
 
-    public DiscountResponse_Full(Discount discount, List<?> games, List<?> dlcs) {
+    public DiscountResponse_Full(Discount discount) {
         super(discount);
         this.discountCode = discount.getDiscountCode();
-        this.games = games;
-        this.dlcs = dlcs;
     }
 }
