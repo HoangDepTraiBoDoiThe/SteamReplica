@@ -53,6 +53,13 @@ public class ApplicationExceptionHandler {
         return new ResponseEntity<>(exceptionData, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    ResponseEntity<?> handleOtherException(AuthenticationException ex, WebRequest webRequest) {
+        ErrorDataType exceptionData = extractErrorData(ex, webRequest);
+        return new ResponseEntity<>(exceptionData, HttpStatus.UNAUTHORIZED);
+    }
+
     ErrorDataType extractErrorData(Exception ex, WebRequest webRequest) {
         String errorMessage = String.format(serverExceptionMessage, ex.getMessage());
         String causerMessage = String.format(serverExceptionMessage, ex.getMessage());

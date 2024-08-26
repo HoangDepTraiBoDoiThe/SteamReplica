@@ -1,14 +1,15 @@
 package com.example.steamreplica.controller;
 
-import com.example.steamreplica.controller.assembler.PurchaseAssembler;
 import com.example.steamreplica.dtos.request.PurchaseRequest;
 import com.example.steamreplica.dtos.response.purchases.PurchaseResponse_Basic;
 import com.example.steamreplica.service.PurchaseService;
+import com.example.steamreplica.util.MyPermissionEvaluator;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -19,15 +20,17 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PurchaseController {
     private final PurchaseService purchaseService;
-    private final PurchaseAssembler purchaseAssembler;
+    private final MyPermissionEvaluator myPermissionEvaluator;
 
+    @PreAuthorize("hasPermission(#id, 'PUrchase', 'ownedData')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getTransactionById(@PathVariable long id, Authentication authentication) {
         return ResponseEntity.ok(purchaseService.getPurchaseById(id, authentication));
     }
 
-    @GetMapping("/user/{user_id}")
-    public ResponseEntity<CollectionModel<EntityModel<PurchaseResponse_Basic>>> getAllTransactions(@PathVariable long user_id, Authentication authentication) {
+    @PreAuthorize("hasPermission(#user_id, 'Purchase', 'ownerRequest')")
+    @GetMapping("/buyer/{user_id}")
+    public ResponseEntity<CollectionModel<EntityModel<PurchaseResponse_Basic>>> getAllTransactionsOfBuyer(@PathVariable long user_id, Authentication authentication) {
         return ResponseEntity.ok(purchaseService.getAllPurchasesOfUser(user_id, authentication));
     }
 
