@@ -1,6 +1,5 @@
 package com.example.steamreplica.util;
 
-import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.purchasedLibrary.Purchase;
 import com.example.steamreplica.repository.PurchaseRepository;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
@@ -27,25 +25,28 @@ public class MyPermissionEvaluator implements PermissionEvaluator {
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
         String requirePermission = (String) permission;
-        AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
-        
+        AuthUserDetail authUserDetail = authentication.getPrincipal() != null ? (AuthUserDetail) authentication.getPrincipal() : null;
+
         // Check if the user id is the same as the auth
         if ("ownerRequest".equalsIgnoreCase(requirePermission)) {
-            return Objects.equals(authUserDetail.getId(), targetId);
-        }        
-        
-        // 
-        if ("ownedData".equalsIgnoreCase(requirePermission)) {
-            if ("Purchase".equalsIgnoreCase(targetType)) {
-                Purchase purchase = purchaseRepository.findById((Long) targetId).orElseThrow(() -> new AuthenticationException("Purchase not found with id [" + targetId + "]"));
-                return Objects.equals(purchase.getBoughtLibrary().getId(), authUserDetail.getId());
-            }
+            return checkOwnerRequest(authUserDetail.getId(), targetId);
         }
         
-//        if ("Purchase".equals(targetType)) {
-//            Purchase purchase = purchaseRepository.findAllByBoughtLibrary_Id((Long) targetId);
-//            
-//        }
+        // Check if the user is the owner of the data
+        if ("ownedData".equalsIgnoreCase(requirePermission) && "Purchase".equalsIgnoreCase(targetType)) {
+            return checkOwnedData(authUserDetail, targetId);
+        }
+
         return false;
+    }
+
+    private boolean checkOwnerRequest(long userId, Serializable targetId) {
+        return Objects.equals(userId, targetId);
+    }
+
+    private boolean checkOwnedData(AuthUserDetail authUserDetail, Serializable targetId) {
+        Purchase purchase = purchaseRepository.findById((Long) targetId)
+                .orElseThrow(() -> new AuthenticationException("Purchase not found with id [" + targetId + "]"));
+        return Objects.equals(purchase.getBoughtLibrary().getId(), authUserDetail.getId());
     }
 }
