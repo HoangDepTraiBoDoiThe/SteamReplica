@@ -23,6 +23,7 @@ import com.example.steamreplica.model.purchasedLibrary.Purchase;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import com.example.steamreplica.model.userApplication.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -47,6 +49,10 @@ public class ServiceHelper {
     
     public BaseResponse makeBaseResponse(long id, String message) {
         return new BaseResponse(id, message);
+    }
+
+    public <T extends BaseResponse> CollectionModel<EntityModel<T>> makeGameResponse_CollectionModel(Class<T> responseType, List<Game> games, Authentication authentication) {
+        return games.stream().map(game -> makeGameResponse(responseType, game, authentication)).collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::of));
     }
 
     public <T extends BaseResponse> EntityModel<T> makeGameResponse(Class<T> responseType, Game game, Authentication authentication) {

@@ -1,10 +1,12 @@
 package com.example.steamreplica.controller;
 
 import com.example.steamreplica.dtos.request.GameRequest;
+import com.example.steamreplica.dtos.response.game.GameResponse_Basic;
 import com.example.steamreplica.dtos.response.game.GameResponse_Full;
 import com.example.steamreplica.service.GameService;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,16 +34,6 @@ public class GameController {
         return ResponseEntity.ok(gameService.getGamesPurchased(authentication));
     }
 
-    @GetMapping("/publisher-owned-games")
-    public ResponseEntity<?> getPublisherOwnedGames(Authentication authentication) {
-        return ResponseEntity.ok(gameService.getPublisherOwnedGames(authentication));
-    }
-
-    @GetMapping("/dev-owned-games")
-    public ResponseEntity<?> getDevOwnedGames(Authentication authentication) {
-        return ResponseEntity.ok(gameService.getDevOwnedGames(authentication));
-    }
-
 //    @GetMapping("/{id}/reviews")
 //    public ResponseEntity<?> getGameReviews(Authentication authentication) {
 //        return ResponseEntity.ok(gameService.getGamesPurchased(authentication));
@@ -49,30 +41,31 @@ public class GameController {
 
     @GetMapping("/new-and-trending")
     public ResponseEntity<?> getNewAndTrendingGames(@RequestParam int page, Authentication authentication) {
-        return ResponseEntity.ok(gameService.getGames(page, authentication));
+        return ResponseEntity.ok(gameService.getNewAndTrendingGames(page, authentication));
     }
 
     @GetMapping("/top-seller")
     public ResponseEntity<?> getTopSellerGames(@RequestParam int page, Authentication authentication) {
-        return ResponseEntity.ok(gameService.getGames(page, authentication));
+        return ResponseEntity.ok(gameService.getTopSellerGames(page, authentication));
     }
 
     @GetMapping("/special")
     public ResponseEntity<?> getSpecialGames(@RequestParam int page, Authentication authentication) {
-        return ResponseEntity.ok(gameService.getGames(page, authentication));
+        return ResponseEntity.ok(gameService.getSpecialGames(page, authentication));
     }
 
     @GetMapping("/category/{category_id}")
-    public ResponseEntity<?> getGamesOfCategory(@RequestParam int page, @PathVariable long category_id, Authentication authentication) {
-        return ResponseEntity.ok(gameService.getGamesOfCategory(page, category_id, authentication));
+    public ResponseEntity<CollectionModel<EntityModel<GameResponse_Basic>>> getGamesOfCategory(@RequestParam int page, @PathVariable long category_id, Authentication authentication) {
+        CollectionModel<EntityModel<GameResponse_Basic>> entityModelList = gameService.getGamesOfCategory(page, category_id, authentication);
+        return ResponseEntity.ok(entityModelList);
     }
 
-    @GetMapping("/dev/{dev_id}")
+    @GetMapping("/dev-owned-games/{dev_id}")
     public ResponseEntity<?> getGamesBelongToDev(@RequestParam int page, @PathVariable long dev_id, Authentication authentication) {
         return ResponseEntity.ok(gameService.getDevOwningGames(page, dev_id, authentication));
     }
 
-    @GetMapping("/dev/{publisher_id}")
+    @GetMapping("/publisher-owned-games/{publisher_id}")
     public ResponseEntity<?> getGamesBelongToPublisher(@RequestParam int page, @PathVariable long publisher_id, Authentication authentication) {
         return ResponseEntity.ok(gameService.getPublisherOwningGames(page, publisher_id, authentication));
     }

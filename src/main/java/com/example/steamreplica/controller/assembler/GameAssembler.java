@@ -23,8 +23,7 @@ public class GameAssembler {
         Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
         
         EntityModel<T> gameResponseEntityModel = EntityModel.of(entity,
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGame(entity.getId(), authentication)).withSelfRel().withType(HttpMethod.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getNewAndTrendingGames(1, authentication)).withRel("Get all Games").withType(HttpMethod.GET.name())
+                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGame(entity.getId(), authentication)).withSelfRel().withType(HttpMethod.GET.name())
         );
 
         if (roles.contains(SystemRole.ADMIN.name()) || roles.contains(SystemRole.GAME_DEVELOPER.name()) || roles.contains(SystemRole.PUBLISHER.name())) {
