@@ -173,6 +173,25 @@ public class CacheHelper {
         });
         cursor.close();
     }
+    public <T extends BaseCacheableModel> void updateCache(T objectToUpdate, String cacheKeyPrefix, String ListCacheKeyPrefix, Object key, HelperInterface<T> helperInterface) {
+        // Update the object in the key-value store
+        redisTemplate.opsForHash().put(makeCacheKey(cacheKeyPrefix), key, objectToUpdate);
+
+        // Update the object in the list cache if it exists
+        String listCacheKeyName = makeListCacheKey(ListCacheKeyPrefix);
+        Cursor<Map.Entry<Object, Object>> cursor = redisTemplate.opsForHash().scan(listCacheKeyName, ScanOptions.NONE);
+        cursor.forEachRemaining(pair -> {
+            T value = (T) pair.getValue();
+            
+            if (helperInterface.isRelated(value, key))
+                redisTemplate.opsForHash().put(listCacheKeyName, objectToUpdate.getId(), objectToUpdate);
+        });
+        cursor.close();
+    }
+    public <T extends BaseCacheableModel, R> void updateCache(String cacheKeyPrefix, T objectToUpdate, Function<T, R> trFunction) {
+        // Update the object in the key-value store
+        redisTemplate.opsForHash().put(makeCacheKey(cacheKeyPrefix), trFunction.apply(objectToUpdate), objectToUpdate);
+    }
 
     /**
      * Updates the pagination cache for the specified object with the given page range and cache key prefixes.
@@ -206,6 +225,15 @@ public class CacheHelper {
         String cacheList = makeListCacheKey(cacheListPrefix);
         redisTemplate.opsForHash().delete(cacheKey, id);
         redisTemplate.delete(cacheList);
+    }
+
+    public void deleteListCaches(String cacheListPrefix) {
+        String cacheList = makeListCacheKey(cacheListPrefix);
+        redisTemplate.delete(cacheList);
+    }
+    public <T extends BaseCacheableModel, R> void deleteCache(String cachePrefix, Object key) {
+        String cacheKey = makeCacheKey(cachePrefix);
+        redisTemplate.opsForHash().delete(cacheKey, key);
     }
 
     /**
