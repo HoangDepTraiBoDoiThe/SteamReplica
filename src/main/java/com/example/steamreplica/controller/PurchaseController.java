@@ -2,11 +2,12 @@ package com.example.steamreplica.controller;
 
 import com.example.steamreplica.controller.assembler.PurchaseAssembler;
 import com.example.steamreplica.dtos.request.PurchaseRequest;
-import com.example.steamreplica.model.purchasedLibrary.Purchase;
+import com.example.steamreplica.dtos.response.purchases.PurchaseResponse_Basic;
 import com.example.steamreplica.service.PurchaseService;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
@@ -25,9 +26,9 @@ public class PurchaseController {
         return ResponseEntity.ok(purchaseService.getPurchaseById(id, authentication));
     }
 
-    @GetMapping
-    public ResponseEntity<?> getAllTransactions(Authentication authentication) {
-        return ResponseEntity.ok(purchaseService.getAllPurchases(authentication));
+    @GetMapping("/user/{user_id}")
+    public ResponseEntity<CollectionModel<EntityModel<PurchaseResponse_Basic>>> getAllTransactions(@PathVariable long user_id, Authentication authentication) {
+        return ResponseEntity.ok(purchaseService.getAllPurchasesOfUser(user_id, authentication));
     }
 
     @PostMapping("/create")

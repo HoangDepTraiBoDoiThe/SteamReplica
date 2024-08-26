@@ -193,6 +193,10 @@ public class ServiceHelper {
         }
     }
 
+    public <T extends BaseResponse> CollectionModel<EntityModel<T>> makePurchaseResponse_CollectionModel(Class<T> responseType, List<Purchase> purchases, Authentication authentication) {
+        return purchases.stream().map(purchase -> makePurchaseResponse(responseType, purchase, authentication)).collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::of));
+    } 
+    
     public <T extends BaseResponse> EntityModel<T> makePurchaseResponse(Class<T> responseType, Purchase purchase, Authentication authentication) {
         try {
             T response;
@@ -204,7 +208,8 @@ public class ServiceHelper {
             if (PurchaseResponse_Full.class.equals(responseType)) {
                 List<EntityModel<PurchaseDlcResponse>> purchasedDLCs = purchase.getPurchasedDLCs().stream().map(purchasedDLC -> makePurchaseDlcResponse(PurchaseDlcResponse.class, purchasedDLC, authentication)).toList();
                 List<EntityModel<PurchaseGameResponse>> purchasedGames = purchase.getPurchasedGames().stream().map(purchasedGame -> makePurchaseGameResponse(PurchaseGameResponse.class, purchasedGame, authentication)).toList();
-                response = (T) new PurchaseResponse_Full(purchase, purchasedTotalPrice, purchasedGames, purchasedDLCs, additionalDiscountPercent);
+                EntityModel<UserResponse_Minimal> buyer = makeUserResponse(UserResponse_Minimal.class, purchase.getBoughtLibrary().getUser(), authentication, "");
+                response = (T) new PurchaseResponse_Full(purchase, purchasedTotalPrice, buyer, purchasedGames, purchasedDLCs, additionalDiscountPercent);
             } else {
                 response = responseType.getDeclaredConstructor(Purchase.class, BigDecimal.class, double.class).newInstance(purchase, purchasedTotalPrice, additionalDiscountPercent);
             } 

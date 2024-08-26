@@ -15,7 +15,11 @@ import java.util.Optional;
 @Repository
 public interface GameRepository extends JpaRepository<Game, Long> {
     Optional<Game> findGameByGameName(String gameName);
-    Optional<Game> findById_full(long id);
+    @EntityGraph(attributePaths = {"purchasedGame"})
+    Optional<Game> findById_withPurchasedGame(long id);
+    @EntityGraph(attributePaths = {"dlcs"})
+    Optional<Game> findById_withDLC(long id);
+    
 
     @Query("SELECT g FROM Game g JOIN g.categories c WHERE c.id = :categoryId")
     Page<Game> findAllByCategoryId(@Param("categoryId") long categoryId, Pageable pageable);
@@ -35,4 +39,5 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 
     @EntityGraph(attributePaths = {"gameImages"})
     Optional<Game> findGameWithAllImagesById(long id);
+
 }

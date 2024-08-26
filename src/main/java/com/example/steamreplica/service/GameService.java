@@ -236,7 +236,12 @@ public class GameService {
     }
 
     @Transactional
-    public Game findGameWithById_entityFull(long id) {
-        return gameRepository.findById_full(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
+    public Game findGameWithById_withDLC(long id) {
+        return gameRepository.findById_withDLC(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
+    }
+
+    @Transactional
+    public Game findGameWithById_withPurchasedGame(long id) {
+        return gameRepository.findById_withPurchasedGame(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
     }
 }

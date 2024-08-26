@@ -62,7 +62,7 @@ public class DlcService {
                 PAGE_RANGE,
                 updateEvent.getId(),
                 (entity, id) -> {
-                    Game game = gameService.findGameWithById_entityFull((Long) id);
+                    Game game = gameService.findGameWithById_withDLC((Long) id);
                     return game.getDlcs().stream().anyMatch(dlc -> Objects.equals(dlc.getId(), entity.getId()));
                 });
     }
@@ -109,6 +109,10 @@ public class DlcService {
     
     public DLC getDlcById_entity(long id) {
         return dlcRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("DLC with id %d not found", id)));
+    }
+    
+    public DLC getDlcById_withPurchasedDLCs(long id) {
+        return dlcRepository.findById_withPurchasedDLCs(id).orElseThrow(() -> new ResourceNotFoundException(String.format("DLC with id %d not found", id)));
     }
 
     @Transactional

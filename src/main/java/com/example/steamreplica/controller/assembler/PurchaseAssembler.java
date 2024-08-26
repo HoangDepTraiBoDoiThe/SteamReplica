@@ -17,7 +17,7 @@ public class PurchaseAssembler {
     public <T extends BaseResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
         EntityModel<T> entityModel = EntityModel.of(entity,
                 WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PurchaseController.class).getTransactionById(entity.getId(), authentication)).withSelfRel().withType(HttpMethod.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PurchaseController.class).getAllTransactions(authentication)).withRel("Get all transaction").withType(HttpMethod.GET.name())
+                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PurchaseController.class).getAllTransactions(entity.getId(), authentication)).withRel("Get all transactions of user").withType(HttpMethod.GET.name())
         );
 
         return entityModel;
