@@ -59,7 +59,7 @@ public class DlcService {
                 PAGE_RANGE,
                 updateEvent.getId(),
                 (entity, id) -> {
-                    Game game = gameService.findGameWithById_entityFull(id);
+                    Game game = gameService.findGameWithById_entityFull((Long) id);
                     return game.getDlcs().stream().anyMatch(dlc -> Objects.equals(dlc.getId(), entity.getId()));
                 });
     }
@@ -72,7 +72,7 @@ public class DlcService {
                 PAGE_RANGE,
                 updateEvent.getId(),
                 (entity, id) -> {
-                    DLCImage dlcImage = dlcImageService.findById_entityFull(id);
+                    DLCImage dlcImage = dlcImageService.findById_entityFull((Long) id);
                     return Objects.equals(dlcImage.getDlc().getId(), entity.getId());
                 });
     }
@@ -86,7 +86,7 @@ public class DlcService {
                 updateEvent.getId(),
                 (entity, id) -> {
                     Game game = (Game) entity;
-                    Discount discount = discountService.getDiscountById_entityFull(id);
+                    Discount discount = discountService.getDiscountById_entityFull((Long) id);
                     return discount.getDiscountedGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId()));
                 });
     }

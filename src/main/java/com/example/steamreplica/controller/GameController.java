@@ -62,6 +62,10 @@ public class GameController {
         return ResponseEntity.ok(gameService.getGames(page, authentication));
     }
 
+    @GetMapping("/category/{category_id}")
+    public ResponseEntity<?> getGamesOfCategory(@RequestParam int page, @PathVariable long category_id, Authentication authentication) {
+        return ResponseEntity.ok(gameService.getGamesOfCategory(page, category_id, authentication));
+    }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
     @PostMapping("/create")

@@ -55,6 +55,7 @@ public class GameService {
     private final String GAME_PAGINATION_CACHE_PREFIX = "gamePaginationCache";
     private final String NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX = "newAndTrending";
     private final String TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX = "topSeller";
+    private final String GAME_OF_CATEGORY_PAGINATION_CACHE_PREFIX = "gamesOfCategory";
     private final String SPECIAL_GAME_PAGINATION_CACHE_PREFIX = "Special";
     private final Integer PAGE_RANGE = 10;
     private final Integer PAGE_SIZE = 10;
@@ -69,7 +70,7 @@ public class GameService {
                 updateEvent.getId(),
                 (entity, id) -> {
                     Game game = (Game) entity;
-                    User user = userService.findUsersWithById_entityFull(id);
+                    User user = userService.findUsersWithById_entityFull((Long) id);
                     boolean matched = user.getPublisherOwnedLibrary().getGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId())) || 
                             user.getDevOwnedLibrary().getGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId()));
                     return matched;
@@ -85,7 +86,7 @@ public class GameService {
                 updateEvent.getId(),
                 (entity, id) -> {
                     Game game = (Game) entity;
-                    Category category = categoryService.getCategoryById_entityFull(id);
+                    Category category = categoryService.getCategoryById_entityFull((Long) id);
                     return category.getGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId()));
                 });
     }
@@ -99,13 +100,18 @@ public class GameService {
                 updateEvent.getId(),
                 (entity, id) -> {
                     Game game = (Game) entity;
-                    Discount discount = discountService.getDiscountById_entityFull(id);
+                    Discount discount = discountService.getDiscountById_entityFull((Long) id);
                     return discount.getDiscountedGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId()));
                 });
     }
 
     public List<EntityModel<GameResponse_Basic>> getGames(int page, Authentication authentication) {
         List<Game> games = gameRepository.findAll(PageRequest.of(page, PAGE_SIZE)).getContent();
+        return games.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
+    }
+
+    public List<EntityModel<GameResponse_Basic>> getGamesOfCategory(int page, long categoryId, Authentication authentication) {
+        List<Game> games = cacheHelper.getPaginationCache(GAME_OF_CATEGORY_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByCategoryId(categoryId, PageRequest.of(page, PAGE_SIZE)).getContent());
         return games.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
 
@@ -167,7 +173,7 @@ public class GameService {
 
         Game updatedGame = gameRepository.save(gameToUpdate);
         cacheHelper.updateCache(updatedGame, GAME_CACHE, GAME_LIST_CACHE);
-        cacheHelper.updatePaginationCache(updatedGame, PAGE_RANGE, NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, SPECIAL_GAME_PAGINATION_CACHE_PREFIX);
+        cacheHelper.updatePaginationCache(updatedGame, PAGE_RANGE, NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, SPECIAL_GAME_PAGINATION_CACHE_PREFIX, GAME_OF_CATEGORY_PAGINATION_CACHE_PREFIX);
         cacheHelper.publishCacheEvent(new GameUpdateEvent(this, updatedGame.getId()));
         return serviceHelper.makeGameResponse(GameResponse_Full.class, updatedGame, authentication);
     }
