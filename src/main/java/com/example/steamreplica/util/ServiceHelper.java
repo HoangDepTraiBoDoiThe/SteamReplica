@@ -157,9 +157,7 @@ public class ServiceHelper {
         
         try {
             if (DiscountResponse_Full.class.equals(responseType)) {
-                List<EntityModel<GameResponse_Minimal>> gameEntityModelList = discount.getDiscountedGames().stream().map(game -> makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
-                List<EntityModel<DlcResponse_Basic>> dlcEntityModelList = discount.getDiscountedDlc().stream().map(dlc -> makeDlcResponse(DlcResponse_Basic.class, dlc, authentication)).toList();
-                response = (T) new DiscountResponse_Full(discount, gameEntityModelList, dlcEntityModelList);
+                response = (T) new DiscountResponse_Full(discount);
             } else {
                 response = responseType.getDeclaredConstructor(Discount.class).newInstance(discount);
             } 

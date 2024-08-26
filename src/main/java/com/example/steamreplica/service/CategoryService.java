@@ -30,14 +30,6 @@ public class CategoryService {
 
     private final String CATEGORY_LIST_CACHE = "categoryListCache";
     private final String CATEGORY_CACHE = "categoryCache";
-
-    @EventListener
-    private void handleCacheListener(GameUpdateEvent gameUpdateEvent) {
-        cacheHelper.refreshCacheOnUpdatedEventReceived(CATEGORY_LIST_CACHE, gameUpdateEvent.getId(), (entity, id) -> {
-            DLC dlc = (DLC) entity;
-            return Objects.equals(dlc.getGame().getId(), id);
-        });
-    }
     
     public EntityModel<CategoryResponse_Full> getCategoryById(long id, Authentication authentication) {
         Category category = cacheHelper.getCache(CATEGORY_CACHE, id, categoryRepository, repo -> repo.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id))));
