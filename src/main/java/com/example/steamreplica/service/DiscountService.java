@@ -3,8 +3,6 @@ package com.example.steamreplica.service;
 import com.example.steamreplica.dtos.request.DiscountRequest;
 import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
 import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Minimal;
-import com.example.steamreplica.event.GameUpdateEvent;
-import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.repository.DiscountRepository;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
@@ -12,14 +10,12 @@ import com.example.steamreplica.util.CacheHelper;
 import com.example.steamreplica.util.ServiceHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -31,8 +27,6 @@ public class DiscountService {
     private final String DISCOUNT_LIST_CACHE = "discountListCache";
     private final String DISCOUNT_CACHE = "discountCache";
     private final String DISCOUNT_PAGINATION_CACHE_PREFIX = "discountPaginationCache";
-    private final String NEW_AND_TRENDING_DISCOUNT_PAGINATION_CACHE_PREFIX = "newAndTrending";
-    private final String TOP_SELLER_DISCOUNT_PAGINATION_CACHE_PREFIX = "topSeller";
     private final String SPECIAL_DISCOUNT_PAGINATION_CACHE_PREFIX = "Special";
     private final Integer PAGE_RANGE = 10;
     private final Integer PAGE_SIZE = 10;

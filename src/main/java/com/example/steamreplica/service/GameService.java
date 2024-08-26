@@ -128,8 +128,7 @@ public class GameService {
     }
 
     public List<EntityModel<GameResponse_Basic>> getSpecialGames(int page, Authentication authentication) {
-        // todo: WIP
-        List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(SPECIAL_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDesc(PageRequest.of(page, PAGE_SIZE)).toList());
+        List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(SPECIAL_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDescWithAvailableDiscounts(PageRequest.of(page, PAGE_SIZE)).toList());
         return mostDownloadedGames.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
     }
 

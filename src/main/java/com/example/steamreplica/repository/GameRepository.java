@@ -19,7 +19,6 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 
     @Query("SELECT g FROM Game g JOIN g.categories c WHERE c.id = :categoryId")
     Page<Game> findAllByCategoryId(@Param("categoryId") long categoryId, Pageable pageable);
-    
     Page<Game> findAllByOrderByReleaseDate(Pageable pageable);
     Page<Game> findAllByOrderByDownloadedCountDesc(Pageable pageable);
     @Query("SELECT g FROM Game g JOIN g.devOwners do WHERE do.user = :user_id")
@@ -27,6 +26,12 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     @Query("SELECT g FROM Game g JOIN g.publisherOwners do WHERE do.user = :user_id")
     Page<Game> findAllByPublisherOwner(@Param("user_id") long user_id, Pageable pageable);
     Page<Game> findAllByOrderByDownloadedCountDescReleaseDateDesc(Pageable pageable);
+
+    @Query("SELECT DISTINCT g FROM Game g " +
+            "JOIN g.discounts d " +
+            "WHERE d.discountStartDate <= CURRENT_DATE AND d.discountEndDate >= CURRENT_DATE " +
+            "ORDER BY g.downloadedCount DESC")
+    Page<Game> findAllByOrderByDownloadedCountDescWithAvailableDiscounts(Pageable pageable);
 
     @EntityGraph(attributePaths = {"gameImages"})
     Optional<Game> findGameWithAllImagesById(long id);
