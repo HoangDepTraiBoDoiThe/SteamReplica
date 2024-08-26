@@ -57,6 +57,8 @@ public class GameService {
     private final String TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX = "topSeller";
     private final String GAME_OF_CATEGORY_PAGINATION_CACHE_PREFIX = "gamesOfCategory";
     private final String SPECIAL_GAME_PAGINATION_CACHE_PREFIX = "Special";
+    private final String DEV_OWNING_GAME_PAGINATION_CACHE_PREFIX = "devOwningGame";
+    private final String PUBLISHER_OWNING_GAME_PAGINATION_CACHE_PREFIX = "publisherOwningGame";
     private final Integer PAGE_RANGE = 10;
     private final Integer PAGE_SIZE = 10;
 
@@ -132,6 +134,18 @@ public class GameService {
     }
 
     @Transactional
+    public List<EntityModel<GameResponse_Basic>> getDevOwningGames(int page, long user_id, Authentication authentication) {
+        List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(DEV_OWNING_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByDevOwner(user_id, PageRequest.of(page, PAGE_SIZE)).toList());
+        return mostDownloadedGames.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
+    }
+
+    @Transactional
+    public List<EntityModel<GameResponse_Basic>> getPublisherOwningGames(int page, long user_id, Authentication authentication) {
+        List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(PUBLISHER_OWNING_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByPublisherOwner(user_id, PageRequest.of(page, PAGE_SIZE)).toList());
+        return mostDownloadedGames.stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Basic.class, game, authentication)).toList();
+    }
+
+    @Transactional
     public EntityModel<GameResponse_Full> getGameById(long id, Authentication authentication) {
         Game game = cacheHelper.getCache(GAME_CACHE, id, gameRepository, repo -> repo.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id))));
         return serviceHelper.makeGameResponse(GameResponse_Full.class, game, authentication);
@@ -173,7 +187,13 @@ public class GameService {
 
         Game updatedGame = gameRepository.save(gameToUpdate);
         cacheHelper.updateCache(updatedGame, GAME_CACHE, GAME_LIST_CACHE);
-        cacheHelper.updatePaginationCache(updatedGame, PAGE_RANGE, NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, SPECIAL_GAME_PAGINATION_CACHE_PREFIX, GAME_OF_CATEGORY_PAGINATION_CACHE_PREFIX);
+        cacheHelper.updatePaginationCache(updatedGame, PAGE_RANGE, 
+                NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, 
+                TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX,
+                DEV_OWNING_GAME_PAGINATION_CACHE_PREFIX,
+                PUBLISHER_OWNING_GAME_PAGINATION_CACHE_PREFIX,
+                SPECIAL_GAME_PAGINATION_CACHE_PREFIX, 
+                GAME_OF_CATEGORY_PAGINATION_CACHE_PREFIX);
         cacheHelper.publishCacheEvent(new GameUpdateEvent(this, updatedGame.getId()));
         return serviceHelper.makeGameResponse(GameResponse_Full.class, updatedGame, authentication);
     }
@@ -182,7 +202,12 @@ public class GameService {
     public void deleteGame(long id) {
         Game game = gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
         cacheHelper.deleteCaches(GAME_CACHE, game.getId(), GAME_LIST_CACHE);
-        cacheHelper.deletePaginationCache(game.getId(), PAGE_RANGE, NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, SPECIAL_GAME_PAGINATION_CACHE_PREFIX);
+        cacheHelper.deletePaginationCache(game.getId(), PAGE_RANGE, 
+                NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, 
+                TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX,
+                DEV_OWNING_GAME_PAGINATION_CACHE_PREFIX,
+                PUBLISHER_OWNING_GAME_PAGINATION_CACHE_PREFIX, 
+                SPECIAL_GAME_PAGINATION_CACHE_PREFIX);
         gameRepository.deleteById(id);
     }
 

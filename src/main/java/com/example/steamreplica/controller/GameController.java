@@ -67,6 +67,16 @@ public class GameController {
         return ResponseEntity.ok(gameService.getGamesOfCategory(page, category_id, authentication));
     }
 
+    @GetMapping("/dev/{dev_id}")
+    public ResponseEntity<?> getGamesBelongToDev(@RequestParam int page, @PathVariable long dev_id, Authentication authentication) {
+        return ResponseEntity.ok(gameService.getDevOwningGames(page, dev_id, authentication));
+    }
+
+    @GetMapping("/dev/{publisher_id}")
+    public ResponseEntity<?> getGamesBelongToPublisher(@RequestParam int page, @PathVariable long publisher_id, Authentication authentication) {
+        return ResponseEntity.ok(gameService.getPublisherOwningGames(page, publisher_id, authentication));
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
     @PostMapping("/create")
     public ResponseEntity<?> createNewGame(@RequestBody @Validated GameRequest gameRequest, Authentication authentication) {
