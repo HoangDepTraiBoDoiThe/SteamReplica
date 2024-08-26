@@ -19,6 +19,7 @@ import com.example.steamreplica.service.exception.GameException;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
 import com.example.steamreplica.util.CacheHelper;
+import com.example.steamreplica.util.IMyHelper;
 import com.example.steamreplica.util.ServiceHelper;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -36,6 +36,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
 @RequiredArgsConstructor
@@ -112,54 +115,29 @@ public class GameService {
     public CollectionModel<EntityModel<GameResponse_Basic>> getGamesOfCategory(int page, long categoryId, Authentication authentication) {
         List<Game> games = cacheHelper.getPaginationCache(GAME_OF_CATEGORY_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByCategoryId(categoryId, PageRequest.of(page, PAGE_SIZE)).getContent());
         CollectionModel<EntityModel<GameResponse_Basic>> entityModels = serviceHelper.makeGameResponse_CollectionModel(GameResponse_Basic.class, games, authentication);
-        entityModels.add(
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGamesOfCategory(page, categoryId, authentication)).withSelfRel().withType(HttpMethod.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGamesOfCategory(page, categoryId, authentication)).withRel("Next").withType(HttpMethod.GET.name())
-        );
-        if (page > 0)
-            entityModels.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGamesOfCategory(page - 1, categoryId, authentication)).withRel("Prev").withType(HttpMethod.GET.name()));
-        
-        return entityModels;
+
+        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> methodOn(GameController.class).getGamesOfCategory(currentPage, categoryId, authentication));
     }
 
     public CollectionModel<EntityModel<GameResponse_Basic>> getNewAndTrendingGames(int page, Authentication authentication) {
         List<Game> games = cacheHelper.getPaginationCache(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDescReleaseDateDesc(PageRequest.of(page, PAGE_SIZE)).toList());
         CollectionModel<EntityModel<GameResponse_Basic>> entityModels = serviceHelper.makeGameResponse_CollectionModel(GameResponse_Basic.class, games, authentication);
-        entityModels.add(
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getNewAndTrendingGames(page, authentication)).withSelfRel().withType(HttpMethod.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getNewAndTrendingGames(page, authentication)).withRel("Next").withType(HttpMethod.GET.name())
-        );
-        if (page > 0)
-            entityModels.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getNewAndTrendingGames(page - 1, authentication)).withRel("Prev").withType(HttpMethod.GET.name()));
 
-        return entityModels;
+        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> methodOn(GameController.class).getNewAndTrendingGames(currentPage, authentication));
     }
 
     public CollectionModel<EntityModel<GameResponse_Basic>> getTopSellerGames(int page, Authentication authentication) {
         List<Game> games = cacheHelper.getPaginationCache(TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDesc(PageRequest.of(page, PAGE_SIZE)).toList());
         CollectionModel<EntityModel<GameResponse_Basic>> entityModels = serviceHelper.makeGameResponse_CollectionModel(GameResponse_Basic.class, games, authentication);
-        entityModels.add(
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getTopSellerGames(page, authentication)).withSelfRel().withType(HttpMethod.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getTopSellerGames(page, authentication)).withRel("Next").withType(HttpMethod.GET.name())
-        );
-        if (page > 0)
-            entityModels.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getTopSellerGames(page - 1, authentication)).withRel("Prev").withType(HttpMethod.GET.name()));
 
-        return entityModels;
+        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> methodOn(GameController.class).getTopSellerGames(currentPage, authentication));
     }
 
     public CollectionModel<EntityModel<GameResponse_Basic>> getSpecialGames(int page, Authentication authentication) {
         List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(SPECIAL_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDescWithAvailableDiscounts(PageRequest.of(page, PAGE_SIZE)).toList());
         CollectionModel<EntityModel<GameResponse_Basic>> entityModels = serviceHelper.makeGameResponse_CollectionModel(GameResponse_Basic.class, mostDownloadedGames, authentication);
 
-        entityModels.add(
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getSpecialGames(page, authentication)).withSelfRel().withType(HttpMethod.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getSpecialGames(page, authentication)).withRel("Next").withType(HttpMethod.GET.name())
-        );
-        if (page > 0)
-            entityModels.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getSpecialGames(page - 1, authentication)).withRel("Prev").withType(HttpMethod.GET.name()));
-
-        return entityModels;
+        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> methodOn(GameController.class).getSpecialGames(currentPage, authentication));
     }
 
     @Transactional
@@ -167,14 +145,7 @@ public class GameService {
         List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(DEV_OWNING_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByDevOwner(user_id, PageRequest.of(page, PAGE_SIZE)).toList());
         CollectionModel<EntityModel<GameResponse_Basic>> entityModels =  serviceHelper.makeGameResponse_CollectionModel(GameResponse_Basic.class, mostDownloadedGames, authentication);
 
-        entityModels.add(
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGamesBelongToDev(page, user_id, authentication)).withSelfRel().withType(HttpMethod.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGamesBelongToDev(page, user_id, authentication)).withRel("Next").withType(HttpMethod.GET.name())
-        );
-        if (page > 0)
-            entityModels.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGamesBelongToDev(page - 1, user_id, authentication)).withRel("Prev").withType(HttpMethod.GET.name()));
-
-        return entityModels;
+        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> methodOn(GameController.class).getGamesBelongToDev(currentPage, user_id, authentication));
     }
 
     @Transactional
@@ -182,16 +153,9 @@ public class GameService {
         List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(PUBLISHER_OWNING_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByPublisherOwner(user_id, PageRequest.of(page, PAGE_SIZE)).toList());
         CollectionModel<EntityModel<GameResponse_Basic>> entityModels = serviceHelper.makeGameResponse_CollectionModel(GameResponse_Basic.class, mostDownloadedGames, authentication);
 
-        entityModels.add(
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGamesBelongToPublisher(page, user_id, authentication)).withSelfRel().withType(HttpMethod.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGamesBelongToPublisher(page, user_id, authentication)).withRel("Next").withType(HttpMethod.GET.name())
-        );
-        if (page > 0)
-            entityModels.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGamesBelongToPublisher(page - 1, user_id, authentication)).withRel("Prev").withType(HttpMethod.GET.name()));
-
-        return entityModels;
+        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> methodOn(GameController.class).getGamesBelongToPublisher(currentPage, user_id, authentication));
     }
-
+    
     @Transactional
     public EntityModel<GameResponse_Full> getGameById(long id, Authentication authentication) {
         Game game = cacheHelper.getCache(GAME_CACHE, id, gameRepository, repo -> repo.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id))));

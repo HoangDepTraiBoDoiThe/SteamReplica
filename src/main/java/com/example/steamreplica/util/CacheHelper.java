@@ -46,22 +46,22 @@ public class CacheHelper {
      * Usually used for if A is updated (the specified ID) and this entity has a relationship with B (the entity), then B should be updated or otherwise removed.
      *
      * @param cacheKeyPrefix  The prefix for the cache key to identify the cache entries.
-     * @param helperInterface The interface used to check the relationship between cache entries and the specified ID.
+     * @param IMyTemplateHelper The interface used to check the relationship between cache entries and the specified ID.
      */
-    public <T extends BaseCacheableModel> void refreshAllCachesSelectiveOnUpdatedEventReceived(String cacheKeyPrefix, List<String> paginationCacheKeyPrefix, List<String> listCacheKeyPrefix, int pageRange, long id, HelperInterface<T> helperInterface) {
-        refreshCacheOnUpdatedEventReceived(cacheKeyPrefix, id, helperInterface);
+    public <T extends BaseCacheableModel> void refreshAllCachesSelectiveOnUpdatedEventReceived(String cacheKeyPrefix, List<String> paginationCacheKeyPrefix, List<String> listCacheKeyPrefix, int pageRange, long id, IMyTemplateHelper<T> IMyTemplateHelper) {
+        refreshCacheOnUpdatedEventReceived(cacheKeyPrefix, id, IMyTemplateHelper);
         refreshListCachesOnUpdatedEventReceived(listCacheKeyPrefix);
-        refreshPaginationCacheOnUpdatedEventReceived(paginationCacheKeyPrefix, pageRange, id, helperInterface);
+        refreshPaginationCacheOnUpdatedEventReceived(paginationCacheKeyPrefix, pageRange, id, IMyTemplateHelper);
     }
 
-    public <T extends BaseCacheableModel> void refreshPaginationCacheOnUpdatedEventReceived(List<String> paginationCacheKeyPrefix, int pageRange, long id, HelperInterface<T> helperInterface) {
+    public <T extends BaseCacheableModel> void refreshPaginationCacheOnUpdatedEventReceived(List<String> paginationCacheKeyPrefix, int pageRange, long id, IMyTemplateHelper<T> IMyTemplateHelper) {
         paginationCacheKeyPrefix.stream()
                 .parallel()
                 .forEach(prefix -> {
                     for (int i = 0; i < pageRange; i++) {
                         String paginationKey = makePaginationCacheKey(prefix, i);
                         redisTemplate.opsForHash().entries(paginationKey).values().stream().map(o -> (T) o).forEach(t -> {
-                            if (helperInterface.isRelated(t, id)) {
+                            if (IMyTemplateHelper.isRelated(t, id)) {
                                 redisTemplate.delete(paginationKey);
                             }
                         });
@@ -73,13 +73,13 @@ public class CacheHelper {
         listCacheKeyPrefix.forEach(prefix -> CompletableFuture.runAsync(() -> redisTemplate.delete(makeListCacheKey(prefix))));
     }
 
-    public <T extends BaseCacheableModel> void refreshCacheOnUpdatedEventReceived(String cacheKeyPrefix, long id, HelperInterface<T> helperInterface) {
+    public <T extends BaseCacheableModel> void refreshCacheOnUpdatedEventReceived(String cacheKeyPrefix, long id, IMyTemplateHelper<T> IMyTemplateHelper) {
         String cacheKey = makeCacheKey(cacheKeyPrefix);
 
         Map<Object, Object> map = redisTemplate.opsForHash().entries(cacheKey);
         if (map.isEmpty()) return;
         map.values().stream().parallel().map(o -> (T) o).forEach(entity -> {
-            if (helperInterface.isRelated(entity, id)) redisTemplate.opsForHash().delete(cacheKey, entity.getId());
+            if (IMyTemplateHelper.isRelated(entity, id)) redisTemplate.opsForHash().delete(cacheKey, entity.getId());
         });
     }
 
@@ -173,7 +173,7 @@ public class CacheHelper {
         });
         cursor.close();
     }
-    public <T extends BaseCacheableModel> void updateCache(T objectToUpdate, String cacheKeyPrefix, String ListCacheKeyPrefix, Object key, HelperInterface<T> helperInterface) {
+    public <T extends BaseCacheableModel> void updateCache(T objectToUpdate, String cacheKeyPrefix, String ListCacheKeyPrefix, Object key, IMyTemplateHelper<T> IMyTemplateHelper) {
         // Update the object in the key-value store
         redisTemplate.opsForHash().put(makeCacheKey(cacheKeyPrefix), key, objectToUpdate);
 
@@ -183,7 +183,7 @@ public class CacheHelper {
         cursor.forEachRemaining(pair -> {
             T value = (T) pair.getValue();
             
-            if (helperInterface.isRelated(value, key))
+            if (IMyTemplateHelper.isRelated(value, key))
                 redisTemplate.opsForHash().put(listCacheKeyName, objectToUpdate.getId(), objectToUpdate);
         });
         cursor.close();
