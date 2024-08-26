@@ -1,5 +1,6 @@
 package com.example.steamreplica.service;
 
+import com.example.steamreplica.controller.DlcController;
 import com.example.steamreplica.dtos.request.DlcRequest;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Basic;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Full;
@@ -21,7 +22,9 @@ import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,9 +112,11 @@ public class DlcService {
     }
 
     @Transactional
-    public List<EntityModel<DlcResponse_Basic>> getAllDlcOfGame(long gameId, int page, Authentication authentication) {
+    public CollectionModel<EntityModel<DlcResponse_Basic>> getAllDlcOfGame(long gameId, int page, Authentication authentication) {
         List<DLC> dlcs = cacheHelper.getPaginationCache(DLC_PAGINATION_CACHE_PREFIX, page, dlcRepository, repo -> repo.findAllByGame_Id(gameId, PageRequest.of(page, PAGE_SIZE)).getContent());
-        return dlcs.stream().map(dlc -> serviceHelper.makeDlcResponse(DlcResponse_Basic.class, dlc, authentication)).toList();
+        CollectionModel<EntityModel<DlcResponse_Basic>> entityModels = serviceHelper.makeDlcResponse_CollectionModel(DlcResponse_Basic.class, dlcs, authentication);
+
+        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> DummyInvocationUtils.methodOn(DlcController.class).getAllDlcOfGame(gameId, currentPage, authentication));
     }
 
 //    public List<EntityModel<DlcResponse_Basic>> getAllDlc(Authentication authentication) {
