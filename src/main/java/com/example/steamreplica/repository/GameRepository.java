@@ -22,6 +22,10 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     
     Page<Game> findAllByOrderByReleaseDate(Pageable pageable);
     Page<Game> findAllByOrderByDownloadedCountDesc(Pageable pageable);
+    @Query("SELECT g FROM Game g JOIN g.devOwners do WHERE do.user = :user_id")
+    Page<Game> findAllByDevOwner(@Param("user_id") long user_id, Pageable pageable);
+    @Query("SELECT g FROM Game g JOIN g.publisherOwners do WHERE do.user = :user_id")
+    Page<Game> findAllByPublisherOwner(@Param("user_id") long user_id, Pageable pageable);
     Page<Game> findAllByOrderByDownloadedCountDescReleaseDateDesc(Pageable pageable);
 
     @EntityGraph(attributePaths = {"gameImages"})

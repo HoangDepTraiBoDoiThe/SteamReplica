@@ -58,7 +58,7 @@ public class CacheHelper {
         paginationCacheKeyPrefix.stream()
                 .parallel()
                 .forEach(prefix -> {
-                    for (int i = 1; i <= pageRange; i++) {
+                    for (int i = 0; i < pageRange; i++) {
                         String paginationKey = makePaginationCacheKey(prefix, i);
                         redisTemplate.opsForHash().entries(paginationKey).values().stream().map(o -> (T) o).forEach(t -> {
                             if (helperInterface.isRelated(t, id)) {

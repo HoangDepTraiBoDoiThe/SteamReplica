@@ -1,6 +1,5 @@
 package com.example.steamreplica.controller.assembler;
 
-import com.example.steamreplica.constants.HttpRequestTypes;
 import com.example.steamreplica.constants.SystemRole;
 import com.example.steamreplica.controller.GameController;
 import com.example.steamreplica.dtos.response.BaseResponse;
@@ -9,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -23,14 +23,14 @@ public class GameAssembler {
         Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
         
         EntityModel<T> gameResponseEntityModel = EntityModel.of(entity,
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGame(entity.getId(), authentication)).withSelfRel().withType(HttpRequestTypes.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getNewAndTrendingGames(1, authentication)).withRel("Get all Games").withType(HttpRequestTypes.GET.name())
+                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getGame(entity.getId(), authentication)).withSelfRel().withType(HttpMethod.GET.name()),
+                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).getNewAndTrendingGames(1, authentication)).withRel("Get all Games").withType(HttpMethod.GET.name())
         );
 
         if (roles.contains(SystemRole.ADMIN.name()) || roles.contains(SystemRole.GAME_DEVELOPER.name()) || roles.contains(SystemRole.PUBLISHER.name())) {
-            gameResponseEntityModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).updateGame(null, entity.getId(), authentication)).withRel("Update game info").withType(HttpRequestTypes.PUT.name()));
-            gameResponseEntityModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).deleteGame(entity.getId())).withRel("Delete game").withType(HttpRequestTypes.DELETE.name()));
-            gameResponseEntityModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).createNewGame(null, authentication)).withRel("Create new game").withType(HttpRequestTypes.POST.name()));
+            gameResponseEntityModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).updateGame(null, entity.getId(), authentication)).withRel("Update game info").withType(HttpMethod.PUT.name()));
+            gameResponseEntityModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).deleteGame(entity.getId())).withRel("Delete game").withType(HttpMethod.DELETE.name()));
+            gameResponseEntityModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GameController.class).createNewGame(null, authentication)).withRel("Create new game").withType(HttpMethod.POST.name()));
         }
         return gameResponseEntityModel;
     }

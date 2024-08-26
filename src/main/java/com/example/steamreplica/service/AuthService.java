@@ -1,7 +1,6 @@
 package com.example.steamreplica.service;
 
 import com.example.steamreplica.Auth.JwtAuthUtil;
-import com.example.steamreplica.constants.HttpRequestTypes;
 import com.example.steamreplica.constants.SystemRole;
 import com.example.steamreplica.controller.AuthController;
 import com.example.steamreplica.controller.UserController;
@@ -49,7 +48,7 @@ public class AuthService {
         BaseResponse registerResponse = new BaseResponse(user.getId(), "User created successfully");
         return EntityModel.of(registerResponse,
                 WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(user.getId(), null)).withSelfRel(),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(AuthController.class).login(new LoginRequest(user.getEmail(), registerRequest.getPassword()), null)).withRel("Login").withType(HttpRequestTypes.POST.name())
+                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(AuthController.class).login(new LoginRequest(user.getEmail(), registerRequest.getPassword()), null)).withRel("Login").withType(HttpMethod.POST.name())
         );
     }
 

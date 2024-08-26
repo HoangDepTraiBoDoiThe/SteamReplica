@@ -1,15 +1,13 @@
 package com.example.steamreplica.controller.assembler;
 
-import com.example.steamreplica.constants.HttpRequestTypes;
 import com.example.steamreplica.constants.SystemRole;
 import com.example.steamreplica.controller.DiscountController;
 import com.example.steamreplica.dtos.response.BaseResponse;
-import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
-import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Minimal;
 import com.example.steamreplica.util.StaticHelper;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -23,14 +21,14 @@ public class DiscountAssembler {
         Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
         
         EntityModel<T> responseEntityModel = EntityModel.of(entity,
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).getDiscount(entity.getId(), authentication)).withSelfRel().withType(HttpRequestTypes.GET.name()),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).getAllDiscounts(authentication)).withRel("Get all discounts").withType(HttpRequestTypes.GET.name())
+                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).getDiscount(entity.getId(), authentication)).withSelfRel().withType(HttpMethod.GET.name()),
+                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).getAllDiscounts(authentication)).withRel("Get all discounts").withType(HttpMethod.GET.name())
                 );
 
         if (roles.contains(SystemRole.ADMIN.name()) || roles.contains(SystemRole.PUBLISHER.name()) || roles.contains(SystemRole.GAME_DEVELOPER.name())) {
-            responseEntityModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).addDiscount(null, authentication, null)).withRel("Create discount").withType(HttpRequestTypes.POST.name()),
-                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).updateDiscount(entity.getId(), null, authentication, null)).withRel("Update discount").withType(HttpRequestTypes.PUT.name()),
-                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).deleteDiscount(entity.getId())).withRel("Delete discount").withType(HttpRequestTypes.DELETE.name()));
+            responseEntityModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).addDiscount(null, authentication, null)).withRel("Create discount").withType(HttpMethod.POST.name()),
+                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).updateDiscount(entity.getId(), null, authentication, null)).withRel("Update discount").withType(HttpMethod.PUT.name()),
+                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).deleteDiscount(entity.getId())).withRel("Delete discount").withType(HttpMethod.DELETE.name()));
         }
         
         return responseEntityModel;
