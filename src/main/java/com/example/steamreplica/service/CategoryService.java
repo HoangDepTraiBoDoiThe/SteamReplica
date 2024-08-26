@@ -3,23 +3,19 @@ package com.example.steamreplica.service;
 import com.example.steamreplica.dtos.request.CategoryRequest;
 import com.example.steamreplica.dtos.response.CategoryResponse_Full;
 import com.example.steamreplica.dtos.response.CategoryResponse_Minimal;
-import com.example.steamreplica.event.GameUpdateEvent;
 import com.example.steamreplica.model.game.Category;
-import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.repository.CategoryRepository;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
 import com.example.steamreplica.util.CacheHelper;
 import com.example.steamreplica.util.ServiceHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor

@@ -166,7 +166,9 @@ public class ServiceHelper {
             if (DlcResponse_Full.class.equals(responseType)) {
                 List<EntityModel<DiscountResponse_Minimal>> discountResponseMinimal = dlc.getDiscounts().stream().map(discount -> makeDiscountResponse(DiscountResponse_Minimal.class, discount, authentication)).toList();
                 EntityModel<GameResponse_Minimal> gameResponse_minimal = makeGameResponse(GameResponse_Minimal.class, dlc.getGame(), authentication);
-                response = (T) new DlcResponse_Full(dlc, discountResponseMinimal, null, gameResponse_minimal);
+                List<EntityModel<ImageResponse>> gameImageResponses = dlc.getDlcImages().stream().map(dlcImage -> makeDlcImageResponse(ImageResponse.class, dlcImage, authentication)).toList();
+                
+                response = (T) new DlcResponse_Full(dlc, discountResponseMinimal, gameImageResponses, gameResponse_minimal);
             } else {
                 response = responseType.getDeclaredConstructor(DLC.class).newInstance(dlc);
             } 
@@ -242,8 +244,7 @@ public class ServiceHelper {
                 BigDecimal purchasedPrice = purchasedDLC.getPriceAtTheTime().multiply(BigDecimal.valueOf(totalDiscount));
                 response = (T) new PurchaseDlcResponse(purchasedDLC, gameResponseMinimalEntityModel, totalDiscount, purchasedPrice);
             } else {
-                response = null;
-//                response = responseType.getDeclaredConstructor(PurchasedDLC.class, EntityModel.class).newInstance(purchasedDLC, gameResponseMinimalEntityModel);
+                response = responseType.getDeclaredConstructor(Long.class).newInstance(purchasedDLC.getId());
             } 
             return purchaseDlcAssembler.toModel(response, authentication);
         } catch (Exception e) {
