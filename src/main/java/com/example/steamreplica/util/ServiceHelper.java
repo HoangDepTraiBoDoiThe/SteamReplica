@@ -25,6 +25,7 @@ import com.example.steamreplica.model.userApplication.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +33,8 @@ import java.math.BigDecimal;
 import java.sql.Blob;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Component
 @RequiredArgsConstructor
@@ -46,7 +49,19 @@ public class ServiceHelper {
     private final PurchaseGameAssembler purchaseGameAssembler;
     private final PurchaseDlcAssembler purchaseDlcAssembler;
 
-    
+    public <T extends BaseResponse> CollectionModel<EntityModel<T>> addLinksToPaginationResponse(CollectionModel<EntityModel<T>> entityModels, int page, IMyHelper helperInterface) {
+
+        entityModels.add(
+                linkTo(helperInterface.getPaginationMethodToLink(page)).withSelfRel().withType(HttpMethod.GET.name()),
+                linkTo(helperInterface.getPaginationMethodToLink(page + 1)).withRel("Next").withType(HttpMethod.GET.name())
+        );
+        if (page > 0)
+            entityModels.add(linkTo((helperInterface.getPaginationMethodToLink(page - 1))).withRel("Prev").withType(HttpMethod.GET.name()));
+
+        return entityModels;
+    }
+
+
     public BaseResponse makeBaseResponse(long id, String message) {
         return new BaseResponse(id, message);
     }
@@ -142,6 +157,9 @@ public class ServiceHelper {
         }
     }
 
+    public <T extends BaseResponse> CollectionModel<EntityModel<T>> makeDlcResponse_CollectionModel(Class<T> responseType, List<DLC> dlcs, Authentication authentication) {
+        return dlcs.stream().map(dlc -> makeDlcResponse(responseType, dlc, authentication)).collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::of));
+    } 
     public <T extends BaseResponse> EntityModel<T> makeDlcResponse(Class<T> responseType, DLC dlc, Authentication authentication) {
         try {
             T response;
