@@ -223,9 +223,8 @@ public class GameService {
     }
 
     @Transactional
-    public List<EntityModel<GameResponse_Minimal>> getGamesPurchased(Authentication authentication) {
-        AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
-        return boughtLibraryRepository.findPurchasedGames(authUserDetail.getId()).stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
+    public List<EntityModel<GameResponse_Minimal>> getGamesPurchased(long user_id, Authentication authentication) {
+        return boughtLibraryRepository.findPurchasedGames(user_id).stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
     }
 
     @Transactional

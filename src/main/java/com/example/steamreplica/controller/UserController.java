@@ -3,9 +3,7 @@ package com.example.steamreplica.controller;
 import com.example.steamreplica.dtos.response.user.UserResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Minimal;
 import com.example.steamreplica.model.userApplication.User;
-import com.example.steamreplica.service.GameService;
 import com.example.steamreplica.service.UserService;
-import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +11,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -21,7 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final GameService gameService;
     
     public List<User> getAllUsers() {
         return new ArrayList<>();

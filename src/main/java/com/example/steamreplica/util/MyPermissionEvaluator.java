@@ -1,8 +1,14 @@
 package com.example.steamreplica.util;
 
 import com.example.steamreplica.model.auth.AuthUserDetail;
+import com.example.steamreplica.model.game.Game;
+import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
+import com.example.steamreplica.model.purchasedLibrary.PublisherOwnedLibrary;
 import com.example.steamreplica.model.purchasedLibrary.Purchase;
+import com.example.steamreplica.model.userApplication.User;
+import com.example.steamreplica.repository.GameRepository;
 import com.example.steamreplica.repository.PurchaseRepository;
+import com.example.steamreplica.service.GameService;
 import com.example.steamreplica.service.exception.AuthenticationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.PermissionEvaluator;
@@ -16,6 +22,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class MyPermissionEvaluator implements PermissionEvaluator {
     private final PurchaseRepository purchaseRepository;
+    private final GameService gameService;
     
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
@@ -29,12 +36,25 @@ public class MyPermissionEvaluator implements PermissionEvaluator {
 
         // Check if the user id is the same as the auth
         if ("ownerRequest".equalsIgnoreCase(requirePermission)) {
-            return checkOwnerRequest(authUserDetail.getId(), targetId);
+            return checkOwnerRequest(Objects.requireNonNull(authUserDetail).getId(), targetId);
         }
         
         // Check if the user is the owner of the data
-        if ("ownedData".equalsIgnoreCase(requirePermission) && "Purchase".equalsIgnoreCase(targetType)) {
-            return checkOwnedData(authUserDetail, targetId);
+        if ("ownedData".equalsIgnoreCase(requirePermission)) {
+            if ("Purchase".equalsIgnoreCase(targetType)) {
+                Purchase purchase = purchaseRepository.findById((Long) targetId).orElseThrow(() -> new AuthenticationException("Purchase not found with id [" + targetId + "]"));
+                return checkOwnerRequest(purchase.getBoughtLibrary().getId(), Objects.requireNonNull(authUserDetail).getId());
+            } else if ("Game_Dev".equalsIgnoreCase(targetType)) {
+                Game game = gameService.getGameById_entity((Long) targetId);
+                DevOwnedLibrary devOwnedLibrary = game.getDevOwners().stream().filter(library -> Objects.equals(library.getId(), (Long)targetId)).findFirst().orElse(null);
+                if (devOwnedLibrary == null) return false;
+                return checkOwnerRequest(Objects.requireNonNull(authUserDetail).getId(), devOwnedLibrary.getId());
+            } else if ("Game_Pub".equalsIgnoreCase(targetType)) {
+                Game game = gameService.getGameById_entity((Long) targetId);
+                PublisherOwnedLibrary publisherOwnedLibrary = game.getPublisherOwners().stream().filter(library -> Objects.equals(library.getId(), (Long)targetId)).findFirst().orElse(null);
+                if (publisherOwnedLibrary == null) return false;
+                return checkOwnerRequest(Objects.requireNonNull(authUserDetail).getId(), publisherOwnedLibrary.getId());
+            }
         }
 
         return false;
@@ -42,11 +62,5 @@ public class MyPermissionEvaluator implements PermissionEvaluator {
 
     private boolean checkOwnerRequest(long userId, Serializable targetId) {
         return Objects.equals(userId, targetId);
-    }
-
-    private boolean checkOwnedData(AuthUserDetail authUserDetail, Serializable targetId) {
-        Purchase purchase = purchaseRepository.findById((Long) targetId)
-                .orElseThrow(() -> new AuthenticationException("Purchase not found with id [" + targetId + "]"));
-        return Objects.equals(purchase.getBoughtLibrary().getId(), authUserDetail.getId());
     }
 }

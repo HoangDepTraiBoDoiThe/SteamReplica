@@ -24,14 +24,14 @@ public class GameController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getGame(@PathVariable long id, Authentication authentication) {
-        Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
         EntityModel<GameResponse_Full> gameResponseEntityModel = gameService.getGameById(id, authentication);
         return ResponseEntity.ok(gameResponseEntityModel);
     }
 
-    @GetMapping("/purchased-games")
-    public ResponseEntity<?> getGamesPurchased(Authentication authentication) {
-        return ResponseEntity.ok(gameService.getGamesPurchased(authentication));
+    @GetMapping("/{user_id}/purchased-games")
+    @PreAuthorize("hasPermission(#user_id, 'Game', 'ownerRequest')")
+    public ResponseEntity<?> getGamesPurchased(@PathVariable long user_id, Authentication authentication) {
+        return ResponseEntity.ok(gameService.getGamesPurchased(user_id, authentication));
     }
 
 //    @GetMapping("/{id}/reviews")
@@ -70,19 +70,19 @@ public class GameController {
         return ResponseEntity.ok(gameService.getPublisherOwningGames(page, publisher_id, authentication));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER')")
     @PostMapping("/create")
     public ResponseEntity<?> createNewGame(@RequestBody @Validated GameRequest gameRequest, Authentication authentication) {
         return ResponseEntity.ok(gameService.addGame(gameRequest, authentication));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
+    @PreAuthorize("hasPermission(#id, 'Game_Pub', 'ownedData')")
     @PutMapping("/{id}/update")
     public ResponseEntity<?> updateGame(@RequestBody GameRequest gameRequest, @PathVariable long id, Authentication authentication) {
         return ResponseEntity.ok(gameService.updateGame(id, gameRequest, authentication));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
+    @PreAuthorize("hasPermission(#id, 'Game_Pub', 'ownedData')")
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<?> deleteGame(@PathVariable long id) {
         gameService.deleteGame(id);

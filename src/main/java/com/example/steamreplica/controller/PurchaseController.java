@@ -20,9 +20,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PurchaseController {
     private final PurchaseService purchaseService;
-    private final MyPermissionEvaluator myPermissionEvaluator;
 
-    @PreAuthorize("hasPermission(#id, 'PUrchase', 'ownedData')")
+    @PreAuthorize("hasPermission(#id, 'Purchase', 'ownedData')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getTransactionById(@PathVariable long id, Authentication authentication) {
         return ResponseEntity.ok(purchaseService.getPurchaseById(id, authentication));
@@ -41,16 +40,8 @@ public class PurchaseController {
         
         return ResponseEntity.ok(purchaseService.createPurchase(purchaseRequest, authentication));
     }
-    
-//    @PutMapping("/{id}/update")
-//    public ResponseEntity<?> updateTransaction(@PathVariable long id, @RequestBody @Validated PurchaseRequest purchaseRequest, BindingResult result) {
-//        var errors = StaticHelper.extractBindingErrorMessages(result);
-//        if (!errors.isEmpty()) return ResponseEntity.badRequest().body(errors);
-//       
-//        Purchase updatedPurchase = purchaseService.updatePurchase(id, purchaseRequest.toModel());
-//        return ResponseEntity.ok(updatedPurchase);
-//    }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<?> deleteTransaction(@PathVariable long id) {
         purchaseService.deletePurchase(id);
