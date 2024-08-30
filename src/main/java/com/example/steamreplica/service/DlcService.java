@@ -54,7 +54,7 @@ public class DlcService {
     private final Integer PAGE_SIZE = 10;
 
     @EventListener
-    private void gameUpdated(GameUpdateEvent updateEvent) {
+    public void gameUpdated(GameUpdateEvent updateEvent) {
         cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
                 DLC_CACHE,
                 List.of(DLC_PAGINATION_CACHE_PREFIX),
@@ -67,7 +67,7 @@ public class DlcService {
                 });
     }
     @EventListener
-    private void imageUpdated(DlcImageUpdateEvent updateEvent) {
+    public void imageUpdated(DlcImageUpdateEvent updateEvent) {
         cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
                 DLC_CACHE,
                 List.of(DLC_PAGINATION_CACHE_PREFIX),
@@ -80,7 +80,7 @@ public class DlcService {
                 });
     }
     @EventListener
-    private void discountUpdated(DiscountUpdateEvent updateEvent) {
+    public void discountUpdated(DiscountUpdateEvent updateEvent) {
         cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
                 DLC_CACHE,
                 List.of(DLC_PAGINATION_CACHE_PREFIX),
@@ -88,18 +88,9 @@ public class DlcService {
                 PAGE_RANGE,
                 updateEvent.getId(),
                 (entity, id) -> {
-                    Game game = (Game) entity;
                     Discount discount = discountService.getDiscountById_entityFull((Long) id);
-                    return discount.getDiscountedGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId()));
+                    return discount.getDiscountedDlc().stream().anyMatch(dlc -> Objects.equals(dlc.getId(), entity.getId()));
                 });
-    }
-    
-    @EventListener
-    private void handleCacheListener(GameUpdateEvent gameUpdateEvent) {
-        cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(DLC_CACHE, List.of(DLC_PAGINATION_CACHE_PREFIX), List.of(DLC_LIST_CACHE), PAGE_RANGE, gameUpdateEvent.getId(), (entity, id) -> {
-            DLC dlc = (DLC) entity;
-            return Objects.equals(dlc.getGame().getId(), id);
-        });
     }
     
     public EntityModel<DlcResponse_Full> getDlcById(long id, Authentication authentication) {

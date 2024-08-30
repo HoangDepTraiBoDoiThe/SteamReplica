@@ -22,7 +22,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class MyPermissionEvaluator implements PermissionEvaluator {
     private final PurchaseRepository purchaseRepository;
-    private final GameService gameService;
+    private final GameRepository gameRepository;
     
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
@@ -45,12 +45,12 @@ public class MyPermissionEvaluator implements PermissionEvaluator {
                 Purchase purchase = purchaseRepository.findById((Long) targetId).orElseThrow(() -> new AuthenticationException("Purchase not found with id [" + targetId + "]"));
                 return checkOwnerRequest(purchase.getBoughtLibrary().getId(), Objects.requireNonNull(authUserDetail).getId());
             } else if ("Game_Dev".equalsIgnoreCase(targetType)) {
-                Game game = gameService.getGameById_entity((Long) targetId);
+                Game game = gameRepository.findById((Long) targetId).orElseThrow(() -> new AuthenticationException("Game not found with id [" + targetId + "]"));
                 DevOwnedLibrary devOwnedLibrary = game.getDevOwners().stream().filter(library -> Objects.equals(library.getId(), (Long)targetId)).findFirst().orElse(null);
                 if (devOwnedLibrary == null) return false;
                 return checkOwnerRequest(Objects.requireNonNull(authUserDetail).getId(), devOwnedLibrary.getId());
             } else if ("Game_Pub".equalsIgnoreCase(targetType)) {
-                Game game = gameService.getGameById_entity((Long) targetId);
+                Game game = gameRepository.findById((Long) targetId).orElseThrow(() -> new AuthenticationException("Game not found with id [" + targetId + "]"));
                 PublisherOwnedLibrary publisherOwnedLibrary = game.getPublisherOwners().stream().filter(library -> Objects.equals(library.getId(), (Long)targetId)).findFirst().orElse(null);
                 if (publisherOwnedLibrary == null) return false;
                 return checkOwnerRequest(Objects.requireNonNull(authUserDetail).getId(), publisherOwnedLibrary.getId());

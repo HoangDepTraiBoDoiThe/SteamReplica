@@ -68,7 +68,7 @@ public class GameService {
     private final Integer PAGE_SIZE = 10;
 
     @EventListener
-    private void userUpdated(UserUpdateEvent updateEvent) {
+    public void userUpdated(UserUpdateEvent updateEvent) {
         cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
                 GAME_CACHE,
                 List.of(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, SPECIAL_GAME_PAGINATION_CACHE_PREFIX, GAME_PAGINATION_CACHE_PREFIX),
@@ -84,7 +84,7 @@ public class GameService {
                 });
     }
     @EventListener
-    private void categoryUpdated(CategoryUpdateEvent updateEvent) {
+    public void categoryUpdated(CategoryUpdateEvent updateEvent) {
         cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
                 GAME_CACHE,
                 List.of(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, SPECIAL_GAME_PAGINATION_CACHE_PREFIX, GAME_PAGINATION_CACHE_PREFIX),
@@ -98,7 +98,7 @@ public class GameService {
                 });
     }
     @EventListener
-    private void discountUpdated(DiscountUpdateEvent updateEvent) {
+    public void discountUpdated(DiscountUpdateEvent updateEvent) {
         cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
                 GAME_CACHE,
                 List.of(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, SPECIAL_GAME_PAGINATION_CACHE_PREFIX, GAME_PAGINATION_CACHE_PREFIX),

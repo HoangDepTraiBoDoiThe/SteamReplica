@@ -25,7 +25,7 @@ public class DlcController {
         return ResponseEntity.ok(dlcService.getPurchasedDlcOfGame(game_id, authentication));
     }
     
-    @GetMapping("/purchased-dlc")
+    @GetMapping("/of-game")
     public ResponseEntity<CollectionModel<EntityModel<DlcResponse_Basic>>> getAllDlcOfGame(@PathVariable long game_id, @RequestParam int page, Authentication authentication) {
         return ResponseEntity.ok(dlcService.getAllDlcOfGame(game_id, page, authentication));
     }

@@ -22,7 +22,6 @@ public class BoughtLibrary {
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @MapsId
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_Id", referencedColumnName = "id")
     private User user;

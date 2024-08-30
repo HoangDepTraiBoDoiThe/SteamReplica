@@ -16,8 +16,10 @@ import java.util.Optional;
 public interface GameRepository extends JpaRepository<Game, Long> {
     Optional<Game> findGameByGameName(String gameName);
     @EntityGraph(attributePaths = {"purchasedGame"})
+    @Query("SELECT g FROM Game g WHERE g.id = :id")
     Optional<Game> findById_withPurchasedGame(long id);
     @EntityGraph(attributePaths = {"dlcs"})
+    @Query("SELECT g FROM Game g WHERE g.id = :id")
     Optional<Game> findById_withDLC(long id);
     
 

@@ -18,6 +18,7 @@ public interface DiscountRepository extends JpaRepository<Discount, Long> {
     Optional<Discount> findAllByDiscountedGame(@Param("game_id") long game_id);
 
     @EntityGraph(attributePaths = {"discountedGames", "discountedDlc", "purchases"})
+    @Query("SELECT d FROM Discount d WHERE d.id = :id")
     Optional<Discount> findById_full(long id);
     Optional<Discount> findDiscountByDiscountCode(String code);
 }

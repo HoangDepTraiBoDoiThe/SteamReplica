@@ -54,7 +54,7 @@ public class PurchaseService {
     private final Integer PAGE_SIZE = 10;
 
     @EventListener
-    private void userUpdated(UserUpdateEvent updateEvent) {
+    public void userUpdated(UserUpdateEvent updateEvent) {
         cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
                 PURCHASE_CACHE,
                 List.of(),
@@ -68,7 +68,7 @@ public class PurchaseService {
     }
     
     @EventListener
-    private void gameUpdated(GameUpdateEvent updateEvent) {
+    public void gameUpdated(GameUpdateEvent updateEvent) {
         cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
                 PURCHASE_CACHE,
                 List.of(),
@@ -82,7 +82,7 @@ public class PurchaseService {
     }
     
     @EventListener
-    private void dlcUpdated(DlcImageUpdateEvent updateEvent) {
+    public void dlcUpdated(DlcImageUpdateEvent updateEvent) {
         cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
                 PURCHASE_CACHE,
                 List.of(),
