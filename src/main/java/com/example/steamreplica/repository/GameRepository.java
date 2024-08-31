@@ -21,7 +21,9 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     @EntityGraph(attributePaths = {"dlcs"})
     @Query("SELECT g FROM Game g WHERE g.id = :id")
     Optional<Game> findById_withDLC(long id);
-    
+    @EntityGraph(attributePaths = {"gameImages"})
+    @Query("SELECT g FROM Game g WHERE g.id = :id")
+    Optional<Game> findById_withWithImages(long id);
 
     @Query("SELECT g FROM Game g JOIN g.categories c WHERE c.id = :categoryId")
     Page<Game> findAllByCategoryId(@Param("categoryId") long categoryId, Pageable pageable);

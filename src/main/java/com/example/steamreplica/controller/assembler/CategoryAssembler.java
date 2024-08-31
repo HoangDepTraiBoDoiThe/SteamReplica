@@ -29,6 +29,7 @@ public class CategoryAssembler {
 
         if (roles.contains(SystemRole.ADMIN.name())) {
             entityModel.add(
+                    WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(CategoryController.class).createCategory(null, authentication, null)).withRel("Create category").withType(HttpMethod.PUT.name()),
                     WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(CategoryController.class).updateCategory(entity.getId(), null, authentication, null)).withRel("Update category").withType(HttpMethod.PUT.name()),
                     WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(CategoryController.class).deleteCategoryById(entity.getId())).withRel("Delete category").withType(HttpMethod.DELETE.name())
                     );
