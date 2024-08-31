@@ -12,7 +12,8 @@ import java.util.stream.StreamSupport;
 @Component
 public class PurchaseDlcAssembler {
     public <T extends BaseResponse> EntityModel<T> toModel(T entity, Authentication authentication) {
-        return null;
+        EntityModel<T> entityModel = EntityModel.of(entity);
+        return entityModel;
     }
 
     public <T extends BaseResponse> CollectionModel<EntityModel<T>> toCollectionModel(Iterable<T> entities, Authentication authentication) {
