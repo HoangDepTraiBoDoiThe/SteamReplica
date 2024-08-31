@@ -5,6 +5,7 @@ import com.example.steamreplica.dtos.response.user.UserResponse_Full;
 import com.example.steamreplica.dtos.response.user.UserResponse_Minimal;
 import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
 import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
+import com.example.steamreplica.model.purchasedLibrary.PublisherOwnedLibrary;
 import com.example.steamreplica.model.userApplication.ApplicationRole;
 import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.UserRepository;
@@ -62,8 +63,8 @@ public class UserService {
         User user = findUsersWithById_entity(id);
         if (user.getPublisherOwnedLibrary() != null) throw new RuntimeException("User is already a publisher");
 
-        DevOwnedLibrary devOwnedLibrary = new DevOwnedLibrary(user);
-        user.setDevOwnedLibrary(devOwnedLibrary);
+        PublisherOwnedLibrary publisherOwnedLibrary = new PublisherOwnedLibrary(user);
+        user.setPublisherOwnedLibrary(publisherOwnedLibrary);
         return serviceHelper.makeUserResponse(UserResponse_Minimal.class, userRepository.save(user), authentication, "User is now a publisher");
     }
 
