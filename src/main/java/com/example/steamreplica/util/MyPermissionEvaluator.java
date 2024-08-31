@@ -39,34 +39,35 @@ public class MyPermissionEvaluator implements PermissionEvaluator {
 
         // Check if the user id is the same as the auth
         if ("ownerRequest".equalsIgnoreCase(requirePermission)) {
-            return checkOwnerRequest(Objects.requireNonNull(authUserDetail).getId(), targetId);
+            return checkOwnerRequest(authentication, targetId);
         }
         
         // Check if the user is the owner of the data
         if ("ownedData".equalsIgnoreCase(requirePermission)) {
             if ("Purchase".equalsIgnoreCase(targetType)) {
                 Purchase purchase = purchaseRepository.findById((Long) targetId).orElseThrow(() -> new AuthenticationException("Purchase not found with id [" + targetId + "]"));
-                return checkOwnerRequest(purchase.getBoughtLibrary().getId(), Objects.requireNonNull(authUserDetail).getId());
+                return checkOwnerRequest(authentication, Objects.requireNonNull(authUserDetail).getId());
             } else if ("Game_Dev".equalsIgnoreCase(targetType)) {
                 Game game = gameRepository.findById((Long) targetId).orElseThrow(() -> new AuthenticationException("Game not found with id [" + targetId + "]"));
                 DevOwnedLibrary devOwnedLibrary = game.getDevOwners().stream().filter(library -> Objects.equals(library.getId(), (Long)targetId)).findFirst().orElse(null);
                 if (devOwnedLibrary == null) return false;
-                return checkOwnerRequest(Objects.requireNonNull(authUserDetail).getId(), devOwnedLibrary.getId());
+                return checkOwnerRequest(authentication, devOwnedLibrary.getId());
             } else if ("Game_Pub".equalsIgnoreCase(targetType)) {
                 Game game = gameRepository.findById((Long) targetId).orElseThrow(() -> new AuthenticationException("Game not found with id [" + targetId + "]"));
                 PublisherOwnedLibrary publisherOwnedLibrary = game.getPublisherOwners().stream().filter(library -> Objects.equals(library.getId(), (Long)targetId)).findFirst().orElse(null);
                 if (publisherOwnedLibrary == null) return false;
-                return checkOwnerRequest(Objects.requireNonNull(authUserDetail).getId(), publisherOwnedLibrary.getId());
+                return checkOwnerRequest(authentication, publisherOwnedLibrary.getId());
             } else if ("Game_Image".equalsIgnoreCase(targetType)) {
                 GameImage gameImage = gameImageRepository.findGameImageWithOwner((Long) targetId).orElseThrow(() -> new AuthenticationException("Game image not found with id [" + targetId + "]"));
-                return gameImage.getGame().getPublisherOwners().stream().anyMatch(library -> checkOwnerRequest(Objects.requireNonNull(authUserDetail).getId(), library.getId()));
+                return gameImage.getGame().getPublisherOwners().stream().anyMatch(library -> checkOwnerRequest(authentication, library.getId()));
             }
         }
 
         return false;
     }
 
-    private boolean checkOwnerRequest(long userId, Serializable targetId) {
-        return Objects.equals(userId, targetId);
+    public boolean checkOwnerRequest(Authentication authentication, Serializable targetId) {
+        AuthUserDetail authUserDetail = authentication.getPrincipal() != null ? (AuthUserDetail) authentication.getPrincipal() : null;
+        return Objects.equals(Objects.requireNonNull(authUserDetail).getId(), targetId);
     }
 }
