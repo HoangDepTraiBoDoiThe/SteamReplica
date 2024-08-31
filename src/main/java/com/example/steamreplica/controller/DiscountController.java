@@ -39,7 +39,7 @@ public class DiscountController {
     }
 
     @PostMapping("/add")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
     public ResponseEntity<?> addDiscount(@RequestBody @Validated DiscountRequest discountRequest, Authentication authentication, BindingResult result) {
         var errors = StaticHelper.extractBindingErrorMessages(result);
         if (!errors.isEmpty()) return ResponseEntity.badRequest().body(errors);
@@ -47,7 +47,7 @@ public class DiscountController {
     }
 
     @PutMapping("/update/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'PUBLISHER', 'GAME_DEVELOPER')")
     public ResponseEntity<?> updateDiscount(@PathVariable long id, @RequestBody @Validated DiscountRequest discountRequest, Authentication authentication, BindingResult result) {
         var errors = StaticHelper.extractBindingErrorMessages(result);
         if (!errors.isEmpty()) return ResponseEntity.badRequest().body(errors);

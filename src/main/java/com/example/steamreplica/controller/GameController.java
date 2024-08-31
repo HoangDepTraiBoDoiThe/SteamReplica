@@ -70,7 +70,7 @@ public class GameController {
         return ResponseEntity.ok(gameService.getPublisherOwningGames(page, publisher_id, authentication));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'PUBLISHER')")
     @PostMapping("/create")
     public ResponseEntity<?> createNewGame(@RequestBody @Validated GameRequest gameRequest, Authentication authentication) {
         return ResponseEntity.ok(gameService.addGame(gameRequest, authentication));
