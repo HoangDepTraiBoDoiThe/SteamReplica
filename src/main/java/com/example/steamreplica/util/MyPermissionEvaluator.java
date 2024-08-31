@@ -2,10 +2,12 @@ package com.example.steamreplica.util;
 
 import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.game.Game;
+import com.example.steamreplica.model.game.GameImage;
 import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
 import com.example.steamreplica.model.purchasedLibrary.PublisherOwnedLibrary;
 import com.example.steamreplica.model.purchasedLibrary.Purchase;
 import com.example.steamreplica.model.userApplication.User;
+import com.example.steamreplica.repository.GameImageRepository;
 import com.example.steamreplica.repository.GameRepository;
 import com.example.steamreplica.repository.PurchaseRepository;
 import com.example.steamreplica.service.GameService;
@@ -23,6 +25,7 @@ import java.util.Objects;
 public class MyPermissionEvaluator implements PermissionEvaluator {
     private final PurchaseRepository purchaseRepository;
     private final GameRepository gameRepository;
+    private final GameImageRepository gameImageRepository;
     
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
@@ -54,6 +57,9 @@ public class MyPermissionEvaluator implements PermissionEvaluator {
                 PublisherOwnedLibrary publisherOwnedLibrary = game.getPublisherOwners().stream().filter(library -> Objects.equals(library.getId(), (Long)targetId)).findFirst().orElse(null);
                 if (publisherOwnedLibrary == null) return false;
                 return checkOwnerRequest(Objects.requireNonNull(authUserDetail).getId(), publisherOwnedLibrary.getId());
+            } else if ("Game_Image".equalsIgnoreCase(targetType)) {
+                GameImage gameImage = gameImageRepository.findGameImageWithOwner((Long) targetId).orElseThrow(() -> new AuthenticationException("Game image not found with id [" + targetId + "]"));
+                return gameImage.getGame().getPublisherOwners().stream().anyMatch(library -> checkOwnerRequest(Objects.requireNonNull(authUserDetail).getId(), library.getId()));
             }
         }
 
