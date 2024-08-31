@@ -14,6 +14,7 @@ import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.repository.BoughtLibraryRepository;
 import com.example.steamreplica.repository.DlcRepository;
+import com.example.steamreplica.service.exception.AuthenticationException;
 import com.example.steamreplica.service.exception.ResourceExitedException;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
 import com.example.steamreplica.util.CacheHelper;
@@ -157,7 +158,7 @@ public class DlcService {
 
     @Transactional
     public List<EntityModel<DlcResponse_Basic>> getPurchasedDlcOfGame(long gameId, Authentication authentication) {
-        AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
+        AuthUserDetail authUserDetail = StaticHelper.extractAuthUserDetail(authentication).orElseThrow(() -> new AuthenticationException("Authentication failed"));
         return boughtLibraryRepository.findPurchasedDlcOfGame(authUserDetail.getId(), gameId).stream().map(dlc -> serviceHelper.makeDlcResponse(DlcResponse_Basic.class, dlc, authentication)).toList();
     }
 }

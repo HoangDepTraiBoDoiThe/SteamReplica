@@ -12,6 +12,8 @@ import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.userApplication.ApplicationRole;
 import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.UserRepository;
+import com.example.steamreplica.service.exception.AuthenticationException;
+import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -55,7 +57,7 @@ public class AuthService {
     public EntityModel<LoginResponse> login(LoginRequest loginRequest) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
-        AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal(); 
+        AuthUserDetail authUserDetail = StaticHelper.extractAuthUserDetail(authentication).orElseThrow(() -> new AuthenticationException("Authentication failed"));
         String token = authUtil.generateToken(authUserDetail);
         return EntityModel.of(new LoginResponse(authUserDetail.getId(), "Login successful", token),
                 WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getUserById(authUserDetail.getId(), null)).withSelfRel().withType(HttpMethod.GET.name())

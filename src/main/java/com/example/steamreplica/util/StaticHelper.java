@@ -1,5 +1,6 @@
 package com.example.steamreplica.util;
 
+import com.example.steamreplica.model.auth.AuthUserDetail;
 import io.jsonwebtoken.io.IOException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.security.core.Authentication;
@@ -46,6 +47,11 @@ public class StaticHelper {
         }
         return errors;
     }
+
+    public static Optional<AuthUserDetail> extractAuthUserDetail(Authentication authentication) {
+        return Optional.ofNullable(authentication == null ? null : (AuthUserDetail)authentication.getPrincipal());
+    }
+    
     public static <R> R catchingBindingError(BindingResult result, Function<List<String>, R> bindingResultExceptionFunction) {
         List<String> errors = result.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
         return bindingResultExceptionFunction.apply(errors);

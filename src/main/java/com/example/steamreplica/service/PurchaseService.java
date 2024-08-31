@@ -17,9 +17,11 @@ import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.BoughtLibraryRepository;
 import com.example.steamreplica.repository.PurchaseRepository;
+import com.example.steamreplica.service.exception.AuthenticationException;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
 import com.example.steamreplica.util.CacheHelper;
 import com.example.steamreplica.util.ServiceHelper;
+import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.hateoas.CollectionModel;
@@ -107,7 +109,7 @@ public class PurchaseService {
     
     @Transactional
     public EntityModel<PurchaseResponse_Full> createPurchase(PurchaseRequest request, Authentication authentication) {
-        AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
+        AuthUserDetail authUserDetail = StaticHelper.extractAuthUserDetail(authentication).orElseThrow(() -> new AuthenticationException("Authentication failed"));
         BoughtLibrary boughtLibrary = boughtLibraryRepository.findById(authUserDetail.getId()).orElseThrow(() -> new ResourceNotFoundException("Can not get Library"));
         
         Set<PurchasedGame> purchasedGames = request.getGameIds().stream().map(aLong -> {

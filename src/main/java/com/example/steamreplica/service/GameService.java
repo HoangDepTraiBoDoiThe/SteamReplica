@@ -15,6 +15,7 @@ import com.example.steamreplica.model.game.GameImage;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.*;
+import com.example.steamreplica.service.exception.AuthenticationException;
 import com.example.steamreplica.service.exception.GameException;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
@@ -230,7 +231,7 @@ public class GameService {
     @Transactional
     public List<EntityModel<GameResponse_Minimal>> getGameReviews(long id, Authentication authentication) {
         // Todo: WIP
-        AuthUserDetail authUserDetail = (AuthUserDetail) authentication.getPrincipal();
+        AuthUserDetail authUserDetail = StaticHelper.extractAuthUserDetail(authentication).orElseThrow(() -> new AuthenticationException("Authentication failed"));
         return boughtLibraryRepository.findPurchasedGames(authUserDetail.getId()).stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
     }
 
