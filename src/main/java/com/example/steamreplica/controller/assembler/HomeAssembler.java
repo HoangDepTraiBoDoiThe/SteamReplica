@@ -25,8 +25,8 @@ public class HomeAssembler {
         );
 
         if (authUserDetail == null || !authentication.isAuthenticated()) {
-            entityModel.add(linkTo(methodOn(AuthController.class).login(null, null)).withRel("Login").withType(HttpMethod.GET.name()));
-            entityModel.add(linkTo(methodOn(AuthController.class).register(null, null)).withRel("Register").withType(HttpMethod.GET.name()));
+            entityModel.add(linkTo(methodOn(AuthController.class).login(null, null)).withRel("Login").withType(HttpMethod.POST.name()));
+            entityModel.add(linkTo(methodOn(AuthController.class).register(null, null)).withRel("Register").withType(HttpMethod.POST.name()));
         } else {
             entityModel.add(linkTo(methodOn(UserController.class).getUserById(authUserDetail.getId(), authentication)).withRel("Get user detail").withType(HttpMethod.GET.name()));
         } 
