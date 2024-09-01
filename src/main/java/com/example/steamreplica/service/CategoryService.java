@@ -28,10 +28,10 @@ public class CategoryService {
     private final String CATEGORY_CACHE = "categoryCache";
     
     public EntityModel<CategoryResponse_Full> getCategoryById(long id, Authentication authentication) {
-        CategoryResponse_Full responseFull = cacheHelper.getCache(CATEGORY_CACHE, id, categoryRepository, repo -> {
+        CategoryResponse_Full responseFull = cacheHelper.getCache(CATEGORY_CACHE, CategoryResponse_Full.class, id, categoryRepository, repo -> {
             Category category = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
             return serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, category);
-        });
+        }, 15);
         return serviceHelper.makeCategoryResponse_EntityModel(responseFull, authentication);
     }
 
@@ -70,9 +70,9 @@ public class CategoryService {
         categoryToUpdate.setCategoryName(categoryRequest.getCategoryName());
         categoryToUpdate.setCategoryDescription(categoryRequest.getCategoryDescription());
         Category updateCategory = categoryRepository.save(categoryToUpdate);
-
-        cacheHelper.updateCache(updateCategory, CATEGORY_CACHE, CATEGORY_LIST_CACHE);
         CategoryResponse_Full responseFull = serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, updateCategory);
+
+        cacheHelper.updateCache(responseFull, CATEGORY_CACHE, CATEGORY_LIST_CACHE);
         return serviceHelper.makeCategoryResponse_EntityModel(responseFull, authentication);
     }
 

@@ -31,10 +31,10 @@ public class DiscountService {
     private final Integer PAGE_SIZE = 10;
     
     public EntityModel<DiscountResponse_Full> getDiscountById(long id, Authentication authentication) {
-        DiscountResponse_Full responseFull = cacheHelper.getCache(DISCOUNT_CACHE, id, discountRepository, repo -> {
+        DiscountResponse_Full responseFull = cacheHelper.getCache(DISCOUNT_CACHE, DiscountResponse_Full.class, id, discountRepository, repo -> {
             Discount discount = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with id [%s]", id)));
             return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, discount);
-        });
+        }, 15);
         return serviceHelper.makeDiscountResponse_EntityModel(responseFull, authentication);    }
 
     public Discount getDiscountById_entity(long id, boolean bThrowIfNotFound, Authentication authentication) {
@@ -45,10 +45,10 @@ public class DiscountService {
     }
 
     public EntityModel<DiscountResponse_Full> getDiscountByCode(String code, Authentication authentication) {
-        DiscountResponse_Full responseFull = cacheHelper.getCache(DISCOUNT_CACHE, code, discountRepository, repo -> {
+        DiscountResponse_Full responseFull = cacheHelper.getCache(DISCOUNT_CACHE, DiscountResponse_Full.class, code, discountRepository, repo -> {
             Discount discount = repo.findDiscountByDiscountCode(code).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with code [%s]", code)));
             return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, discount);
-        });
+        }, 15);
         return serviceHelper.makeDiscountResponse_EntityModel(responseFull, authentication);
     }
 
@@ -76,10 +76,10 @@ public class DiscountService {
         discountToUpdate.setDiscountDescription(discountRequest.getDiscountDescription());
         discountToUpdate.setDiscountPercent(discountRequest.getDiscountPercent());
         Discount updatedDiscount = discountRepository.save(discountToUpdate);
-
-        cacheHelper.updateCache(updatedDiscount, DISCOUNT_CACHE, DISCOUNT_LIST_CACHE);
-        cacheHelper.updateCache(DISCOUNT_CACHE, updatedDiscount, Discount::getDiscountCode);
         DiscountResponse_Full responseFull = serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, updatedDiscount);
+
+        cacheHelper.updateCache(responseFull, DISCOUNT_CACHE, DISCOUNT_LIST_CACHE);
+        cacheHelper.updateCache(DISCOUNT_CACHE, responseFull, DiscountResponse_Full::getDiscountCode);
         return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);    }
 
     @Transactional

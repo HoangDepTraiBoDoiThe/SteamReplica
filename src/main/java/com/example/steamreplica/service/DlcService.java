@@ -4,6 +4,7 @@ import com.example.steamreplica.controller.DlcController;
 import com.example.steamreplica.dtos.request.DlcRequest;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Basic;
 import com.example.steamreplica.dtos.response.game.dlc.DlcResponse_Full;
+import com.example.steamreplica.dtos.response.purchases.PurchaseResponse_Full;
 import com.example.steamreplica.event.DiscountUpdateEvent;
 import com.example.steamreplica.event.GameUpdateEvent;
 import com.example.steamreplica.event.DlcImageUpdateEvent;
@@ -96,10 +97,10 @@ public class DlcService {
     }
     
     public EntityModel<DlcResponse_Full> getDlcById(long id, Authentication authentication) {
-        DlcResponse_Full responseFull = cacheHelper.getCache(DLC_CACHE, id, dlcRepository, repo -> {
+        DlcResponse_Full responseFull = cacheHelper.getCache(DLC_CACHE, DlcResponse_Full.class, id, dlcRepository, repo -> {
             DLC dlc = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("DLC with id %d not found", id)));
             return serviceHelper.makeDlcResponse(DlcResponse_Full.class, dlc, authentication);
-        });
+        }, 30);
         return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);
     }
     
@@ -150,11 +151,11 @@ public class DlcService {
         dlcToUpdate.setDlcThumbnail(StaticHelper.convertToBlob(dlcRequest.getDlcThumbnail()));
         dlcToUpdate.setReleaseDate(dlcRequest.getReleaseDate());
         DLC updatedDlc = dlcRepository.save(dlcToUpdate);
-
-        cacheHelper.updateCache(updatedDlc, DLC_CACHE, DLC_LIST_CACHE);
-        cacheHelper.updatePaginationCache(updatedDlc, PAGE_RANGE, DLC_PAGINATION_CACHE_PREFIX);
-
         DlcResponse_Full responseFull = serviceHelper.makeDlcResponse(DlcResponse_Full.class, updatedDlc, authentication);
+
+        cacheHelper.updateCache(responseFull, DLC_CACHE, DLC_LIST_CACHE);
+        cacheHelper.updatePaginationCache(responseFull, PAGE_RANGE, DLC_PAGINATION_CACHE_PREFIX);
+
         return serviceHelper.makeDlcResponse_EntityModel(responseFull, authentication);
     }
 
@@ -163,7 +164,7 @@ public class DlcService {
         DLC dlc = dlcRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("DLC not found"));
         dlcRepository.deleteById(id);
         cacheHelper.deleteCaches(DLC_CACHE, dlc.getId(), DLC_LIST_CACHE);
-        cacheHelper.deletePaginationCache(dlc.getId(), PAGE_RANGE, DLC_PAGINATION_CACHE_PREFIX);
+        cacheHelper.deletePaginationCacheSelective(dlc.getId(), PAGE_RANGE, DLC_PAGINATION_CACHE_PREFIX);
     }
 
     @Transactional
