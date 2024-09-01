@@ -4,6 +4,7 @@ import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -31,11 +32,13 @@ public class Purchase extends BaseCacheableModel {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToMany(mappedBy = "transaction", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonBackReference
     private Set<PurchasedGame> purchasedGames = new HashSet<>();
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToMany(mappedBy = "transaction", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonBackReference
     private Set<PurchasedDLC> purchasedDLCs = new HashSet<>();
 
     @ManyToOne

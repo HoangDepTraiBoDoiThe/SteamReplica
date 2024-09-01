@@ -16,7 +16,7 @@ public class Category extends BaseCacheableModel {
     @Column(nullable = false)
     private String categoryName;
     private String categoryDescription;
-    
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToMany(mappedBy = "categories")

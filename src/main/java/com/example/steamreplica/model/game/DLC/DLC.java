@@ -4,6 +4,7 @@ import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.purchasedLibrary.DLC.PurchasedDLC;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -60,6 +61,7 @@ public class DLC extends BaseCacheableModel {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "dlc")
+    @JsonBackReference
     private Set<DLCImage> dlcImages = new HashSet<>();
 
     @EqualsAndHashCode.Exclude

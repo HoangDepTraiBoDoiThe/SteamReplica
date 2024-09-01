@@ -2,6 +2,7 @@ package com.example.steamreplica.model.purchasedLibrary;
 
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.userApplication.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,7 +27,8 @@ public class PublisherOwnedLibrary {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id", referencedColumnName = "id")
     private User user;
-    
+
+    @JsonBackReference
     @ManyToMany(mappedBy = "publisherOwners", fetch = FetchType.EAGER)
     private Set<Game> games = new HashSet<>();
 }

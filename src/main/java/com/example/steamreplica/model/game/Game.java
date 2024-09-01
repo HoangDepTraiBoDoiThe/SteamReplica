@@ -6,7 +6,7 @@ import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
 import com.example.steamreplica.model.purchasedLibrary.PublisherOwnedLibrary;
 import com.example.steamreplica.model.purchasedLibrary.game.PurchasedGame;
 import com.example.steamreplica.model.game.discount.Discount;
-import com.example.steamreplica.model.userApplication.User;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,6 +32,7 @@ public class Game extends BaseCacheableModel {
     private String gameDescription;
 
     @Column(nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;
 
     @Column
@@ -50,6 +51,7 @@ public class Game extends BaseCacheableModel {
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @JsonBackReference
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<GameImage> gameImages = new HashSet<>();
 
@@ -68,6 +70,7 @@ public class Game extends BaseCacheableModel {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToMany(mappedBy = "game")
+    @JsonBackReference
     private Set<PurchasedGame> purchasedGame = new HashSet<>();
 
     @EqualsAndHashCode.Exclude
@@ -85,6 +88,7 @@ public class Game extends BaseCacheableModel {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @Column(name = "dlcs")
+    @JsonBackReference
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "game")
     private Set<DLC> dlcs = new HashSet<>();
 }

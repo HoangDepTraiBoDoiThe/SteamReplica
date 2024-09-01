@@ -20,7 +20,7 @@ public class GameReview extends BaseCacheableModel {
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @OneToOne()
+    @OneToOne
     @JoinColumn(referencedColumnName = "id")
     private PurchasedGame purchasedGame;
 }

@@ -1,6 +1,7 @@
 package com.example.steamreplica.model.userApplication;
 
 import com.example.steamreplica.model.BaseCacheableModel;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -19,6 +20,7 @@ public class ApplicationRole extends BaseCacheableModel {
     
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @JsonBackReference
     @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     private Set<User> users = new HashSet<>();
 

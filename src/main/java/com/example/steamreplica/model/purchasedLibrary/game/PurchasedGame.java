@@ -4,6 +4,7 @@ import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.model.game.GameReview;
 import com.example.steamreplica.model.purchasedLibrary.Purchase;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
@@ -38,6 +39,7 @@ public class PurchasedGame extends BaseCacheableModel {
     
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @JsonBackReference
     @OneToOne(orphanRemoval = true, mappedBy = "purchasedGame")
     private GameReview gameReview;
 }

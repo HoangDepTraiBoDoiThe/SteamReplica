@@ -7,6 +7,7 @@ import com.example.steamreplica.model.purchasedLibrary.BoughtLibrary;
 import com.example.steamreplica.model.purchasedLibrary.DevOwnedLibrary;
 import com.example.steamreplica.model.purchasedLibrary.PublisherOwnedLibrary;
 import com.example.steamreplica.util.StaticHelper;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -75,24 +76,29 @@ public class User extends BaseCacheableModel {
 
     // Friends of this user
     @OneToMany(mappedBy = "user")
+    @JsonBackReference
     private Set<Friend> friends = new HashSet<>();
 
     // This user is friend to ...
     @OneToMany(mappedBy = "friend")
+    @JsonBackReference
     private Set<Friend> friendOf = new HashSet<>();
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @JsonBackReference
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private BoughtLibrary boughtLibrary;
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private DevOwnedLibrary devOwnedLibrary;
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @JsonBackReference
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private PublisherOwnedLibrary publisherOwnedLibrary;
 
