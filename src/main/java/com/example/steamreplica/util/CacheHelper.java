@@ -2,6 +2,7 @@ package com.example.steamreplica.util;
 
 import com.example.steamreplica.dtos.response.BaseResponse;
 import com.example.steamreplica.service.exception.CacheException;
+import com.example.steamreplica.service.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,18 +59,16 @@ public class CacheHelper {
     }
 
     public <T extends BaseResponse> void refreshPaginationCacheOnUpdatedEventReceived(List<String> paginationCacheKeyPrefix, int pageRange, long id, IMyTemplateHelper<T> IMyTemplateHelper) {
-        paginationCacheKeyPrefix.stream()
-                .parallel()
-                .forEach(prefix -> {
-                    for (int i = 0; i < pageRange; i++) {
-                        String paginationKey = makePaginationCacheKey(prefix, i);
-                        redisTemplate.opsForHash().entries(paginationKey).values().stream().map(o -> (T) o).forEach(t -> {
-                            if (IMyTemplateHelper.isRelated(t, id)) {
-                                redisTemplate.delete(paginationKey);
-                            }
-                        });
+        paginationCacheKeyPrefix.stream().parallel().forEach(prefix -> {
+            for (int i = 0; i < pageRange; i++) {
+                String paginationKey = makePaginationCacheKey(prefix, i);
+                redisTemplate.opsForHash().entries(paginationKey).values().stream().map(o -> (T) o).forEach(t -> {
+                    if (IMyTemplateHelper.isRelated(t, id)) {
+                        redisTemplate.delete(paginationKey);
                     }
                 });
+            }
+        });
     }
 
     public void refreshListCachesOnUpdatedEventReceived(List<String> listCacheKeyPrefix) {
@@ -113,7 +112,8 @@ public class CacheHelper {
 
             return objectToCache;
         } catch (Exception e) {
-            throw new CacheException("Error while getting cache: ", e);
+            handleException(e);
+            return null;
         }
     }
 
@@ -140,7 +140,8 @@ public class CacheHelper {
 
             return list;
         } catch (Exception e) {
-            throw new CacheException("Error while getting target list of data in cache.", e);
+            handleException(e);
+            return null;
         }
     }
 
@@ -167,7 +168,8 @@ public class CacheHelper {
 
             return list;
         } catch (Exception e) {
-            throw new CacheException("Error while getting pagination list of data in cache.", e);
+            handleException(e);
+            return null;
         }
     }
 
@@ -188,13 +190,12 @@ public class CacheHelper {
         cursor.forEachRemaining(pair -> {
             T value = null;
             try {
-                value = objectMapper.readValue((String) pair.getValue(), new TypeReference<T>() {
-                });
+                value = objectMapper.readValue((String) pair.getValue(), new TypeReference<T>() {});
                 if (Objects.equals(value.getId(), objectToUpdate.getId())) {
                     redisTemplate.opsForHash().put(listCacheKeyName, String.valueOf(objectToUpdate.getId()), objectMapper.writeValueAsString(objectToUpdate));
                 }
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                handleException(e);
             }
         });
         cursor.close();
@@ -215,8 +216,8 @@ public class CacheHelper {
                 if (IMyTemplateHelper.isRelated(value, key)) {
                     redisTemplate.opsForHash().put(listCacheKeyName, String.valueOf(objectToUpdate.getId()), objectMapper.writeValueAsString(objectToUpdate));
                 }
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                handleException(e);
             }
         });
 
@@ -227,8 +228,8 @@ public class CacheHelper {
         // Update the object in the key-value store
         try {
             redisTemplate.opsForHash().put(makeCacheKey(cacheKeyPrefix), trFunction.apply(objectToUpdate), objectMapper.writeValueAsString(objectToUpdate));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            handleException(e);
         }
     }
 
@@ -251,12 +252,13 @@ public class CacheHelper {
             cacheEntry.values().stream().forEach(value -> {
                 try {
                     T item = null;
-                    item = objectMapper.readValue((String) value, new TypeReference<T>() {});
+                    item = objectMapper.readValue((String) value, new TypeReference<T>() {
+                    });
                     if (Objects.equals(item.getId(), objectToUpdate.getId())) {
                         redisTemplate.opsForHash().put(paginationCacheKey, String.valueOf(item.getId()), objectMapper.writeValueAsString(item));
                     }
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+                } catch (Exception e) {
+                    handleException(e);
                 }
             });
         }));
@@ -298,14 +300,15 @@ public class CacheHelper {
                     if (Objects.equals(value.getId(), id)) {
                         redisTemplate.delete(cacheKeyName);
                     }
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+                } catch (Exception e) {
+                    handleException(e);
                 }
 
             });
             cursor.close();
         }));
     }
+
     public <T extends BaseResponse> void deletePaginationCache(int pageRange, String... paginationCachePrefix) {
         Arrays.stream(paginationCachePrefix).parallel().forEach(prefix -> IntStream.rangeClosed(1, pageRange).forEach(i -> {
             String cacheKeyName = makePaginationCacheKey(prefix, i);
@@ -316,12 +319,22 @@ public class CacheHelper {
                     value = objectMapper.readValue((String) pair.getValue(), new TypeReference<T>() {
                     });
                     redisTemplate.delete(cacheKeyName);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+                } catch (Exception e) {
+                    handleException(e);
                 }
 
             });
             cursor.close();
         }));
+    }
+
+    private void handleException(Exception e) throws ResourceNotFoundException, CacheException {
+        if (e instanceof ResourceNotFoundException) {
+            throw (ResourceNotFoundException) e;
+        } else if (e instanceof CacheException) {
+            throw (CacheException) e;
+        } else {
+            throw new CacheException("Error while getting data in cache", e);
+        }
     }
 }
