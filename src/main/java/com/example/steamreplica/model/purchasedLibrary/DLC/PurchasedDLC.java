@@ -4,6 +4,7 @@ import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.model.game.DLC.DLC;
 import com.example.steamreplica.model.game.DLC.DLCReview;
 import com.example.steamreplica.model.purchasedLibrary.Purchase;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
@@ -41,6 +42,7 @@ public class PurchasedDLC extends BaseCacheableModel {
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @JsonBackReference
     @OneToOne(orphanRemoval = true, mappedBy = "purchasedDLC", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private DLCReview DLCReview;
 }

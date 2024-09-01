@@ -1,7 +1,6 @@
 package com.example.steamreplica.model.game.DLC;
 
 import com.example.steamreplica.model.BaseCacheableModel;
-import com.example.steamreplica.model.game.Game;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
