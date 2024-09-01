@@ -5,6 +5,6 @@ public class CacheException extends RuntimeException {
         super("Cache exception: " + message);
     }
     public CacheException(String message, Throwable cause) {
-        super("Cache exception: " + message, cause);
+        super("Cache exception: " + message + cause.getMessage(), cause);
     }
 }

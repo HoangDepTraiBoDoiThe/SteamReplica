@@ -26,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,10 +105,10 @@ public class PurchaseService {
     }
     
     public EntityModel<PurchaseResponse_Full> getPurchaseById(long id, Authentication authentication) {
-        PurchaseResponse_Full responseFull = cacheHelper.getCache(PURCHASE_CACHE, id, purchaseRepository, repo -> {
+        PurchaseResponse_Full responseFull = cacheHelper.getCache(PURCHASE_CACHE, PurchaseResponse_Full.class, id, purchaseRepository, repo -> {
             Purchase purchase = repo.findById(id).orElseThrow(() -> new RuntimeException("Purchase Transaction not found"));
             return serviceHelper.makePurchaseResponse(PurchaseResponse_Full.class, purchase);
-        });
+        }, 60);
         return serviceHelper.makePurchaseResponse_EntityModel(responseFull, authentication);
     }
     
