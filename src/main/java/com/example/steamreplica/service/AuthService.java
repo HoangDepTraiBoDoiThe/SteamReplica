@@ -1,6 +1,6 @@
 package com.example.steamreplica.service;
 
-import com.example.steamreplica.Auth.JwtAuthUtil;
+import com.example.steamreplica.util.JwtAuthUtil;
 import com.example.steamreplica.constants.SystemRole;
 import com.example.steamreplica.controller.AuthController;
 import com.example.steamreplica.controller.UserController;
