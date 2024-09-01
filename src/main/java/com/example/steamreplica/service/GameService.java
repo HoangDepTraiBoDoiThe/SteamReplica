@@ -9,18 +9,15 @@ import com.example.steamreplica.event.CategoryUpdateEvent;
 import com.example.steamreplica.event.DiscountUpdateEvent;
 import com.example.steamreplica.event.GameUpdateEvent;
 import com.example.steamreplica.event.UserUpdateEvent;
-import com.example.steamreplica.model.auth.AuthUserDetail;
 import com.example.steamreplica.model.game.Category;
 import com.example.steamreplica.model.game.GameImage;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.model.userApplication.User;
 import com.example.steamreplica.repository.*;
-import com.example.steamreplica.service.exception.AuthenticationException;
 import com.example.steamreplica.service.exception.GameException;
 import com.example.steamreplica.model.game.Game;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
 import com.example.steamreplica.util.CacheHelper;
-import com.example.steamreplica.util.IMyHelper;
 import com.example.steamreplica.util.ServiceHelper;
 import com.example.steamreplica.util.StaticHelper;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +25,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +34,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
@@ -77,10 +72,9 @@ public class GameService {
                 PAGE_RANGE,
                 updateEvent.getId(),
                 (entity, id) -> {
-                    Game game = (Game) entity;
                     User user = userService.findUsersWithById_entityFull((Long) id);
-                    boolean matched = user.getPublisherOwnedLibrary().getGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId())) || 
-                            user.getDevOwnedLibrary().getGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId()));
+                    boolean matched = user.getPublisherOwnedLibrary().getGames().stream().anyMatch(g -> Objects.equals(g.getId(), entity.getId())) || 
+                            user.getDevOwnedLibrary().getGames().stream().anyMatch(g -> Objects.equals(g.getId(), entity.getId()));
                     return matched;
                 });
     }
@@ -93,9 +87,8 @@ public class GameService {
                 PAGE_RANGE,
                 updateEvent.getId(),
                 (entity, id) -> {
-                    Game game = (Game) entity;
                     Category category = categoryService.getCategoryById_entityFull((Long) id);
-                    return category.getGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId()));
+                    return category.getGames().stream().anyMatch(g -> Objects.equals(g.getId(), entity.getId()));
                 });
     }
     @EventListener
@@ -107,9 +100,8 @@ public class GameService {
                 PAGE_RANGE,
                 updateEvent.getId(),
                 (entity, id) -> {
-                    Game game = (Game) entity;
                     Discount discount = discountService.getDiscountById_entityFull((Long) id);
-                    return discount.getDiscountedGames().stream().anyMatch(g -> Objects.equals(g.getId(), game.getId()));
+                    return discount.getDiscountedGames().stream().anyMatch(g -> Objects.equals(g.getId(), entity.getId()));
                 });
     }
 
@@ -177,10 +169,10 @@ public class GameService {
     
     @Transactional
     public EntityModel<GameResponse_Full> getGameById(long id, Authentication authentication) {
-        GameResponse_Full responseFull = cacheHelper.getCache(GAME_CACHE, id, gameRepository, repo -> {
-            Game game = repo.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
+        GameResponse_Full responseFull = cacheHelper.getCache(GAME_CACHE, GameResponse_Full.class, id, gameRepository, repo -> {
+            Game game = repo.findGameWithAll(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
             return serviceHelper.makeGameResponse(GameResponse_Full.class, game, authentication);
-        });
+        }, 30);
         return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);
     }
 
@@ -203,6 +195,7 @@ public class GameService {
 
         Game newCreatedGame = gameRepository.save(newGame);
         GameResponse_Full responseFull = serviceHelper.makeGameResponse(GameResponse_Full.class, newCreatedGame, authentication);
+
         return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);
     }
 
@@ -220,8 +213,10 @@ public class GameService {
         gameToUpdate.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, true, authentication)).collect(Collectors.toSet()));
 
         Game updatedGame = gameRepository.save(gameToUpdate);
-        cacheHelper.updateCache(updatedGame, GAME_CACHE, GAME_LIST_CACHE);
-        cacheHelper.updatePaginationCache(updatedGame, PAGE_RANGE, 
+        GameResponse_Full responseFull = serviceHelper.makeGameResponse(GameResponse_Full.class, updatedGame, authentication);
+        
+        cacheHelper.updateCache(responseFull, GAME_CACHE, GAME_LIST_CACHE);
+        cacheHelper.updatePaginationCache(responseFull, PAGE_RANGE, 
                 NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, 
                 TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX,
                 DEV_OWNING_GAME_PAGINATION_CACHE_PREFIX,
@@ -230,7 +225,6 @@ public class GameService {
                 GAME_OF_CATEGORY_PAGINATION_CACHE_PREFIX);
         cacheHelper.publishCacheEvent(new GameUpdateEvent(this, updatedGame.getId()));
         
-        GameResponse_Full responseFull = serviceHelper.makeGameResponse(GameResponse_Full.class, updatedGame, authentication);
         return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);
     }
 
@@ -238,7 +232,7 @@ public class GameService {
     public void deleteGame(long id) {
         Game game = gameRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
         cacheHelper.deleteCaches(GAME_CACHE, game.getId(), GAME_LIST_CACHE);
-        cacheHelper.deletePaginationCache(game.getId(), PAGE_RANGE, 
+        cacheHelper.deletePaginationCacheSelective(game.getId(), PAGE_RANGE, 
                 NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, 
                 TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX,
                 DEV_OWNING_GAME_PAGINATION_CACHE_PREFIX,

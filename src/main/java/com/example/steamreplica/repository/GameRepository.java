@@ -33,6 +33,10 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     Page<Game> findAllByDevOwner(@Param("user_id") long user_id, Pageable pageable);
     @Query("SELECT g FROM Game g JOIN g.publisherOwners do WHERE do.user = :user_id")
     Page<Game> findAllByPublisherOwner(@Param("user_id") long user_id, Pageable pageable);
+
+    @EntityGraph(attributePaths = "publisherOwners")
+    @Query("SELECT g FROM Game g WHERE g.id = :id")
+    Optional<Game> findGamesByIdWithPublisherOwners(long id);
     Page<Game> findAllByOrderByDownloadedCountDescReleaseDateDesc(Pageable pageable);
 
     @Query("SELECT DISTINCT g FROM Game g " +
@@ -43,5 +47,9 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 
     @EntityGraph(attributePaths = {"gameImages"})
     Optional<Game> findGameWithAllImagesById(long id);
+
+    @EntityGraph(attributePaths = {"gameImages", "categories", "discounts", "purchasedGame", "devOwners", "publisherOwners", "dlcs"})
+    @Query("SELECT g FROM Game g WHERE g.id = :id")
+    Optional<Game> findGameWithAll(long id);
 
 }
