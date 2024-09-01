@@ -1,4 +1,4 @@
-package com.example.steamreplica.Auth;
+package com.example.steamreplica.util;
 
 import com.example.steamreplica.model.auth.AuthUserDetail;
 import io.jsonwebtoken.Claims;
@@ -18,11 +18,10 @@ import java.util.function.Function;
 
 @Configuration
 public class JwtAuthUtil {
-    @Value("${auth.security.token.expirationInMillis}")
-    private String expirationInMillis;
+    @Value("${auth.security.token.expirationMinutes}")
+    private int expirationMinutes;
     @Value("${auth.security.token.securityKey}")
     private String securityKey;
-    private static final long TOKEN_VALIDITY_HOURS = 24;
     public <R> R extractClaimsProperty(String token, Function<Claims, R> claimsRFunction) {
         var claims = Jwts.parserBuilder().setSigningKey(securityKey).build().parseClaimsJws(token).getBody();
         return claimsRFunction.apply(claims);
@@ -39,7 +38,7 @@ public class JwtAuthUtil {
         claims.put("roles", user.getAuthorities());
         claims.put("id", user.getId());
         Instant now = Instant.now();
-        Instant expiryDate = now.plus(TOKEN_VALIDITY_HOURS, ChronoUnit.HOURS);
+        Instant expiryDate = now.plus(expirationMinutes, ChronoUnit.MINUTES);
 
         return Jwts.builder()
                 .setClaims(claims)
