@@ -114,53 +114,74 @@ public class GameService {
     }
 
     public CollectionModel<EntityModel<GameResponse_Basic>> getGamesOfCategory(int page, long categoryId, Authentication authentication) {
-        List<Game> games = cacheHelper.getPaginationCache(GAME_OF_CATEGORY_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByCategoryId(categoryId, PageRequest.of(page, PAGE_SIZE)).getContent());
-        CollectionModel<EntityModel<GameResponse_Basic>> entityModels = serviceHelper.makeGameResponse_CollectionModel(GameResponse_Basic.class, games, authentication);
+        List<GameResponse_Basic> gameResponses = cacheHelper.getPaginationCache(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, GameResponse_Basic.class, page, gameRepository, repo -> {
+            List<Game> games = repo.findAllByCategoryId(categoryId, PageRequest.of(page, PAGE_SIZE)).toList();
+            return serviceHelper.makeGameResponses(GameResponse_Basic.class, games, authentication);
+        });
 
-        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> methodOn(GameController.class).getGamesOfCategory(currentPage, categoryId, authentication));
+        var entityModelCollectionModel = serviceHelper.makeGameResponse_CollectionModel(gameResponses, authentication);
+        return serviceHelper.addLinksToPaginationResponse(entityModelCollectionModel, page, currentPage -> methodOn(GameController.class).getNewAndTrendingGames(currentPage, authentication));
     }
 
     public CollectionModel<EntityModel<GameResponse_Basic>> getNewAndTrendingGames(int page, Authentication authentication) {
-        List<Game> games = cacheHelper.getPaginationCache(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDescReleaseDateDesc(PageRequest.of(page, PAGE_SIZE)).toList());
-        CollectionModel<EntityModel<GameResponse_Basic>> entityModels = serviceHelper.makeGameResponse_CollectionModel(GameResponse_Basic.class, games, authentication);
+        List<GameResponse_Basic> gameResponses = cacheHelper.getPaginationCache(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, GameResponse_Basic.class, page, gameRepository, repo -> {
+            List<Game> games = repo.findAllByOrderByDownloadedCountDescReleaseDateDesc(PageRequest.of(page, PAGE_SIZE)).toList();
+            return serviceHelper.makeGameResponses(GameResponse_Basic.class, games, authentication);
+        });
 
-        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> methodOn(GameController.class).getNewAndTrendingGames(currentPage, authentication));
+        var entityModelCollectionModel = serviceHelper.makeGameResponse_CollectionModel(gameResponses, authentication);
+        return serviceHelper.addLinksToPaginationResponse(entityModelCollectionModel, page, currentPage -> methodOn(GameController.class).getNewAndTrendingGames(currentPage, authentication));
     }
 
     public CollectionModel<EntityModel<GameResponse_Basic>> getTopSellerGames(int page, Authentication authentication) {
-        List<Game> games = cacheHelper.getPaginationCache(TOP_SELLER_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDesc(PageRequest.of(page, PAGE_SIZE)).toList());
-        CollectionModel<EntityModel<GameResponse_Basic>> entityModels = serviceHelper.makeGameResponse_CollectionModel(GameResponse_Basic.class, games, authentication);
+        List<GameResponse_Basic> gameResponses = cacheHelper.getPaginationCache(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, GameResponse_Basic.class, page, gameRepository, repo -> {
+            List<Game> games = repo.findAllByOrderByDownloadedCountDesc(PageRequest.of(page, PAGE_SIZE)).toList();
+            return serviceHelper.makeGameResponses(GameResponse_Basic.class, games, authentication);
+        });
 
-        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> methodOn(GameController.class).getTopSellerGames(currentPage, authentication));
+        var entityModelCollectionModel = serviceHelper.makeGameResponse_CollectionModel(gameResponses, authentication);
+        return serviceHelper.addLinksToPaginationResponse(entityModelCollectionModel, page, currentPage -> methodOn(GameController.class).getNewAndTrendingGames(currentPage, authentication));
     }
 
     public CollectionModel<EntityModel<GameResponse_Basic>> getSpecialGames(int page, Authentication authentication) {
-        List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(SPECIAL_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByOrderByDownloadedCountDescWithAvailableDiscounts(PageRequest.of(page, PAGE_SIZE)).toList());
-        CollectionModel<EntityModel<GameResponse_Basic>> entityModels = serviceHelper.makeGameResponse_CollectionModel(GameResponse_Basic.class, mostDownloadedGames, authentication);
+        List<GameResponse_Basic> gameResponses = cacheHelper.getPaginationCache(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, GameResponse_Basic.class, page, gameRepository, repo -> {
+            List<Game> games = repo.findAllByOrderByDownloadedCountDescWithAvailableDiscounts(PageRequest.of(page, PAGE_SIZE)).toList();
+            return serviceHelper.makeGameResponses(GameResponse_Basic.class, games, authentication);
+        });
 
-        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> methodOn(GameController.class).getSpecialGames(currentPage, authentication));
+        var entityModelCollectionModel = serviceHelper.makeGameResponse_CollectionModel(gameResponses, authentication);
+        return serviceHelper.addLinksToPaginationResponse(entityModelCollectionModel, page, currentPage -> methodOn(GameController.class).getNewAndTrendingGames(currentPage, authentication));
     }
 
     @Transactional
     public CollectionModel<EntityModel<GameResponse_Basic>> getDevOwningGames(int page, long user_id, Authentication authentication) {
-        List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(DEV_OWNING_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByDevOwner(user_id, PageRequest.of(page, PAGE_SIZE)).toList());
-        CollectionModel<EntityModel<GameResponse_Basic>> entityModels =  serviceHelper.makeGameResponse_CollectionModel(GameResponse_Basic.class, mostDownloadedGames, authentication);
+        List<GameResponse_Basic> gameResponses = cacheHelper.getPaginationCache(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, GameResponse_Basic.class, page, gameRepository, repo -> {
+            List<Game> games = repo.findAllByDevOwner(user_id, PageRequest.of(page, PAGE_SIZE)).toList();
+            return serviceHelper.makeGameResponses(GameResponse_Basic.class, games, authentication);
+        });
 
-        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> methodOn(GameController.class).getGamesBelongToDev(currentPage, user_id, authentication));
+        var entityModelCollectionModel = serviceHelper.makeGameResponse_CollectionModel(gameResponses, authentication);
+        return serviceHelper.addLinksToPaginationResponse(entityModelCollectionModel, page, currentPage -> methodOn(GameController.class).getNewAndTrendingGames(currentPage, authentication));   
     }
 
     @Transactional
     public CollectionModel<EntityModel<GameResponse_Basic>> getPublisherOwningGames(int page, long user_id, Authentication authentication) {
-        List<Game> mostDownloadedGames = cacheHelper.getPaginationCache(PUBLISHER_OWNING_GAME_PAGINATION_CACHE_PREFIX, page, gameRepository, repo -> repo.findAllByPublisherOwner(user_id, PageRequest.of(page, PAGE_SIZE)).toList());
-        CollectionModel<EntityModel<GameResponse_Basic>> entityModels = serviceHelper.makeGameResponse_CollectionModel(GameResponse_Basic.class, mostDownloadedGames, authentication);
+        List<GameResponse_Basic> gameResponses = cacheHelper.getPaginationCache(NEW_AND_TRENDING_GAME_PAGINATION_CACHE_PREFIX, GameResponse_Basic.class, page, gameRepository, repo -> {
+            List<Game> games = repo.findAllByPublisherOwner(user_id, PageRequest.of(page, PAGE_SIZE)).toList();
+            return serviceHelper.makeGameResponses(GameResponse_Basic.class, games, authentication);
+        });
 
-        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> methodOn(GameController.class).getGamesBelongToPublisher(currentPage, user_id, authentication));
+        var entityModelCollectionModel = serviceHelper.makeGameResponse_CollectionModel(gameResponses, authentication);
+        return serviceHelper.addLinksToPaginationResponse(entityModelCollectionModel, page, currentPage -> methodOn(GameController.class).getNewAndTrendingGames(currentPage, authentication));     
     }
     
     @Transactional
     public EntityModel<GameResponse_Full> getGameById(long id, Authentication authentication) {
-        Game game = cacheHelper.getCache(GAME_CACHE, id, gameRepository, repo -> repo.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id))));
-        return serviceHelper.makeGameResponse(GameResponse_Full.class, game, authentication);
+        GameResponse_Full responseFull = cacheHelper.getCache(GAME_CACHE, id, gameRepository, repo -> {
+            Game game = repo.findGameWithAllImagesById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Game with this id [%s] not found", id)));
+            return serviceHelper.makeGameResponse(GameResponse_Full.class, game, authentication);
+        });
+        return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);
     }
 
     public Game getGameById_entity(long id) {
@@ -175,13 +196,14 @@ public class GameService {
 
         newGame.setDevOwners(gameRequest.getDeveloperIds().stream().map(devOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
         newGame.setPublisherOwners(gameRequest.getPublisherIds().stream().map(publisherOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
-        newGame.setDiscounts(gameRequest.getDiscountIds().stream().map(aLong -> discountService.getDiscountById_entity(aLong, authentication)).collect(Collectors.toSet()));
-        newGame.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, authentication)).collect(Collectors.toSet()));
+        newGame.setDiscounts(gameRequest.getDiscountIds().stream().map(aLong -> discountService.getDiscountById_entity(aLong, true, authentication)).collect(Collectors.toSet()));
+        newGame.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, true, authentication)).collect(Collectors.toSet()));
         List<GameImage> newGameImages = gameRequest.getGameImagesRequest().stream().map(image -> new GameImage(image.getImageName(), StaticHelper.convertToBlob(image.getImage()), newGame)).toList();
         newGame.setGameImages(new HashSet<>(newGameImages));
 
         Game newCreatedGame = gameRepository.save(newGame);
-        return serviceHelper.makeGameResponse(GameResponse_Full.class, newCreatedGame, authentication);
+        GameResponse_Full responseFull = serviceHelper.makeGameResponse(GameResponse_Full.class, newCreatedGame, authentication);
+        return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);
     }
 
     @Transactional
@@ -194,8 +216,8 @@ public class GameService {
         gameToUpdate.setReleaseDate(gameRequest.getReleaseDate());
         gameToUpdate.setDevOwners(gameRequest.getDeveloperIds().stream().map(devOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
         gameToUpdate.setPublisherOwners(gameRequest.getPublisherIds().stream().map(publisherOwnedLibraryService::findByUserId_entity).collect(Collectors.toSet()));
-        gameToUpdate.setDiscounts(gameRequest.getDiscountIds().stream().map(aLong -> discountService.getDiscountById_entity(aLong, authentication)).collect(Collectors.toSet()));
-        gameToUpdate.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, authentication)).collect(Collectors.toSet()));
+        gameToUpdate.setDiscounts(gameRequest.getDiscountIds().stream().map(aLong -> discountService.getDiscountById_entity(aLong, false, authentication)).collect(Collectors.toSet()));
+        gameToUpdate.setCategories(gameRequest.getCategoryIds().stream().map(aLong -> categoryService.getCategoryById_entity(aLong, true, authentication)).collect(Collectors.toSet()));
 
         Game updatedGame = gameRepository.save(gameToUpdate);
         cacheHelper.updateCache(updatedGame, GAME_CACHE, GAME_LIST_CACHE);
@@ -207,7 +229,9 @@ public class GameService {
                 SPECIAL_GAME_PAGINATION_CACHE_PREFIX, 
                 GAME_OF_CATEGORY_PAGINATION_CACHE_PREFIX);
         cacheHelper.publishCacheEvent(new GameUpdateEvent(this, updatedGame.getId()));
-        return serviceHelper.makeGameResponse(GameResponse_Full.class, updatedGame, authentication);
+        
+        GameResponse_Full responseFull = serviceHelper.makeGameResponse(GameResponse_Full.class, updatedGame, authentication);
+        return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);
     }
 
     @Transactional
@@ -224,15 +248,17 @@ public class GameService {
     }
 
     @Transactional
-    public List<EntityModel<GameResponse_Minimal>> getGamesPurchased(long user_id, Authentication authentication) {
-        return boughtLibraryRepository.findPurchasedGames(user_id).stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
+    public CollectionModel<EntityModel<GameResponse_Minimal>> getGamesPurchased(long user_id, Authentication authentication) {
+        List<Game> games = boughtLibraryRepository.findPurchasedGames(user_id).stream().toList();
+        return serviceHelper.makeGameResponse_CollectionModel(serviceHelper.makeGameResponses(GameResponse_Minimal.class, games, authentication), authentication);
     }
 
     @Transactional
     public List<EntityModel<GameResponse_Minimal>> getGameReviews(long id, Authentication authentication) {
         // Todo: WIP
-        AuthUserDetail authUserDetail = StaticHelper.extractAuthUserDetail(authentication).orElseThrow(() -> new AuthenticationException("Authentication failed"));
-        return boughtLibraryRepository.findPurchasedGames(authUserDetail.getId()).stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
+//        AuthUserDetail authUserDetail = StaticHelper.extractAuthUserDetail(authentication).orElseThrow(() -> new AuthenticationException("Authentication failed"));
+//        return boughtLibraryRepository.findPurchasedGames(authUserDetail.getId()).stream().map(game -> serviceHelper.makeGameResponse(GameResponse_Minimal.class, game, authentication)).toList();
+        return null;
     }
 
     @Transactional

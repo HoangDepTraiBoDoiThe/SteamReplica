@@ -2,7 +2,6 @@ package com.example.steamreplica.service;
 
 import com.example.steamreplica.dtos.request.DiscountRequest;
 import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
-import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Minimal;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.repository.DiscountRepository;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
@@ -10,7 +9,7 @@ import com.example.steamreplica.util.CacheHelper;
 import com.example.steamreplica.util.ServiceHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -32,29 +31,41 @@ public class DiscountService {
     private final Integer PAGE_SIZE = 10;
     
     public EntityModel<DiscountResponse_Full> getDiscountById(long id, Authentication authentication) {
-        Discount discount = cacheHelper.getCache(DISCOUNT_CACHE, id, discountRepository, repo -> repo.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with id [%s]", id))));
-        return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, discount, authentication);
-    }
+        DiscountResponse_Full responseFull = cacheHelper.getCache(DISCOUNT_CACHE, id, discountRepository, repo -> {
+            Discount discount = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with id [%s]", id)));
+            return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, discount);
+        });
+        return serviceHelper.makeDiscountResponse_EntityModel(responseFull, authentication);    }
 
-    public Discount getDiscountById_entity(long id, Authentication authentication) {
-        return discountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with id [%s]", id)));
+    public Discount getDiscountById_entity(long id, boolean bThrowIfNotFound, Authentication authentication) {
+        Discount discount = discountRepository.findById(id).orElse(null);
+        if (discount == null && bThrowIfNotFound)
+            throw new ResourceNotFoundException(String.format("Discount not found with id [%s]", id));
+        return discount;
     }
 
     public EntityModel<DiscountResponse_Full> getDiscountByCode(String code, Authentication authentication) {
-        Discount discount = cacheHelper.getCache(DISCOUNT_CACHE, code, discountRepository, repo -> repo.findDiscountByDiscountCode(code).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with code [%s]", code))));
-        return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, discount, authentication);
+        DiscountResponse_Full responseFull = cacheHelper.getCache(DISCOUNT_CACHE, code, discountRepository, repo -> {
+            Discount discount = repo.findDiscountByDiscountCode(code).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with code [%s]", code)));
+            return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, discount);
+        });
+        return serviceHelper.makeDiscountResponse_EntityModel(responseFull, authentication);
     }
 
-    public List<EntityModel<DiscountResponse_Minimal>> getAllDiscounts(Authentication authentication) {
-        List<Discount> discounts = cacheHelper.getListCache(DISCOUNT_LIST_CACHE, discountRepository, ListCrudRepository::findAll);
-        return discounts.stream().map(discount -> serviceHelper.makeDiscountResponse(DiscountResponse_Minimal.class, discount, authentication)).toList();
+    public CollectionModel<EntityModel<DiscountResponse_Full>> getAllDiscounts(Authentication authentication) {
+        List<DiscountResponse_Full> responseFulls = cacheHelper.getListCache(DISCOUNT_LIST_CACHE, discountRepository, repo -> {
+            List<Discount> discounts = repo.findAll();
+            return serviceHelper.makeDiscountResponses(DiscountResponse_Full.class, discounts);
+        });
+        return serviceHelper.makeDiscountResponse_CollectionModel(responseFulls, authentication);
     }
 
     @Transactional
     public EntityModel<DiscountResponse_Full> addDiscount(DiscountRequest discountRequest, Authentication authentication) {
         Discount newDiscount = new Discount(discountRequest.getDiscountName(), discountRequest.getDiscountCode(), discountRequest.getDiscountDescription(), discountRequest.getDiscountPercent());
         Discount newCreatedDiscount = discountRepository.save(newDiscount);
-        return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, newCreatedDiscount, authentication);
+        DiscountResponse_Full responseFull = serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, newCreatedDiscount);
+        return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);
     }
 
     @Transactional
@@ -68,8 +79,8 @@ public class DiscountService {
 
         cacheHelper.updateCache(updatedDiscount, DISCOUNT_CACHE, DISCOUNT_LIST_CACHE);
         cacheHelper.updateCache(DISCOUNT_CACHE, updatedDiscount, Discount::getDiscountCode);
-        return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, updatedDiscount, authentication);
-    }
+        DiscountResponse_Full responseFull = serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, updatedDiscount);
+        return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);    }
 
     @Transactional
     public void deleteDiscount(long id) {

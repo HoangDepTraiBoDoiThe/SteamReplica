@@ -98,13 +98,19 @@ public class PurchaseService {
     }
     
     public CollectionModel<EntityModel<PurchaseResponse_Basic>> getAllPurchasesOfUser(long user_id, Authentication authentication) {
-        List<Purchase> purchases = cacheHelper.getListCache(PURCHASE_LIST_CACHE, purchaseRepository, repo -> repo.findAllByBoughtLibrary_Id(user_id).stream().toList());
-        return serviceHelper.makePurchaseResponse_CollectionModel(PurchaseResponse_Basic.class, purchases, authentication);
+        List<PurchaseResponse_Basic> responseBasics = cacheHelper.getListCache(PURCHASE_LIST_CACHE, purchaseRepository, repo -> {
+            List<Purchase> purchases = repo.findAllByBoughtLibrary_Id(user_id).stream().toList();
+            return serviceHelper.makePurchaseResponses(PurchaseResponse_Basic.class, purchases);
+        });
+        return serviceHelper.makePurchaseResponse_CollectionModel(responseBasics, authentication);
     }
     
     public EntityModel<PurchaseResponse_Full> getPurchaseById(long id, Authentication authentication) {
-        Purchase purchase = cacheHelper.getCache(PURCHASE_CACHE, id, purchaseRepository, repo -> repo.findById(id).orElseThrow(() -> new RuntimeException("Purchase Transaction not found")));
-        return serviceHelper.makePurchaseResponse(PurchaseResponse_Full.class, purchase, authentication);
+        PurchaseResponse_Full responseFull = cacheHelper.getCache(PURCHASE_CACHE, id, purchaseRepository, repo -> {
+            Purchase purchase = repo.findById(id).orElseThrow(() -> new RuntimeException("Purchase Transaction not found"));
+            return serviceHelper.makePurchaseResponse(PurchaseResponse_Full.class, purchase);
+        });
+        return serviceHelper.makePurchaseResponse_EntityModel(responseFull, authentication);
     }
     
     @Transactional
@@ -123,11 +129,13 @@ public class PurchaseService {
             return new PurchasedDLC(dlcService.getDlcById_entity(aLong), dlcTotalDiscount);
         }).collect(Collectors.toSet());
         
-        Discount additionalDiscount = discountService.getDiscountById_entity(request.getAdditionalDiscountId(), authentication);
+        Discount additionalDiscount = discountService.getDiscountById_entity(request.getAdditionalDiscountId(), true, authentication);
         
         Purchase purchase = new Purchase(ZonedDateTime.now(), "None", boughtLibrary, purchasedGames, purchasedDLCSs, additionalDiscount);
         Purchase newCreatedPurchase = purchaseRepository.save(purchase);
-        return serviceHelper.makePurchaseResponse(PurchaseResponse_Full.class, newCreatedPurchase, authentication);
+
+        PurchaseResponse_Full responseFull = serviceHelper.makePurchaseResponse(PurchaseResponse_Full.class, newCreatedPurchase);
+        return serviceHelper.makePurchaseResponse_EntityModel(responseFull, authentication);
     }
     
 //    public EntityModel<PurchaseResponse_Full> updatePurchase(long id, PurchaseRequest request, Authentication authentication) {

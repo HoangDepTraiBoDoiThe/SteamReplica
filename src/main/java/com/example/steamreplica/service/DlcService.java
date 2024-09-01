@@ -25,7 +25,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
 @RequiredArgsConstructor
@@ -95,8 +96,11 @@ public class DlcService {
     }
     
     public EntityModel<DlcResponse_Full> getDlcById(long id, Authentication authentication) {
-        DLC dlc = cacheHelper.getCache(DLC_CACHE, id, dlcRepository, repo -> repo.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("DLC with id %d not found", id))));
-        return serviceHelper.makeDlcResponse(DlcResponse_Full.class, dlc, authentication);
+        DlcResponse_Full responseFull = cacheHelper.getCache(DLC_CACHE, id, dlcRepository, repo -> {
+            DLC dlc = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("DLC with id %d not found", id)));
+            return serviceHelper.makeDlcResponse(DlcResponse_Full.class, dlc, authentication);
+        });
+        return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);
     }
     
     public DLC getDlcById_entity(long id) {
@@ -109,10 +113,12 @@ public class DlcService {
 
     @Transactional
     public CollectionModel<EntityModel<DlcResponse_Basic>> getAllDlcOfGame(long gameId, int page, Authentication authentication) {
-        List<DLC> dlcs = cacheHelper.getPaginationCache(DLC_PAGINATION_CACHE_PREFIX, page, dlcRepository, repo -> repo.findAllByGame_Id(gameId, PageRequest.of(page, PAGE_SIZE)).getContent());
-        CollectionModel<EntityModel<DlcResponse_Basic>> entityModels = serviceHelper.makeDlcResponse_CollectionModel(DlcResponse_Basic.class, dlcs, authentication);
-
-        return serviceHelper.addLinksToPaginationResponse(entityModels, page, currentPage -> DummyInvocationUtils.methodOn(DlcController.class).getAllDlcOfGame(gameId, currentPage, authentication));
+        List<DlcResponse_Basic> responseBasics = cacheHelper.getPaginationCache(DLC_PAGINATION_CACHE_PREFIX, DlcResponse_Basic.class, page, dlcRepository, repo -> {
+            List<DLC> dlcs = repo.findAllByGame_Id(gameId, PageRequest.of(page, PAGE_SIZE)).getContent();
+            return serviceHelper.makeDlcResponses(DlcResponse_Basic.class, dlcs, authentication);
+        });
+        var entityModelCollectionModel = serviceHelper.makeDlcResponse_CollectionModel(responseBasics, authentication);
+        return serviceHelper.addLinksToPaginationResponse(entityModelCollectionModel, page, page1 -> methodOn(DlcController.class).getPurchasedDlcOfGame(gameId, authentication));
     }
 
 //    public List<EntityModel<DlcResponse_Basic>> getAllDlc(Authentication authentication) {
@@ -130,7 +136,9 @@ public class DlcService {
        
         DLC newCreatedDlc = dlcRepository.save(newDlc);
 
-        return serviceHelper.makeDlcResponse(DlcResponse_Full.class, newCreatedDlc, authentication);
+        // todo: wip update game cache
+        DlcResponse_Full responseFull = serviceHelper.makeDlcResponse(DlcResponse_Full.class, newCreatedDlc, authentication);
+        return serviceHelper.makeDlcResponse_EntityModel(responseFull, authentication);
     }
 
     @Transactional
@@ -145,7 +153,9 @@ public class DlcService {
 
         cacheHelper.updateCache(updatedDlc, DLC_CACHE, DLC_LIST_CACHE);
         cacheHelper.updatePaginationCache(updatedDlc, PAGE_RANGE, DLC_PAGINATION_CACHE_PREFIX);
-        return serviceHelper.makeDlcResponse(DlcResponse_Full.class, updatedDlc, authentication);
+
+        DlcResponse_Full responseFull = serviceHelper.makeDlcResponse(DlcResponse_Full.class, updatedDlc, authentication);
+        return serviceHelper.makeDlcResponse_EntityModel(responseFull, authentication);
     }
 
     @Transactional
@@ -157,8 +167,11 @@ public class DlcService {
     }
 
     @Transactional
-    public List<EntityModel<DlcResponse_Basic>> getPurchasedDlcOfGame(long gameId, Authentication authentication) {
+    public CollectionModel<EntityModel<DlcResponse_Basic>> getPurchasedDlcOfGame(long gameId, Authentication authentication) {
+        // todo: validate owner request
         AuthUserDetail authUserDetail = StaticHelper.extractAuthUserDetail(authentication).orElseThrow(() -> new AuthenticationException("Authentication failed"));
-        return boughtLibraryRepository.findPurchasedDlcOfGame(authUserDetail.getId(), gameId).stream().map(dlc -> serviceHelper.makeDlcResponse(DlcResponse_Basic.class, dlc, authentication)).toList();
+        List<DLC> dlcs = boughtLibraryRepository.findPurchasedDlcOfGame(authUserDetail.getId(), gameId).stream().toList();
+        List<DlcResponse_Basic> responseBasics = serviceHelper.makeDlcResponses(DlcResponse_Basic.class, dlcs, authentication);
+        return serviceHelper.makeDlcResponse_CollectionModel(responseBasics, authentication);
     }
 }
