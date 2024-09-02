@@ -9,6 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 
 import java.sql.Blob;
 import java.time.LocalDateTime;
@@ -21,13 +22,13 @@ public class JacksonConfig {
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
-        SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ISO_DATE_TIME));
-        simpleModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ISO_DATE_TIME));
-        simpleModule.addSerializer(Blob.class, new SqlBlobSerializer());
-        simpleModule.addDeserializer(Blob.class, new BlobDeserializer());
+        Jackson2HalModule jackson2HalModule = new Jackson2HalModule();
+        jackson2HalModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ISO_DATE_TIME));
+        jackson2HalModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ISO_DATE_TIME));
+        jackson2HalModule.addSerializer(Blob.class, new SqlBlobSerializer());
+        jackson2HalModule.addDeserializer(Blob.class, new BlobDeserializer());
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.registerModule(simpleModule);
+        mapper.registerModule(jackson2HalModule);
         return mapper;
     }
 }
