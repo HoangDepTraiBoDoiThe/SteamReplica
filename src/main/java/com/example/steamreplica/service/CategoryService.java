@@ -10,6 +10,7 @@ import com.example.steamreplica.util.CacheHelper;
 import com.example.steamreplica.util.ServiceHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
@@ -26,42 +27,35 @@ public class CategoryService {
 
     private final String CATEGORY_LIST_CACHE = "categoryListCache";
     private final String CATEGORY_CACHE = "categoryCache";
-    
+
     public EntityModel<CategoryResponse_Full> getCategoryById(long id, Authentication authentication) {
-        CategoryResponse_Full responseFull = cacheHelper.getCache(CATEGORY_CACHE, CategoryResponse_Full.class, id, categoryRepository, repo -> {
+        return cacheHelper.getCache(CATEGORY_CACHE, CategoryResponse_Full.class, id, categoryRepository, repo -> {
             Category category = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
-            return serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, category);
-        }, 15);
-        return serviceHelper.makeCategoryResponse_EntityModel(responseFull, authentication);
+            return serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, category, authentication);
+        }, 30);
     }
 
     @Transactional
-    public Category getCategoryById_entity(long id, boolean bThrowIfNotFound, Authentication authentication) {
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
-        if (category == null && bThrowIfNotFound)
-            throw new ResourceNotFoundException(String.format("Discount not found with id [%s]", id));
-        return category;
+    public Category getCategoryById_entity(long id, Authentication authentication) {
+        return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
     }
 
     @Transactional
     public Category getCategoryById_entityFull(long id) {
         return categoryRepository.findById_full(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Category with id %d not found", id)));
     }
-    
-    public CollectionModel<EntityModel<CategoryResponse_Minimal>> getAllCategories(Authentication authentication) {
-        List<CategoryResponse_Minimal> categoryResponseMinimals  = cacheHelper.getListCache(CATEGORY_LIST_CACHE, categoryRepository, repo -> {
-            List<Category> categories = repo.findAll();
-            return serviceHelper.makeCategoryResponses(CategoryResponse_Minimal.class, categories);
-        });
 
-        return serviceHelper.makeCategoryResponse_CollectionModel(categoryResponseMinimals, authentication);
+    public CollectionModel<EntityModel<CategoryResponse_Minimal>> getAllCategories(Authentication authentication) {
+        return cacheHelper.getListCache(CATEGORY_LIST_CACHE, CategoryResponse_Minimal.class, categoryRepository, categoryRepository1 -> {
+            List<Category> categories = categoryRepository1.findAll();
+            return serviceHelper.makeCategoryResponse_CollectionModel(CategoryResponse_Minimal.class, categories, authentication);
+        });
     }
 
     @Transactional
     public EntityModel<CategoryResponse_Full> createCategory(CategoryRequest categoryRequest, Authentication authentication) {
         Category newCategory = categoryRequest.toModel();
-        CategoryResponse_Full responseFull = serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, newCategory);
-        return serviceHelper.makeCategoryResponse_EntityModel(responseFull, authentication);
+        return serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, newCategory, authentication);
     }
 
     @Transactional
@@ -70,10 +64,11 @@ public class CategoryService {
         categoryToUpdate.setCategoryName(categoryRequest.getCategoryName());
         categoryToUpdate.setCategoryDescription(categoryRequest.getCategoryDescription());
         Category updateCategory = categoryRepository.save(categoryToUpdate);
-        CategoryResponse_Full responseFull = serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, updateCategory);
 
-        cacheHelper.updateCache(responseFull, CATEGORY_CACHE, CATEGORY_LIST_CACHE);
-        return serviceHelper.makeCategoryResponse_EntityModel(responseFull, authentication);
+        EntityModel<CategoryResponse_Full> categoryResponseFullEntityModel = serviceHelper.makeCategoryResponse(CategoryResponse_Full.class, updateCategory, authentication);
+        cacheHelper.updateCache(categoryResponseFullEntityModel, CATEGORY_CACHE);
+        cacheHelper.deleteListCaches(CATEGORY_LIST_CACHE);
+        return categoryResponseFullEntityModel;
     }
 
     @Transactional

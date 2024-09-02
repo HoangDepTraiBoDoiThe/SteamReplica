@@ -1,17 +1,20 @@
 package com.example.steamreplica.util;
 
 import com.example.steamreplica.dtos.response.BaseResponse;
+import com.example.steamreplica.model.BaseCacheableModel;
 import com.example.steamreplica.service.exception.CacheException;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeBase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +30,7 @@ public class CacheHelper {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ObjectMapper objectMapper;
+    private final ServiceHelper serviceHelper;
 
     private static String makeCacheKey(String cacheKeyPrefix) {
         return cacheKeyPrefix + "::";
@@ -54,25 +58,27 @@ public class CacheHelper {
      */
     public <T extends BaseResponse> void refreshAllCachesSelectiveOnUpdatedEventReceived(String cacheKeyPrefix, List<String> paginationCacheKeyPrefix, List<String> listCacheKeyPrefix, int pageRange, long id, IMyTemplateHelper<T> IMyTemplateHelper) {
         refreshCacheOnUpdatedEventReceived(cacheKeyPrefix, id, IMyTemplateHelper);
-        refreshListCachesOnUpdatedEventReceived(listCacheKeyPrefix);
+        listCacheKeyPrefix.forEach(this::deleteListCaches);
         refreshPaginationCacheOnUpdatedEventReceived(paginationCacheKeyPrefix, pageRange, id, IMyTemplateHelper);
     }
 
     public <T extends BaseResponse> void refreshPaginationCacheOnUpdatedEventReceived(List<String> paginationCacheKeyPrefix, int pageRange, long id, IMyTemplateHelper<T> IMyTemplateHelper) {
-        paginationCacheKeyPrefix.stream().parallel().forEach(prefix -> {
-            for (int i = 0; i < pageRange; i++) {
-                String paginationKey = makePaginationCacheKey(prefix, i);
-                redisTemplate.opsForHash().entries(paginationKey).values().stream().map(o -> (T) o).forEach(t -> {
-                    if (IMyTemplateHelper.isRelated(t, id)) {
-                        redisTemplate.delete(paginationKey);
-                    }
-                });
+        paginationCacheKeyPrefix.stream().parallel().forEach(prefix -> IntStream.rangeClosed(1, pageRange).parallel().forEach(i -> {
+            String paginationCacheKey = makePaginationCacheKey(prefix, i);
+            String objectJson = (String) redisTemplate.opsForValue().get(paginationCacheKey);
+            CollectionModel<EntityModel<T>> deserializedObject = null;
+            try {
+                deserializedObject = objectMapper.readValue(objectJson, objectMapper.getTypeFactory().constructParametricType(CollectionModel.class, objectMapper.getTypeFactory().constructParametricType(EntityModel.class, BaseResponse.class)));
+            } catch (Exception e) {
+                handleException(e);
+                return;
             }
-        });
-    }
-
-    public void refreshListCachesOnUpdatedEventReceived(List<String> listCacheKeyPrefix) {
-        listCacheKeyPrefix.forEach(prefix -> CompletableFuture.runAsync(() -> redisTemplate.delete(makeListCacheKey(prefix))));
+            deserializedObject.getContent().forEach(tEntityModel -> {
+                if (IMyTemplateHelper.isRelated(tEntityModel.getContent(), id)) {
+                    redisTemplate.delete(paginationCacheKey);
+                }
+            });
+        }));
     }
 
     public <T extends BaseResponse> void refreshCacheOnUpdatedEventReceived(String cacheKeyPrefix, long id, IMyTemplateHelper<T> IMyTemplateHelper) {
@@ -99,15 +105,16 @@ public class CacheHelper {
      * @return The retrieved object from the cache or a newly created object.
      * @throws CacheException if an error occurs while retrieving the object from the cache.
      */
-    public <R extends BaseResponse, T> R getCache(String cacheKeyPrefix, Class<R> Clazz, Object key, T repo, Function<T, R> trFunction, long timeToLive) {
+    public <R extends BaseResponse, T> EntityModel<R> getCache(String cacheKeyPrefix, Class<R> Clazz, Object key, T repo, Function<T, EntityModel<R>> trFunction, long timeToLive) {
         try {
             String cacheKey = makeCacheKey(cacheKeyPrefix);
 
-            Object cachedObject = redisTemplate.opsForHash().get(cacheKey, String.valueOf(key));
-            if (cachedObject != null) return objectMapper.readValue((String) cachedObject, Clazz);
+            String objectJson = (String) redisTemplate.opsForHash().get(cacheKey, key);
+            EntityModel<R> deserializedObject = objectMapper.readValue(objectJson, objectMapper.getTypeFactory().constructParametricType(EntityModel.class, Clazz));
+            if (deserializedObject != null) return deserializedObject;
 
-            R objectToCache = trFunction.apply(repo);
-            redisTemplate.opsForHash().put(cacheKey, String.valueOf(key), objectMapper.writeValueAsString(objectToCache));
+            EntityModel<R> objectToCache = trFunction.apply(repo);
+            redisTemplate.opsForHash().put(cacheKey, key, objectMapper.writeValueAsString(objectToCache));
             redisTemplate.expire(cacheKey, timeToLive, TimeUnit.MINUTES);
 
             return objectToCache;
@@ -118,27 +125,19 @@ public class CacheHelper {
     }
 
     // Get target list in cache from Redis with cacheKeyPrefix and key and return the list if it exists, otherwise create the object with trFunction and cache it.
-    public <R extends BaseResponse, T> List<R> getListCache(String cacheKeyPrefix, T repo, Function<T, List<R>> trFunction) {
+    public <R extends BaseResponse, T> CollectionModel<EntityModel<R>> getListCache(String cacheKeyPrefix, Class<R> responseType, T repo, Function<T, CollectionModel<EntityModel<R>>> trFunction) {
         try {
             String cacheKey = makeListCacheKey(cacheKeyPrefix);
 
-            Map<Object, Object> object = redisTemplate.opsForHash().entries(cacheKey);
-            List<R> exitingList = object.values().stream().map(value -> {
-                try {
-                    return objectMapper.readValue((String) value, new TypeReference<R>() {
-                    });
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }).toList();
-            if (!exitingList.isEmpty()) return exitingList;
+            String objectJson = (String) redisTemplate.opsForValue().get(cacheKey);
+            CollectionModel<EntityModel<R>> cachedResponses = objectMapper.readValue(objectJson, objectMapper.getTypeFactory().constructParametricType(CollectionModel.class, objectMapper.getTypeFactory().constructParametricType(EntityModel.class, responseType)));
 
-            List<R> list = trFunction.apply(repo);
-            for (R item : list) {
-                redisTemplate.opsForHash().put(cacheKey, String.valueOf(item.getId()), list);
-            }
+            if (!cachedResponses.getContent().isEmpty()) return cachedResponses;
 
-            return list;
+            CollectionModel<EntityModel<R>> entityModels = trFunction.apply(repo);
+            redisTemplate.opsForValue().set(cacheKey, entityModels);
+
+            return entityModels;
         } catch (Exception e) {
             handleException(e);
             return null;
@@ -146,59 +145,34 @@ public class CacheHelper {
     }
 
     // Get pagination list in cache from Redis with cacheKeyPrefix and key and return the list if it exists, otherwise create the object with trFunction and cache it.
-    public <R extends BaseResponse, T> List<R> getPaginationCache(String cacheKeyPrefix, Class<R> Clazz, int page, T repo, Function<T, List<R>> trFunction) {
+    public <R extends BaseResponse, T> CollectionModel<EntityModel<R>> getPaginationCache(String cacheKeyPrefix, Class<R> Clazz, int page, T repo, Function<T, CollectionModel<EntityModel<R>>> trFunction) {
         try {
             String cacheKey = makePaginationCacheKey(cacheKeyPrefix, page);
 
-            Map<Object, Object> object = redisTemplate.opsForHash().entries(cacheKey);
-            List<R> exitingList = object.values().stream().map(value -> {
-                try {
-                    return objectMapper.readValue((String) value, Clazz);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }).toList();
-            if (!exitingList.isEmpty()) return exitingList;
-
-            List<R> list = trFunction.apply(repo);
-            for (R item : list) {
-                redisTemplate.opsForHash().put(cacheKey, String.valueOf(item.getId()), objectMapper.writeValueAsString(EntityModel.of(item)));
+            String objectJson = (String) redisTemplate.opsForValue().get(cacheKey);
+            if (objectJson != null) {
+                CollectionModel<EntityModel<R>> deserializedObject = objectMapper.readValue(objectJson, objectMapper.getTypeFactory().constructParametricType(CollectionModel.class, objectMapper.getTypeFactory().constructParametricType(EntityModel.class, Clazz)));
+                if (!deserializedObject.getContent().isEmpty()) return deserializedObject;
             }
+
+            CollectionModel<EntityModel<R>> entityModels = trFunction.apply(repo);
+            redisTemplate.opsForValue().set(cacheKey, objectMapper.writeValueAsString(entityModels));
             redisTemplate.expire(cacheKey, 15, TimeUnit.MINUTES);
 
-            return list;
+            return entityModels;
         } catch (Exception e) {
             handleException(e);
             return null;
         }
     }
 
-    /**
-     * Updates the cache for a specific object in Redis. If the object exists in the list cache, it updates the object in the hash map.
-     *
-     * @param objectToUpdate     The object to update in the cache.
-     * @param cacheKeyPrefix     The prefix for the cache key.
-     * @param ListCacheKeyPrefix The prefix for the list cache key.
-     */
-    public <T extends BaseResponse> void updateCache(T objectToUpdate, String cacheKeyPrefix, String ListCacheKeyPrefix) {
-        // Update the object in the key-value store
-        redisTemplate.opsForHash().put(makeCacheKey(cacheKeyPrefix), String.valueOf(objectToUpdate.getId()), objectToUpdate);
-
-        // Update the object in the list cache if it exists
-        String listCacheKeyName = makeListCacheKey(ListCacheKeyPrefix);
-        Cursor<Map.Entry<Object, Object>> cursor = redisTemplate.opsForHash().scan(listCacheKeyName, ScanOptions.NONE);
-        cursor.forEachRemaining(pair -> {
-            T value = null;
-            try {
-                value = objectMapper.readValue((String) pair.getValue(), new TypeReference<T>() {});
-                if (Objects.equals(value.getId(), objectToUpdate.getId())) {
-                    redisTemplate.opsForHash().put(listCacheKeyName, String.valueOf(objectToUpdate.getId()), objectMapper.writeValueAsString(objectToUpdate));
-                }
-            } catch (Exception e) {
-                handleException(e);
-            }
-        });
-        cursor.close();
+    public <T extends BaseResponse> void updateCache(EntityModel<T> objectToUpdate, String cacheKeyPrefix) {
+        if (objectToUpdate.getContent() == null) return;
+        try {
+            redisTemplate.opsForValue().set(makeCacheKey(cacheKeyPrefix), objectMapper.writeValueAsString(objectToUpdate));
+        } catch (Exception e) {
+            handleException(e);
+        }
     }
 
     public <T extends BaseResponse> void updateCache(T objectToUpdate, String cacheKeyPrefix, String ListCacheKeyPrefix, Object key, IMyTemplateHelper<T> IMyTemplateHelper) {
@@ -224,42 +198,23 @@ public class CacheHelper {
         cursor.close();
     }
 
-    public <T extends BaseResponse, R> void updateCache(String cacheKeyPrefix, T objectToUpdate, Function<T, R> trFunction) {
-        // Update the object in the key-value store
-        try {
-            redisTemplate.opsForHash().put(makeCacheKey(cacheKeyPrefix), trFunction.apply(objectToUpdate), objectMapper.writeValueAsString(objectToUpdate));
-        } catch (Exception e) {
-            handleException(e);
-        }
-    }
-
-    /**
-     * Updates the pagination cache for the specified object with the given page range and cache key prefixes.
-     * Retrieves the cache entries from Redis based on the pagination cache key prefixes and iterates over each page within the range.
-     * Compares the object IDs in the cache with the ID of the object to update, and updates the cache entry if a match is found.
-     *
-     * @param objectToUpdate           The object to be updated in the cache.
-     * @param pageRange                The range of pages to update in the cache.
-     * @param paginationCacheKeyPrefix The prefixes used to construct the pagination cache keys.
-     */
-    public <T extends BaseResponse> void updatePaginationCache(T objectToUpdate, int pageRange, String... paginationCacheKeyPrefix) {
-        if (objectToUpdate == null) {
+    public <T extends BaseResponse> void updatePaginationCache(EntityModel<T> objectToUpdate, int pageRange, String... paginationCacheKeyPrefix) {
+        if (objectToUpdate.getContent() == null) {
             throw new IllegalArgumentException("objectToUpdate cannot be null");
         }
         Arrays.stream(paginationCacheKeyPrefix).parallel().forEach(prefix -> IntStream.rangeClosed(1, pageRange).parallel().forEach(i -> {
             String paginationCacheKey = makePaginationCacheKey(prefix, i);
-            Map<Object, Object> cacheEntry = redisTemplate.opsForHash().entries(paginationCacheKey);
-            cacheEntry.values().stream().forEach(value -> {
-                try {
-                    T item = null;
-                    item = objectMapper.readValue((String) value, new TypeReference<T>() {
-                    });
-                    if (Objects.equals(item.getId(), objectToUpdate.getId())) {
-                        redisTemplate.opsForHash().put(paginationCacheKey, String.valueOf(item.getId()), objectMapper.writeValueAsString(item));
-                    }
-                } catch (Exception e) {
-                    handleException(e);
-                }
+            String objectJson = (String) redisTemplate.opsForValue().get(paginationCacheKey);
+            CollectionModel<EntityModel<T>> deserializedObject = null;
+            try {
+                deserializedObject = objectMapper.readValue(objectJson, objectMapper.getTypeFactory().constructParametricType(CollectionModel.class, objectMapper.getTypeFactory().constructParametricType(EntityModel.class, BaseResponse.class)));
+            } catch (Exception e) {
+                handleException(e);
+                return;
+            }
+            deserializedObject.getContent().forEach(tEntityModel -> {
+                if (Objects.equals(Objects.requireNonNull(tEntityModel.getContent()).getId(), objectToUpdate.getContent().getId()))
+                    redisTemplate.delete(paginationCacheKey);
             });
         }));
     }
@@ -281,50 +236,10 @@ public class CacheHelper {
         redisTemplate.opsForHash().delete(cacheKey, String.valueOf(key));
     }
 
-    /**
-     * Deletes the cache entries associated with the specified object ID within the given page range and pagination cache key prefixes.
-     *
-     * @param id                    The ID of the object to match for deletion in the cache.
-     * @param pageRange             The range of pages to search for cache entries.
-     * @param paginationCachePrefix The prefixes used to construct the pagination cache keys.
-     */
-    public <T extends BaseResponse> void deletePaginationCacheSelective(long id, int pageRange, String... paginationCachePrefix) {
-        Arrays.stream(paginationCachePrefix).parallel().forEach(prefix -> IntStream.rangeClosed(1, pageRange).forEach(i -> {
-            String cacheKeyName = makePaginationCacheKey(prefix, i);
-            Cursor<Map.Entry<Object, Object>> cursor = redisTemplate.opsForHash().scan(cacheKeyName, ScanOptions.NONE);
-            cursor.forEachRemaining(pair -> {
-                try {
-                    T value = null;
-                    value = objectMapper.readValue((String) pair.getValue(), new TypeReference<T>() {
-                    });
-                    if (Objects.equals(value.getId(), id)) {
-                        redisTemplate.delete(cacheKeyName);
-                    }
-                } catch (Exception e) {
-                    handleException(e);
-                }
-
-            });
-            cursor.close();
-        }));
-    }
-
     public <T extends BaseResponse> void deletePaginationCache(int pageRange, String... paginationCachePrefix) {
         Arrays.stream(paginationCachePrefix).parallel().forEach(prefix -> IntStream.rangeClosed(1, pageRange).forEach(i -> {
             String cacheKeyName = makePaginationCacheKey(prefix, i);
-            Cursor<Map.Entry<Object, Object>> cursor = redisTemplate.opsForHash().scan(cacheKeyName, ScanOptions.NONE);
-            cursor.forEachRemaining(pair -> {
-                try {
-                    T value = null;
-                    value = objectMapper.readValue((String) pair.getValue(), new TypeReference<T>() {
-                    });
-                    redisTemplate.delete(cacheKeyName);
-                } catch (Exception e) {
-                    handleException(e);
-                }
-
-            });
-            cursor.close();
+            redisTemplate.delete(cacheKeyName);
         }));
     }
 

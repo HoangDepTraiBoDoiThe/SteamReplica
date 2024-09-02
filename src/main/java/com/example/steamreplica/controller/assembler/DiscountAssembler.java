@@ -3,6 +3,8 @@ package com.example.steamreplica.controller.assembler;
 import com.example.steamreplica.constants.SystemRole;
 import com.example.steamreplica.controller.DiscountController;
 import com.example.steamreplica.dtos.response.BaseResponse;
+import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Minimal;
+import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.util.StaticHelper;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -21,7 +23,6 @@ public class DiscountAssembler {
         Collection<String> roles = StaticHelper.extractGrantedAuthority(authentication);
         
         EntityModel<T> responseEntityModel = EntityModel.of(entity,
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).getDiscount(entity.getId(), authentication)).withSelfRel().withType(HttpMethod.GET.name()),
                 WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DiscountController.class).getAllDiscounts(authentication)).withRel("Get all discounts").withType(HttpMethod.GET.name())
                 );
 

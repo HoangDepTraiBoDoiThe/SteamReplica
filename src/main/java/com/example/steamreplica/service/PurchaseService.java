@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,7 +68,7 @@ public class PurchaseService {
                     return user.getBoughtLibrary().getPurchases().stream().anyMatch(purchase -> Objects.equals(purchase.getId(), id));
                 });
     }
-    
+
     @EventListener
     public void gameUpdated(GameUpdateEvent updateEvent) {
         cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
@@ -81,7 +82,7 @@ public class PurchaseService {
                     return game.getPurchasedGame().stream().anyMatch(purchasedGame -> Objects.equals(purchasedGame.getTransaction().getId(), id));
                 });
     }
-    
+
     @EventListener
     public void dlcUpdated(DlcImageUpdateEvent updateEvent) {
         cacheHelper.refreshAllCachesSelectiveOnUpdatedEventReceived(
@@ -95,28 +96,26 @@ public class PurchaseService {
                     return dlc.getPurchasedDLCs().stream().anyMatch(purchasedDLC -> Objects.equals(purchasedDLC.getTransaction().getId(), id));
                 });
     }
-    
+
     public CollectionModel<EntityModel<PurchaseResponse_Basic>> getAllPurchasesOfUser(long user_id, Authentication authentication) {
-        List<PurchaseResponse_Basic> responseBasics = cacheHelper.getListCache(PURCHASE_LIST_CACHE, purchaseRepository, repo -> {
+        return cacheHelper.getListCache(PURCHASE_LIST_CACHE, PurchaseResponse_Basic.class, purchaseRepository, repo -> {
             List<Purchase> purchases = repo.findAllByBoughtLibrary_Id(user_id).stream().toList();
-            return serviceHelper.makePurchaseResponses(PurchaseResponse_Basic.class, purchases);
+            return serviceHelper.makePurchaseResponse_CollectionModel(PurchaseResponse_Basic.class, purchases, authentication);
         });
-        return serviceHelper.makePurchaseResponse_CollectionModel(responseBasics, authentication);
     }
-    
+
     public EntityModel<PurchaseResponse_Full> getPurchaseById(long id, Authentication authentication) {
-        PurchaseResponse_Full responseFull = cacheHelper.getCache(PURCHASE_CACHE, PurchaseResponse_Full.class, id, purchaseRepository, repo -> {
+        return cacheHelper.getCache(PURCHASE_CACHE, PurchaseResponse_Full.class, id, purchaseRepository, repo -> {
             Purchase purchase = repo.findById(id).orElseThrow(() -> new RuntimeException("Purchase Transaction not found"));
-            return serviceHelper.makePurchaseResponse(PurchaseResponse_Full.class, purchase);
-        }, 60);
-        return serviceHelper.makePurchaseResponse_EntityModel(responseFull, authentication);
+            return serviceHelper.makePurchaseResponse(PurchaseResponse_Full.class, purchase, authentication);
+        }, 30);
     }
-    
+
     @Transactional
     public EntityModel<PurchaseResponse_Full> createPurchase(PurchaseRequest request, Authentication authentication) {
         AuthUserDetail authUserDetail = StaticHelper.extractAuthUserDetail(authentication).orElseThrow(() -> new AuthenticationException("Authentication failed"));
         BoughtLibrary boughtLibrary = boughtLibraryRepository.findById(authUserDetail.getId()).orElseThrow(() -> new ResourceNotFoundException("Can not get Library"));
-        
+
         Set<PurchasedGame> purchasedGames = request.getGameIds().stream().map(aLong -> {
             Game game = gameService.getGameById_entity(aLong);
             double gameTotalDiscount = game.getDiscounts().stream().mapToDouble(Discount::getDiscountPercent).sum();
@@ -127,16 +126,14 @@ public class PurchaseService {
             double dlcTotalDiscount = dlc.getDiscounts().stream().mapToDouble(Discount::getDiscountPercent).sum();
             return new PurchasedDLC(dlcService.getDlcById_entity(aLong), dlcTotalDiscount);
         }).collect(Collectors.toSet());
-        
-        Discount additionalDiscount = discountService.getDiscountById_entity(request.getAdditionalDiscountId(), true, authentication);
-        
+
+        Discount additionalDiscount = discountService.getDiscountById_entity(request.getAdditionalDiscountId(), authentication);
+
         Purchase purchase = new Purchase(ZonedDateTime.now(), "None", boughtLibrary, purchasedGames, purchasedDLCSs, additionalDiscount);
         Purchase newCreatedPurchase = purchaseRepository.save(purchase);
-
-        PurchaseResponse_Full responseFull = serviceHelper.makePurchaseResponse(PurchaseResponse_Full.class, newCreatedPurchase);
-        return serviceHelper.makePurchaseResponse_EntityModel(responseFull, authentication);
+        return serviceHelper.makePurchaseResponse(PurchaseResponse_Full.class, newCreatedPurchase, authentication);
     }
-    
+
 //    public EntityModel<PurchaseResponse_Full> updatePurchase(long id, PurchaseRequest request, Authentication authentication) {
 //        Purchase existingPurchase = purchaseRepository.findById(id).orElseThrow(() -> new RuntimeException("Purchase not found"));
 //
@@ -146,7 +143,7 @@ public class PurchaseService {
 //
 //        return purchaseRepository.save(existingPurchase);
 //    }
-    
+
     public void deletePurchase(long id) {
         Purchase purchase = purchaseRepository.findById(id).orElseThrow(() -> new RuntimeException("Purchase not found"));
         cacheHelper.deleteCaches(PURCHASE_CACHE, purchase.getId(), PURCHASE_LIST_CACHE);

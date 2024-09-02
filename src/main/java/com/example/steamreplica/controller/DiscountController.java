@@ -19,17 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class DiscountController {
     private final DiscountService discountService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getDiscount(@PathVariable long id, Authentication authentication) {
-        EntityModel<DiscountResponse_Full> responseEntityModel = discountService.getDiscountById(id, authentication);
+    @GetMapping("/{code}")
+    public ResponseEntity<?> getDiscount(@PathVariable String code, Authentication authentication) {
+        EntityModel<DiscountResponse_Full> responseEntityModel = discountService.getDiscountByCode(code, authentication);
         responseEntityModel.add(
         );
-        return ResponseEntity.ok(responseEntityModel);
-    }
-
-    @GetMapping("/code/{code}")
-    public ResponseEntity<?> getDiscountByCode(@PathVariable String code, Authentication authentication) {
-        EntityModel<DiscountResponse_Full> responseEntityModel = discountService.getDiscountByCode(code, authentication);
         return ResponseEntity.ok(responseEntityModel);
     }
 

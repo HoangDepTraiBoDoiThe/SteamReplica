@@ -2,6 +2,7 @@ package com.example.steamreplica.service;
 
 import com.example.steamreplica.dtos.request.DiscountRequest;
 import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Full;
+import com.example.steamreplica.dtos.response.game.discount.DiscountResponse_Minimal;
 import com.example.steamreplica.model.game.discount.Discount;
 import com.example.steamreplica.repository.DiscountRepository;
 import com.example.steamreplica.service.exception.ResourceNotFoundException;
@@ -9,6 +10,7 @@ import com.example.steamreplica.util.CacheHelper;
 import com.example.steamreplica.util.ServiceHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.Authentication;
@@ -29,43 +31,30 @@ public class DiscountService {
     private final String SPECIAL_DISCOUNT_PAGINATION_CACHE_PREFIX = "Special";
     private final Integer PAGE_RANGE = 10;
     private final Integer PAGE_SIZE = 10;
-    
-    public EntityModel<DiscountResponse_Full> getDiscountById(long id, Authentication authentication) {
-        DiscountResponse_Full responseFull = cacheHelper.getCache(DISCOUNT_CACHE, DiscountResponse_Full.class, id, discountRepository, repo -> {
-            Discount discount = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with id [%s]", id)));
-            return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, discount);
-        }, 15);
-        return serviceHelper.makeDiscountResponse_EntityModel(responseFull, authentication);    }
-
-    public Discount getDiscountById_entity(long id, boolean bThrowIfNotFound, Authentication authentication) {
-        Discount discount = discountRepository.findById(id).orElse(null);
-        if (discount == null && bThrowIfNotFound)
-            throw new ResourceNotFoundException(String.format("Discount not found with id [%s]", id));
-        return discount;
-    }
 
     public EntityModel<DiscountResponse_Full> getDiscountByCode(String code, Authentication authentication) {
-        DiscountResponse_Full responseFull = cacheHelper.getCache(DISCOUNT_CACHE, DiscountResponse_Full.class, code, discountRepository, repo -> {
+        return cacheHelper.getCache(DISCOUNT_CACHE, DiscountResponse_Full.class, code, discountRepository, repo -> {
             Discount discount = repo.findDiscountByDiscountCode(code).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with code [%s]", code)));
-            return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, discount);
-        }, 15);
-        return serviceHelper.makeDiscountResponse_EntityModel(responseFull, authentication);
+            return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, discount, authentication);
+        }, 30);
     }
 
-    public CollectionModel<EntityModel<DiscountResponse_Full>> getAllDiscounts(Authentication authentication) {
-        List<DiscountResponse_Full> responseFulls = cacheHelper.getListCache(DISCOUNT_LIST_CACHE, discountRepository, repo -> {
-            List<Discount> discounts = repo.findAll();
-            return serviceHelper.makeDiscountResponses(DiscountResponse_Full.class, discounts);
+    public Discount getDiscountById_entity(long id, Authentication authentication) {
+        return discountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Discount not found with id [%s]", id)));
+    }
+
+    public CollectionModel<EntityModel<DiscountResponse_Minimal>> getAllDiscounts(Authentication authentication) {
+        return cacheHelper.getListCache(DISCOUNT_LIST_CACHE, DiscountResponse_Minimal.class, discountRepository, discountRepository1 -> {
+            List<Discount> discounts = discountRepository1.findAll();
+            return serviceHelper.makeDiscountResponse_CollectionModel(DiscountResponse_Minimal.class, discounts, authentication);
         });
-        return serviceHelper.makeDiscountResponse_CollectionModel(responseFulls, authentication);
     }
 
     @Transactional
     public EntityModel<DiscountResponse_Full> addDiscount(DiscountRequest discountRequest, Authentication authentication) {
         Discount newDiscount = new Discount(discountRequest.getDiscountName(), discountRequest.getDiscountCode(), discountRequest.getDiscountDescription(), discountRequest.getDiscountPercent());
         Discount newCreatedDiscount = discountRepository.save(newDiscount);
-        DiscountResponse_Full responseFull = serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, newCreatedDiscount);
-        return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);
+        return serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, newCreatedDiscount, authentication);
     }
 
     @Transactional
@@ -76,11 +65,13 @@ public class DiscountService {
         discountToUpdate.setDiscountDescription(discountRequest.getDiscountDescription());
         discountToUpdate.setDiscountPercent(discountRequest.getDiscountPercent());
         Discount updatedDiscount = discountRepository.save(discountToUpdate);
-        DiscountResponse_Full responseFull = serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, updatedDiscount);
 
-        cacheHelper.updateCache(responseFull, DISCOUNT_CACHE, DISCOUNT_LIST_CACHE);
-        cacheHelper.updateCache(DISCOUNT_CACHE, responseFull, DiscountResponse_Full::getDiscountCode);
-        return serviceHelper.makeGameResponse_EntityModel(responseFull, authentication);    }
+        EntityModel<DiscountResponse_Full> entityModel = serviceHelper.makeDiscountResponse(DiscountResponse_Full.class, updatedDiscount, authentication);
+
+        cacheHelper.updateCache(entityModel, DISCOUNT_CACHE);
+        cacheHelper.deleteListCaches(DISCOUNT_LIST_CACHE);
+        return entityModel;
+    }
 
     @Transactional
     public void deleteDiscount(long id) {
